@@ -9,9 +9,10 @@ def scanIpAddress():
     data = request.get_json()
     ipAddress = data["ipAddress"]
     subnetMask = data["subnetMask"]
+    scanType = data["scanType"]
 
     # scan network for hosts
     nm = nmap.PortScanner()
-    nm.scan(hosts=f"{ipAddress}/{subnetMask}", arguments='-sn') # ping scan
+    nm.scan(hosts=f"{ipAddress}/{subnetMask}", arguments=f"-{scanType}")
     hostList = nm.all_hosts()
     return hostList
