@@ -1,7 +1,7 @@
 from flask import Blueprint
 
-homeBp = Blueprint("/", __name__)
+home = Blueprint("/", __name__)
 
-@homeBp.route("/", methods=["GET"])
+@home.get("/")
 def testMethod():
     return "Hello Flask!"
