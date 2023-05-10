@@ -10,5 +10,5 @@ def ScanIpAddress():
     
     # Scan for open ports 
     nm = nmap.PortScanner() 
-    nm.scan(hosts=f"{ipAddress}", arguments= "-Pn")
+    nm.scan(hosts=f"{ipAddress}", arguments= "-P-")
     return nm.scaninfo()
