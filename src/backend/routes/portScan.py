@@ -7,10 +7,9 @@ def ScanIpAddress():
     # retrieve IP address and subnet mask from request body
     data = request.get_json()
     ipAddress = data["ipAddress"]
-    subnetMask = data["subnetMask"]
     
     # Scan for open ports 
     nm = nmap.PortScanner() 
-    nm.scan(hosts=f"{ipAddress}/{subnetMask}")
+    nm.scan(hosts=f"{ipAddress}")
     portList = nm.scaninfo()
     return portList
