@@ -1,7 +1,7 @@
 from flask import Blueprint
 
-testBp = Blueprint("test", __name__, url_prefix="/test")
+test = Blueprint("test", __name__, url_prefix="/test")
 
-@testBp.route("", methods=["GET"])
+@test.get("/")
 def testMethod():
     return "Sample text for testing"
