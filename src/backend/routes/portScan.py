@@ -19,4 +19,4 @@ def ScanIpAddress():
         #line_list = line.split(";")
       #  my_list.extend(line_list)
     
-    return nm.csv
+    return nm.csv()
