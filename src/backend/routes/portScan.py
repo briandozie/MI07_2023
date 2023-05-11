@@ -13,7 +13,7 @@ def ScanIpAddress():
     nm = nmap.PortScanner() 
     nm.scan(hosts=f"{ipAddress}", arguments=f"-{scanType}")
     # Format the output
-    #my_lines = nm.csv.splitline()
+    #my_lines = nm.csv().splitline()
     #my_list = []
    # for line in range(my_lines):
         #line_list = line.split(";")
