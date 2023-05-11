@@ -14,7 +14,7 @@ def ScanIpAddress():
     nm.scan(hosts=f"{ipAddress}", arguments=f"-{scanType}")
     
     # extract the indexes for the columns
-    rows = data.strip().split("\n")
+    rows = nm.csv().strip().split("\n")
     categories = rows[0].split(";")
     max_lengths = [len(category) for category in categories]
     rows_data = [row.split(";") for row in rows[1:]]
