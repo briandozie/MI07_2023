@@ -6,6 +6,7 @@ from pymongo import MongoClient
 from routes.home import home
 from routes.test import test
 from routes.ipScan import ipScan
+from routes.portScan import portScan
 
 # connecting to MongoDB Atlas cloud database
 cluster = os.getenv("DATABASE_URL")
@@ -18,3 +19,4 @@ app = Flask(__name__) # creating flask app
 app.register_blueprint(home)
 app.register_blueprint(test)
 app.register_blueprint(ipScan)
+app.register_blueprint(portScan)
