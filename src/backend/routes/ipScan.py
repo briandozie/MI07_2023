@@ -13,6 +13,16 @@ def scanIpAddress():
 
     # scan network for hosts
     nm = nmap.PortScanner()
-    nm.scan(hosts=f"{ipAddress}/{subnetMask}", arguments=f"-{scanType}")
-    hostList = nm.all_hosts()
+    hostList = []
+
+    # Scan IP address range
+    if "-" in ipAddress:
+        start_ip, end_ip = ipAddress.split("-")
+        nm.scan(hosts=f"{start_ip}-{end_ip}/{subnetMask}", arguments=f"-{scanType}")
+        hostList.extend(nm.all_hosts())
+    else:
+        # Scan multiple IP addresses
+        for ip in ipAddress:
+            nm.scan(hosts=f"{ip}/{subnetMask}", arguments=f"-{scanType}")
+            hostList.extend(nm.all_hosts())
     return hostList
