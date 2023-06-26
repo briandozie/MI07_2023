@@ -1,17 +1,16 @@
 from flask import Blueprint, request
 import nmap
+import subprocess
 
 cveScan = Blueprint("cveScan", __name__, url_prefix="/cveScan")
 
 @cveScan.post("/")
-def scanIpAddress():
+def scanTargetCVE():
     data = request.get_json()
     ipAddress = data["ipAddress"]
     scanType = data["scanType"]
     script = data["script"]
 
     # Scan for CVE in target
-    nm = nmap.PortScanner()
-    nm.scan(hosts=f"{ipAddress}", arguments=f"-{scanType} --script {script}")
-    
-    return nm.csv()
+    return subprocess.run(["powershell", f"nmap -{scanType} --script {script} {ipAddress}"], 
+                          shell=True, text=True, stdout=subprocess.PIPE).stdout.splitlines()
