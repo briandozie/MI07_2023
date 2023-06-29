@@ -7,6 +7,7 @@ from routes.home import home
 from routes.test import test
 from routes.ipScan import ipScan
 from routes.portScan import portScan
+from routes.serviceScan import serviceScan
 
 # connecting to MongoDB Atlas cloud database
 cluster = os.getenv("DATABASE_URL")
@@ -20,3 +21,4 @@ app.register_blueprint(home)
 app.register_blueprint(test)
 app.register_blueprint(ipScan)
 app.register_blueprint(portScan)
+app.register_blueprint(serviceScan)
