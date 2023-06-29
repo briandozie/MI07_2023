@@ -20,7 +20,7 @@ def ScanIpAddress():
     rows_data = [row.split(";") for row in rows[1:]]
 
     # Only keep specified columns
-    keep_columns = ["host", "port", "name", "product", "version"]
+    keep_columns = ["host", "port", "name", "product", "extrainfo", "version"]
     keep_indices = [categories.index(col) for col in keep_columns]
     categories = [categories[i] for i in keep_indices]
     max_lengths = [max_lengths[i] for i in keep_indices]
