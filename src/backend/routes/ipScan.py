@@ -11,18 +11,15 @@ def scanIpAddress():
     subnetMask = data["subnetMask"]
     scanType = data["scanType"]
 
+     # convert subnet mask to CIDR format
+    subnetMaskCIDR = sum([bin(int(x)).count('1') for x in subnetMask.split('.')])
+
+    # calculate the range of IP addresses to scan
+    startIP = f"{ipAddress}/{subnetMaskCIDR}"
+    endIP = f"{ipAddress[:-len(ipAddress.split('.')[-1])]}{int(ipAddress.split('.')[-1])+90}/{subnetMaskCIDR}"
+
     # scan network for hosts
     nm = nmap.PortScanner()
-    hostList = []
-
-    # Scan IP address range
-    if "-" in ipAddress:
-        start_ip, end_ip = ipAddress.split("-")
-        nm.scan(hosts=f"{start_ip}-{end_ip}/{subnetMask}", arguments=f"-{scanType}")
-        hostList.extend(nm.all_hosts())
-    else:
-        # Scan multiple IP addresses
-        for ip in ipAddress:
-            nm.scan(hosts=f"{ip}/{subnetMask}", arguments=f"-{scanType}")
-            hostList.extend(nm.all_hosts())
+    nm.scan(hosts=f"{startIP}-{endIP}", arguments=f"-{scanType}")
+    hostList = nm.all_hosts()
     return hostList
