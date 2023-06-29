@@ -18,8 +18,9 @@ def scanIpAddress():
         hostList = []
         for ipAddress in ipAddresses:
             nm.scan(hosts=ipAddress, arguments=f"-{scanType}")
-            hostList = nm.all_hosts()
+            hostList.extend(nm.all_hosts())
         return hostList
+    
     elif "ipRange" in data:
         # Scan a range of IP addresses
         ipRange = data["ipRange"]
