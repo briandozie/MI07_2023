@@ -14,6 +14,6 @@ def scanIpAddress():
 
     # scan network for hosts
     nm = nmap.PortScanner()
-    nm.scan(hosts=f"{startIP}-{endIP}/{subnetMask}", arguments=f"-{scanType}")
+    nm.scan(hosts=f"{startIP}-{endIP}", arguments=f"-{scanType}")
     hostList = nm.all_hosts()
     return hostList
