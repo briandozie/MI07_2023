@@ -3,7 +3,7 @@ import nmap
 portScan = Blueprint("portScan", __name__, url_prefix="/portScan")
 
 @portScan.post("/")
-def ScanIpAddress():
+def PortScan():
     # retrieve IP address and subnet mask from request body
     data = request.get_json()
     ipAddress = data["ipAddress"]

@@ -3,7 +3,7 @@ import nmap
 serviceScan = Blueprint("serviceScan", __name__, url_prefix="/serviceScan")
 
 @serviceScan.post("/")
-def ScanIpAddress():
+def ServiceScan():
     # retrieve IP address and subnet mask from request body
     data = request.get_json()
     ipAddress = data["ipAddress"]
