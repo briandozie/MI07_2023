@@ -12,13 +12,13 @@ def scanIpAddress():
     if "ipAddresses" in data:
         # Scan multiple individual IP addresses
         ipAddresses = data["ipAddresses"]
-
+        
         # scan network for hosts
         nm = nmap.PortScanner()
+        hostList = []
         for ipAddress in ipAddresses:
             nm.scan(hosts=ipAddress, arguments=f"-{scanType}")
-        
-        hostList = nm.all_hosts()
+            hostList = nm.all_hosts()
         return hostList
     elif "ipRange" in data:
         # Scan a range of IP addresses
