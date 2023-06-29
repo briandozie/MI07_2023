@@ -13,10 +13,6 @@ def ScanIpAddress():
     nm = nmap.PortScanner() 
     nm.scan(hosts=f"{ipAddress}", arguments=f"-{scanType}")
     
-    return nm.csv()
-    
-    
-    '''
     # extract the indexes for the columns
     rows = nm.csv().strip().split("\n")
     categories = rows[0].split(";")
@@ -24,7 +20,7 @@ def ScanIpAddress():
     rows_data = [row.split(";") for row in rows[1:]]
 
     # Only keep specified columns
-    keep_columns = ["host", "protocol", "port", "state"]
+    keep_columns = ["host", "port", "name", "product", "version"]
     keep_indices = [categories.index(col) for col in keep_columns]
     categories = [categories[i] for i in keep_indices]
     max_lengths = [max_lengths[i] for i in keep_indices]
@@ -46,4 +42,3 @@ def ScanIpAddress():
         output += "".join(element.ljust(max_lengths[i] + 2) for i, element in enumerate(row_data)) + "\n"
 
     return output
-    '''
