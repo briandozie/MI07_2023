@@ -1,9 +1,9 @@
 from flask import Blueprint, request
 import nmap
-portScan = Blueprint("portScan", __name__, url_prefix="/portScan")
+serviceScan = Blueprint("serviceScan", __name__, url_prefix="/serviceScan")
 
-@portScan.post("/")
-def PortScan():
+@serviceScan.post("/")
+def ServiceScan():
     # retrieve IP address and subnet mask from request body
     data = request.get_json()
     ipAddress = data["ipAddress"]
@@ -20,7 +20,7 @@ def PortScan():
     rows_data = [row.split(";") for row in rows[1:]]
 
     # Only keep specified columns
-    keep_columns = ["host", "protocol", "port", "state"]
+    keep_columns = ["host", "port", "name", "product", "extrainfo", "version"]
     keep_indices = [categories.index(col) for col in keep_columns]
     categories = [categories[i] for i in keep_indices]
     max_lengths = [max_lengths[i] for i in keep_indices]
@@ -33,7 +33,8 @@ def PortScan():
                 row_data[i] = " " * (max_lengths[i] - len(categories[i]))
             else:
                 max_lengths[i] = max(max_lengths[i], len(element))
-
+    
+    
     # Build output string
     output = ""
     output += "".join(category.ljust(max_lengths[i] + 2) for i, category in enumerate(categories)) + "\n"
