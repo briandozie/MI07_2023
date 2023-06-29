@@ -5,25 +5,26 @@ ipScan = Blueprint("ipScan", __name__, url_prefix="/ipScan")
 
 @ipScan.post("/")
 def scanIpAddress():
-    # retrieve IP address and subnet mask from request body
+    # retrieve start address, end address, subnet mask, and scan type from request body
     data = request.get_json()
-    ipAddress = data["ipAddress"]
+    startAddress = data["startAddress"]
+    endAddress = data["endAddress"]
     subnetMask = data["subnetMask"]
     scanType = data["scanType"]
 
-    # convert subnet mask to CIDR format
-    subnetMaskCIDR = sum([bin(int(x)).count('1') for x in subnetMask.split('.')])
-
-    # calculate the range of IP addresses to scan
-    startIP = f"{ipAddress}/{subnetMaskCIDR}"
-    endIP_last_octet = int(ipAddress.split('.')[-1]) + 90
-    endIP = f"{ipAddress[:-len(ipAddress.split('.')[-1])]}{endIP_last_octet}/{subnetMaskCIDR}"
-
-    # print the IP range
-    print(f"Scanning IP range: {startIP} - {endIP}")
-
     # scan network for hosts
     nm = nmap.PortScanner()
-    nm.scan(hosts=f"{startIP}-{endIP}", arguments=f"-{scanType}")
-    hostList = nm.all_hosts()
+
+    # Convert the start and end addresses to integers for iteration
+    start = int(startAddress.split('.')[-1])
+    end = int(endAddress.split('.')[-1])
+
+    hostList = []
+
+    # Iterate over the range of hosts and scan each IP address
+    for i in range(start, end + 1):
+        currentAddress = startAddress.rsplit('.', 1)[0] + '.' + str(i)
+        nm.scan(hosts=f"{currentAddress}/{subnetMask}", arguments=f"-{scanType}")
+        hostList.append(nm.all_hosts())
+
     return hostList
