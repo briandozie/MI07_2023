@@ -9,7 +9,7 @@ from routes.ipScan import ipScan
 from routes.portScan import portScan
 from routes.cveScan import cveScan
 
-
+# connecting to MongoDB Atlas cloud database
 cluster = os.getenv("DATABASE_URL")
 client = MongoClient(cluster)
 db = client.IDS_TEST 
