@@ -11,12 +11,16 @@ def scanIpAddress():
     subnetMask = data["subnetMask"]
     scanType = data["scanType"]
 
-     # convert subnet mask to CIDR format
+    # convert subnet mask to CIDR format
     subnetMaskCIDR = sum([bin(int(x)).count('1') for x in subnetMask.split('.')])
 
     # calculate the range of IP addresses to scan
     startIP = f"{ipAddress}/{subnetMaskCIDR}"
-    endIP = f"{ipAddress[:-len(ipAddress.split('.')[-1])]}{int(ipAddress.split('.')[-1])+90}/{subnetMaskCIDR}"
+    endIP_last_octet = int(ipAddress.split('.')[-1]) + 90
+    endIP = f"{ipAddress[:-len(ipAddress.split('.')[-1])]}{endIP_last_octet}/{subnetMaskCIDR}"
+
+    # print the IP range
+    print(f"Scanning IP range: {startIP} - {endIP}")
 
     # scan network for hosts
     nm = nmap.PortScanner()
