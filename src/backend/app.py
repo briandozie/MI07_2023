@@ -4,7 +4,6 @@ from pymongo import MongoClient
 
 # importing routes
 from routes.home import home
-from routes.test import test
 from routes.ipScan import ipScan
 from routes.portScan import portScan
 from routes.cveScan import cveScan
@@ -19,7 +18,6 @@ app = Flask(__name__) # creating flask app
 
 # registering blueprints for routes
 app.register_blueprint(home)
-app.register_blueprint(test)
 app.register_blueprint(ipScan)
 app.register_blueprint(portScan)
 app.register_blueprint(cveScan)
