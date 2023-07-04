@@ -1,5 +1,6 @@
 import os
 from flask import Flask
+from flask_cors import CORS
 from pymongo import MongoClient
 
 # importing routes
@@ -15,6 +16,7 @@ client = MongoClient(cluster)
 db = client.IDS_TEST
 
 app = Flask(__name__) # creating flask app
+CORS(app, resources={r"/*":{'origins':"*"}})
 
 # registering blueprints for routes
 app.register_blueprint(home)
