@@ -38,7 +38,13 @@
     "parserOptions": {
       "parser": "@babel/eslint-parser"
     },
-    "rules": {}
+    "rules": {
+      "prettier/prettier": [
+        "error",
+        { "endOfLine": "auto" }
+      ],
+      "vue/multi-word-component-names": "off"
+    }
   },
   "browserslist": [
     "> 1%",
