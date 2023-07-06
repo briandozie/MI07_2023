@@ -1,2 +1,0 @@
-This is just a file used to allow Git to track this new frontend directory.
-This file is to be deleted later.
