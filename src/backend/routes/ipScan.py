@@ -10,31 +10,33 @@ def scanIpAddress():
     ipAddress = data["ipAddress"]
     subnetMask = data["subnetMask"]
     scanType = data["scanType"]
+
+    # scan network for hosts
     nm = nmap.PortScanner()
     nm.scan(hosts=f"{ipAddress}/{subnetMask}", arguments=f"-{scanType}")
     hostList = nm.all_hosts()
     return hostList
     
-    if "ipAddresses" in data:
-        # Scan multiple individual IP addresses
-        ipAddresses = data["ipAddresses"]
+    # if "ipAddresses" in data:
+    #     # Scan multiple individual IP addresses
+    #     ipAddresses = data["ipAddresses"]
         
-        # scan network for hosts
-        nm = nmap.PortScanner()
-        hostList = []
-        for ipAddress in ipAddresses:
-            nm.scan(hosts=ipAddress, arguments=f"-{scanType}")
-            hostList.extend(nm.all_hosts())
-        return hostList
+    #     # scan network for hosts
+    #     nm = nmap.PortScanner()
+    #     hostList = []
+    #     for ipAddress in ipAddresses:
+    #         nm.scan(hosts=ipAddress, arguments=f"-{scanType}")
+    #         hostList.extend(nm.all_hosts())
+    #     return hostList
     
-    elif "ipRange" in data:
-        # Scan a range of IP addresses
-        ipRange = data["ipRange"]
-        startIP, endIP = ipRange.split("-")
-        # scan network for hosts
-        nm = nmap.PortScanner()
-        nm.scan(hosts=f"{startIP}-{endIP}", arguments=f"-{scanType}")
-        hostList = nm.all_hosts()
-        return hostList
-    else:
-        return "Invalid request format"
+    # elif "ipRange" in data:
+    #     # Scan a range of IP addresses
+    #     ipRange = data["ipRange"]
+    #     startIP, endIP = ipRange.split("-")
+    #     # scan network for hosts
+    #     nm = nmap.PortScanner()
+    #     nm.scan(hosts=f"{startIP}-{endIP}", arguments=f"-{scanType}")
+    #     hostList = nm.all_hosts()
+    #     return hostList
+    # else:
+    #     return "Invalid request format"
