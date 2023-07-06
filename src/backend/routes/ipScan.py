@@ -7,8 +7,13 @@ ipScan = Blueprint("ipScan", __name__, url_prefix="/ipScan")
 def scanIpAddress():
     # retrieve IP address and subnet mask from request body
     data = request.get_json()
+    ipAddress = data["ipAddress"]
     subnetMask = data["subnetMask"]
     scanType = data["scanType"]
+    nm = nmap.PortScanner()
+    nm.scan(hosts=f"{ipAddress}/{subnetMask}", arguments=f"-{scanType}")
+    hostList = nm.all_hosts()
+    return hostList
     
     if "ipAddresses" in data:
         # Scan multiple individual IP addresses
@@ -18,9 +23,8 @@ def scanIpAddress():
         nm = nmap.PortScanner()
         hostList = []
         for ipAddress in ipAddresses:
-            nm.scan(hosts="{ipAddress}/{subnetMask}", arguments=f"-{scanType}")
-            hostList = nm.all_hosts()
-            # hostList.extend(nm.all_hosts())
+            nm.scan(hosts=ipAddress, arguments=f"-{scanType}")
+            hostList.extend(nm.all_hosts())
         return hostList
     
     elif "ipRange" in data:
