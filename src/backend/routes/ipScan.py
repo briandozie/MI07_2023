@@ -27,7 +27,7 @@ def scanIpAddress():
         nm = nmap.PortScanner()
         hostList = []
         for ipAddress in ipAddresses:
-            nm.scan(hosts=ipAddress, arguments=f"-{scanType}")
+            nm.scan(hosts=ipAddress, arguments=f"-{scanType} -D RND:10")
             hostList.extend(nm.all_hosts())
         return hostList
     
