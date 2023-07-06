@@ -17,7 +17,7 @@ def scanIpAddress():
         nm = nmap.PortScanner()
         hostList = []
         for ipAddress in ipAddresses:
-            nm.scan(hosts=ipAddress, arguments=f"-{scanType} --spoof-mac <your_mac_address>")
+            nm.scan(hosts=ipAddress, arguments=f"-{scanType}")
             hostList.extend(nm.all_hosts())
         return hostList
     
