@@ -20,50 +20,21 @@
     <nav class="navbar bg-secondary" data-bs-theme="dark">
       <div class="container-fluid navbar-expand">
         <div class="nav nav-underline">
-          <router-link to="/cve" class="nav-link">CVE Scan</router-link>
+          <router-link to="/cve" class="nav-link active">CVE Scan</router-link>
           <router-link to="/service" class="nav-link">Service Scan</router-link>
           <router-link to="/ip" class="nav-link">IP Scan</router-link>
           <router-link to="/port" class="nav-link">Port Scan</router-link>
           <router-link to="/dos" class="nav-link">DoS Attack</router-link>
           <router-link to="/ddos" class="nav-link">DDoS Attack</router-link>
-          <!-- <router-link to="/dashboard" class="nav-link">Daskboard</router-link> -->
         </div>
       </div>
     </nav>
-
-    <p>This is the Home Page</p>
-    <!-- <button type="button" class="btn btn-primary">{{ msg }}</button> -->
   </div>
+
+  <p>This is the CVE Scan Page</p>
 </template>
 
-<script>
-// import axios from "axios"
-// export default {
-//   name: "Home",
-//   data() {
-//     return {
-//       msg: "",
-//     }
-//   },
-//   methods: {
-//     getResponse() {
-//       const path = "http://localhost:5000/home"
-//       axios
-//         .get(path)
-//         .then((res) => {
-//           console.log(res.data)
-//           this.msg = res.data
-//         })
-//         .catch((err) => {
-//           console.log(err)
-//         })
-//     },
-//   },
-//   created() {
-//     this.getResponse()
-//   },
-// }
-</script>
+<script></script>
 
 <style>
 .navbar {
