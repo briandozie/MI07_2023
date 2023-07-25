@@ -34,48 +34,64 @@
       </div>
     </nav>
 
-    <!-- Page Title -->
-    <h1>Port Scan</h1>
+    <div class="container">
+      <div id="topRow" class="row">
+        <div class="col">
+          <!-- Page Title -->
+          <h1>Port Scan</h1>
 
-    <form @submit="onSubmit">
-      <!-- Target network input text field -->
-      <div class="mb-3">
-        <label for="targetNetworkInput" class="form-label"
-          >Target Network</label
-        >
-        <input
-          type="text"
-          class="form-control"
-          id="targetNetworkInput"
-          placeholder="IP address"
-          v-model="portScanForm.ipAddress"
-        />
+          <form @submit="onSubmit">
+            <!-- Target network input text field -->
+            <div class="mb-3 w-75">
+              <label for="targetNetworkInput" class="form-label"
+                >Target Network</label
+              >
+              <input
+                type="text"
+                class="form-control"
+                id="targetNetworkInput"
+                placeholder="IP address"
+                v-model="portScanForm.ipAddress"
+              />
+            </div>
+
+            <!-- Scan type dropdown menu -->
+            <label for="scanTypeInput" class="form-label">Scan Type</label>
+            <select
+              class="form-select w-75"
+              id="scanTypeInput"
+              aria-label="Default select example"
+              v-model="portScanForm.scanType"
+            >
+              <option disabled value="">Select Scan Type</option>
+              <option value="sV">TCP</option>
+              <option value="sU">UDP</option>
+            </select>
+
+            <!-- Run button -->
+            <div class="run-button">
+              <button type="submit" class="btn btn-primary">Run</button>
+              <!-- <button type="submit" class="btn btn-primary float-end">Run</button> -->
+            </div>
+          </form>
+        </div>
+        <div class="col">
+          <!-- Event Log -->
+          <label for="eventLog" class="form-label">Event Log</label>
+          <div id="eventCard" class="card">
+            <div class="card-body"></div>
+          </div>
+        </div>
       </div>
-
-      <!-- Scan type dropdown menu -->
-      <label for="scanTypeInput" class="form-label">Scan Type</label>
-      <select
-        class="form-select"
-        id="scanTypeInput"
-        aria-label="Default select example"
-        v-model="portScanForm.scanType"
-      >
-        <option disabled value="">Select Scan Type</option>
-        <option value="sV">TCP</option>
-        <option value="sU">UDP</option>
-      </select>
-
-      <!-- Run button -->
-      <div class="run-button">
-        <button type="submit" class="btn btn-primary">Run</button>
-        <!-- <button type="submit" class="btn btn-primary float-end">Run</button> -->
+      <div id="bottomRow" class="row">
+        <div class="col">
+          <!-- Scan Result old -->
+          <label for="resultOutput" class="form-label">Scan Result</label>
+          <div class="card">
+            <div class="card-body">{{ result }}</div>
+          </div>
+        </div>
       </div>
-    </form>
-
-    <!-- Scan Result -->
-    <label for="resultOutput" class="form-label">Scan Result</label>
-    <div class="card">
-      <div class="card-body">{{ result }}</div>
     </div>
   </div>
 </template>
@@ -132,18 +148,31 @@ export default {
 }
 h1 {
   display: block;
-  padding-top: 10px;
-  margin-left: 15px;
+}
+form {
+  padding-top: 30px;
+  margin-left: 50px;
 }
 .btn-primary {
   min-width: 100px;
   max-width: 100px;
 }
 .run-button {
-  padding-top: 50px;
-  padding-bottom: 30px;
+  padding-top: 53px;
+  padding-right: 20px;
+  text-align: right;
 }
 .card {
   min-height: 100px;
+}
+#topRow {
+  padding-top: 50px;
+}
+#bottomRow {
+  padding-top: 50px;
+}
+#eventCard {
+  min-height: 300px;
+  max-height: 300px;
 }
 </style>
