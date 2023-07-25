@@ -77,9 +77,26 @@
         </div>
         <div class="col">
           <!-- Event Log -->
-          <label for="eventLog" class="form-label">Event Log</label>
+          <div class="row">
+            <div class="col-md-4">
+              <label for="eventLog" class="form-label">Event Log</label>
+            </div>
+            <div class="col-md-8">
+              <div
+                v-show="display"
+                class="progress"
+                role="progressbar"
+                style="height: 10px"
+              >
+                <div
+                  class="progress-bar progress-bar-striped progress-bar-animated"
+                  style="width: 100%"
+                ></div>
+              </div>
+            </div>
+          </div>
           <div id="eventCard" class="card">
-            <div class="card-body"></div>
+            <div id="eventLogBox" class="card-body">{{ eventLog }}</div>
           </div>
         </div>
       </div>
@@ -87,7 +104,7 @@
         <div class="col">
           <!-- Scan Result old -->
           <label for="resultOutput" class="form-label">Scan Result</label>
-          <div class="card">
+          <div id="resultOutputBox" class="card">
             <div class="card-body">{{ result }}</div>
           </div>
         </div>
@@ -107,25 +124,37 @@ export default {
         scanType: "",
       },
       result: "",
+      eventLog: "",
+      display: false,
     }
   },
   methods: {
     // POST Function
     scanPorts(payload) {
       const path = "http://localhost:5000/portScan/"
+      this.eventLog += `Scan started on network ${this.portScanForm.ipAddress}\n`
+      this.display = true
       axios
         .post(path, payload)
         .then((res) => {
           console.log(res.data)
           this.result = res.data
+          this.eventLog += "Scan completed successfully\n"
         })
         .catch((err) => {
           console.log(err)
+        })
+        .finally(() => {
+          // this.scanning = false
         })
     },
     initForm() {
       this.portScanForm.ipAddress = ""
       this.portScanForm.scanType = ""
+    },
+    initStatus() {
+      this.eventLog = ""
+      this.result = ""
     },
     onSubmit(e) {
       e.preventDefault()
@@ -135,7 +164,7 @@ export default {
       }
       console.log(payload)
       this.scanPorts(payload)
-      this, this.initForm()
+      this.initForm()
     },
   },
   created() {},
@@ -174,5 +203,16 @@ form {
 #eventCard {
   min-height: 300px;
   max-height: 300px;
+}
+.card-body {
+  white-space: pre-wrap;
+}
+#resultOutputBox {
+  margin-bottom: 50px;
+}
+.progress-bar {
+}
+.progress {
+  visibility: hidden;
 }
 </style>
