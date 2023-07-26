@@ -150,6 +150,13 @@ export default {
 				.toString()
 				.padStart(2, "0")}`
 		},
+		formattedElapsedTimeEventLog() {
+			const minutes = Math.floor(this.elapsedTime / 60)
+			const seconds = this.elapsedTime % 60
+			return `${minutes.toString().padStart(1, "0")} minute(s) and ${seconds
+				.toString()
+				.padStart(1, "0")} second(s)`
+		},
 	},
 	methods: {
 		// POST Function
@@ -164,7 +171,7 @@ export default {
 				.then((res) => {
 					console.log(res.data)
 					this.result = res.data
-					this.eventLog += "Scan completed successfully\n"
+					this.eventLog += `Scan completed successfully in ${this.formattedElapsedTimeEventLog}\n`
 				})
 				.catch((err) => {
 					console.log(err)
@@ -172,6 +179,7 @@ export default {
 				.finally(() => {
 					this.display = false
 					this.stopTimer()
+					this.resetTimer()
 				})
 		},
 		initForm() {
