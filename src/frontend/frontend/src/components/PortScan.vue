@@ -164,7 +164,7 @@ export default {
 			const path = "http://localhost:5000/portScan/"
 			this.startTimer() // start timer
 			this.initStatus()
-			this.eventLog += `Scan started on network ${this.portScanForm.ipAddress}\n`
+			this.eventLog += `Scan started on network "${this.portScanForm.ipAddress}"\n`
 			this.display = true
 			axios
 				.post(path, payload)
