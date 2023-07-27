@@ -1,4 +1,5 @@
 <template>
+  <!-- Primary Navigation Bar -->
   <div>
     <nav
       class="navbar bg-dark border-bottom border-bottom-dark"
@@ -17,6 +18,7 @@
       </div>
     </nav>
 
+	<!-- Secondary Navigation Bar -->
     <nav class="navbar bg-secondary" data-bs-theme="dark">
       <div class="container-fluid navbar-expand">
         <div class="nav nav-underline">
@@ -32,7 +34,37 @@
       </div>
     </nav>
 
-    <p>This is the Service Scan Page</p>
+	<!-- Page Title -->
+    <h1>Service Scan</h1>
+
+	<form @submit="onSubmit">
+      <!-- Target network input text field -->
+      <div class="mb-3">
+        <label for="targetNetworkInput" class="form-label"
+          >Target Network</label
+        >
+        <input
+          type="text"
+          class="form-control"
+          id="targetNetworkInput"
+          placeholder="IP address"
+          v-model="serviceScanForm.ipAddress"
+        />
+      </div>
+
+	  <!-- Scan type dropdown menu -->
+      <label for="scanTypeInput" class="form-label">Scan Type</label>
+      <select
+        class="form-select"
+        id="scanTypeInput"
+        aria-label="Default select example"
+        v-model="serviceScanForm.scanType"
+      >
+        <option disabled value="">Select Scan Type</option>
+        <option value="sV">TCP</option>
+      </select>
+	</form>
+    
   </div>
 </template>
 
