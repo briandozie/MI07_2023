@@ -64,7 +64,7 @@
 							v-model="portScanForm.scanType"
 						>
 							<option disabled value="">Select Scan Type</option>
-							<option value="sV">TCP</option>
+							<option value="Pn">TCP</option>
 							<option value="sU">UDP</option>
 						</select>
 
