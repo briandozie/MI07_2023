@@ -63,7 +63,19 @@
         <option disabled value="">Select Scan Type</option>
         <option value="sV">TCP</option>
       </select>
-	</form>
+
+	  <!-- Run button -->
+      <div class="run-button">
+        <button type="submit" class="btn btn-primary">Run</button>
+        <!-- <button type="submit" class="btn btn-primary float-end">Run</button> -->
+      </div>
+    </form>
+
+	<!-- Scan Result -->
+    <label for="resultOutput" class="form-label">Scan Result</label>
+    <div class="card">
+      <div class="card-body">{{ result }}</div>
+    </div>
     
   </div>
 </template>
