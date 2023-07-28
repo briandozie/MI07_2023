@@ -1,6 +1,6 @@
 <template>
-  <nav></nav>
-  <router-view />
+	<nav></nav>
+	<router-view />
 </template>
 
 <style>
