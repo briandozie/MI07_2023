@@ -19,11 +19,11 @@
     </nav>
 
 	<!-- Secondary Navigation Bar -->
-    <nav class="navbar bg-secondary" data-bs-theme="dark">
+  <nav class="navbar bg-secondary" data-bs-theme="dark">
       <div class="container-fluid navbar-expand">
         <div class="nav nav-underline">
           <router-link to="/cve" class="nav-link">CVE Scan</router-link>
-          <router-link to="/service" class="nav-link active"
+          <router-link to="/Service" class="nav-link active"
             >Service Scan</router-link
           >
           <router-link to="/ip" class="nav-link">IP Scan</router-link>
@@ -35,7 +35,7 @@
     </nav>
 
 	<!-- Page Title -->
-    <h1>Service Scan</h1>
+  <h1>Service Scan</h1>
 
 	<form @submit="onSubmit">
       <!-- Target network input text field -->
