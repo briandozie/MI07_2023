@@ -76,19 +76,74 @@
     <div class="card">
       <div class="card-body">{{ result }}</div>
     </div>
-    
   </div>
 </template>
 
-<script></script>
+<script>
+import axios from "axios"
+export default {
+  name: "ServiceScan",
+  data() {
+    return {
+      serviceScanForm: {
+        ipAddress: "",
+        scanType: "",
+      },
+      result: "",
+    }
+  },
+  methods: {
+    // POST Function
+    scanPorts(payload) {
+      const path = "http://localhost:5000/serviceScan/"
+      axios
+        .post(path, payload)
+        .then((res) => {
+          console.log(res.data)
+          this.result = res.data
+        })
+        .catch((err) => {
+          console.log(err)
+        })
+    },
+    initForm() {
+      this.serviceScanForm.ipAddress = ""
+      this.serviceScanForm.scanType = ""
+    },
+    onSubmit(e) {
+      e.preventDefault()
+      const payload = {
+        ipAddress: this.serviceScanForm.ipAddress,
+        scanType: this.serviceScanForm.scanType,
+      }
+      console.log(payload)
+      this.scanPorts(payload)
+      this, this.initForm()
+    },
+  },
+  created() {},
+}
+
+</script>
 
 <style>
 .navbar {
   height: 50px;
 }
-p {
+h1 {
   display: block;
   padding-top: 10px;
   margin-left: 15px;
+}
+.btn-primary {
+  min-width: 100px;
+  max-width: 100px;
+}
+.run-button {
+  padding-top: 50px;
+  padding-bottom: 30px;
+}
+.card {
+  min-height: 100px;
 }
 </style>
