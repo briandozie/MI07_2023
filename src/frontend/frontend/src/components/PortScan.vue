@@ -64,13 +64,15 @@
 							v-model="portScanForm.scanType"
 						>
 							<option disabled value="">Select Scan Type</option>
-							<option value="sV">TCP</option>
+							<option value="Pn">TCP</option>
 							<option value="sU">UDP</option>
 						</select>
 
 						<!-- Run button -->
 						<div class="run-button">
-							<button type="submit" class="btn btn-primary">Run</button>
+							<button type="submit" class="btn btn-primary" :disabled="display">
+								Run
+							</button>
 						</div>
 					</form>
 				</div>
