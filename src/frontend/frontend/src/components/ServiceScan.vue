@@ -94,7 +94,7 @@ export default {
 	},
 	methods: {
 		// POST Function
-		scanPorts(payload) {
+		scanServices(payload) {
 			const path = "http://localhost:5000/serviceScan/"
 			axios
 				.post(path, payload)
@@ -117,7 +117,7 @@ export default {
 				scanType: this.serviceScanForm.scanType,
 			}
 			console.log(payload)
-			this.scanPorts(payload)
+			this.scanServices(payload)
 			this, this.initForm()
 		},
 	},
