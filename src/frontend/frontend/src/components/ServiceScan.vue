@@ -79,18 +79,18 @@
 	</div>
 
 	<!-- Display the scan result in a table -->
-	<div v-if="result && result.length > 0" class="mt-4">
+	<!-- <div v-if="result && result.length > 0" class="mt-4">
 		<table class="table table-bordered">
-			<thread>
+			<thead>
 				<tr>
-					<th>host</th>
-					<th>port</th>
-					<th>name</th>
-					<th>product</th>
-					<th>extrainfo</th>
-					<th>version</th>
+					<th>Host</th>
+					<th>Port</th>
+					<th>Name</th>
+					<th>Product</th>
+					<th>Extrainfo</th>
+					<th>Version</th>
 				</tr>
-			</thread>
+			</thead>
 			<tbody>
 				<tr v-for="(item, index) in result" :key="index">
 					<td>{{ item.host }}</td>
@@ -102,7 +102,7 @@
 				</tr>
 			</tbody>
 		</table>
-	</div>
+	</div> -->
 </template>
 
 <script>
@@ -126,7 +126,7 @@ export default {
 				.post(path, payload)
 				.then((res) => {
 					console.log(res.data)
-					this.result = res.formatResponse(res.data) // formatting the response
+					this.result = res.data // formatting the response
 				})
 				.catch((err) => {
 					console.log(err)
@@ -146,19 +146,18 @@ export default {
 			this.scanServices(payload)
 			this.initForm()
 		},
-	},
-
-	formatResponse(response) {
-		const rows = response.split("\n")
-		const result = []
-		for (const row of rows) {
-			const columns = row.split(" ") // split each rows into columns
-			if (columns.length === 6) {
-				const [host, port, name, product, extrainfo, version] = columns
-				result.push({ host, port, name, product, extrainfo, version })
+		formatResponse(response) {
+			const rows = response.split("\n")
+			const result = []
+			for (const row of rows) {
+				const columns = row.split(" ") // split each rows into columns
+				if (columns.length === 6) {
+					const [host, port, name, product, extrainfo, version] = columns
+					result.push({ host, port, name, product, extrainfo, version })
+				}
 			}
-		}
-		return result
+			return result
+		},
 	},
 
 	created() {},
@@ -184,5 +183,38 @@ h1 {
 }
 .card {
 	min-height: 100px;
+}
+<style>
+/* ... Your existing styles ... */
+
+/* Additional styles for the scan result display */
+.scan-result-item {
+	margin-bottom: 10px;
+	padding: 10px;
+	border: 1px solid #ccc;
+	border-radius: 5px;
+	/* Add the following styles to control the layout */
+	display: flex;
+	flex-direction: column;
+}
+
+.scan-result-item-row {
+	display: flex;
+	align-items: center;
+	/* Add margin to separate each row */
+	margin-bottom: 5px;
+}
+
+.scan-result-item-label {
+	font-weight: bold;
+	margin-right: 5px;
+}
+
+.scan-result-item-value {
+	flex: 1;
+}
+
+.scan-result-divider {
+	margin-top: 10px;
 }
 </style>
