@@ -93,14 +93,14 @@
 			</thread>
 			<tbody>
 				<tr v-for="(item, index) in result" :key="index">
-          <td>{{ item.host }}</td>
-          <td>{{ item.port }}</td>
-          <td>{{ item.name }}</td>
-          <td>{{ item.product }}</td>
-          <td>{{ item.extrainfo }}</td>
-          <td>{{ item.version }}</td>
-        </tr>
-      </tbody>
+					<td>{{ item.host }}</td>
+					<td>{{ item.port }}</td>
+					<td>{{ item.name }}</td>
+					<td>{{ item.product }}</td>
+					<td>{{ item.extrainfo }}</td>
+					<td>{{ item.version }}</td>
+				</tr>
+			</tbody>
 		</table>
 	</div>
 </template>
@@ -126,7 +126,7 @@ export default {
 				.post(path, payload)
 				.then((res) => {
 					console.log(res.data)
-					this.result = res.formatResponse(res.data); // formatting the response
+					this.result = res.formatResponse(res.data) // formatting the response
 				})
 				.catch((err) => {
 					console.log(err)
@@ -149,18 +149,18 @@ export default {
 	},
 
 	formatResponse(response) {
-		const rows = response.split("\n");
-		const result = [];
+		const rows = response.split("\n")
+		const result = []
 		for (const row of rows) {
-			const columns = row.split(" "); // split each rows into columns
+			const columns = row.split(" ") // split each rows into columns
 			if (columns.length === 6) {
-				const [host, port, name, product, extrainfo, version] = columns;
-				result.push({ host, port, name, product, extrainfo, version});
+				const [host, port, name, product, extrainfo, version] = columns
+				result.push({ host, port, name, product, extrainfo, version })
 			}
 		}
-		return result;
+		return result
 	},
-	
+
 	created() {},
 }
 </script>
