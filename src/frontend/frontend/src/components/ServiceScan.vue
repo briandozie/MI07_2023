@@ -77,6 +77,32 @@
 			<div class="card-body">{{ result }}</div>
 		</div>
 	</div>
+
+	<!-- Display the scan result in a table -->
+	<div v-if="result && result.length > 0" class="mt-4">
+		<table class="table table-bordered">
+			<thread>
+				<tr>
+					<th>host</th>
+					<th>port</th>
+					<th>name</th>
+					<th>product</th>
+					<th>extrainfo</th>
+					<th>version</th>
+				</tr>
+			</thread>
+			<tbody>
+				<tr v-for="(item, index) in result" :key="index">
+          <td>{{ item.host }}</td>
+          <td>{{ item.port }}</td>
+          <td>{{ item.name }}</td>
+          <td>{{ item.product }}</td>
+          <td>{{ item.extrainfo }}</td>
+          <td>{{ item.version }}</td>
+        </tr>
+      </tbody>
+		</table>
+	</div>
 </template>
 
 <script>
@@ -100,7 +126,7 @@ export default {
 				.post(path, payload)
 				.then((res) => {
 					console.log(res.data)
-					this.result = res.data
+					this.result = res.formatResponse(res.data); // formatting the response
 				})
 				.catch((err) => {
 					console.log(err)
@@ -118,9 +144,23 @@ export default {
 			}
 			console.log(payload)
 			this.scanServices(payload)
-			this, this.initForm()
+			this.initForm()
 		},
 	},
+
+	formatResponse(response) {
+		const rows = response.split("\n");
+		const result = [];
+		for (const row of rows) {
+			const columns = row.split(" "); // split each rows into columns
+			if (columns.length === 6) {
+				const [host, port, name, product, extrainfo, version] = columns;
+				result.push({ host, port, name, product, extrainfo, version});
+			}
+		}
+		return result;
+	},
+	
 	created() {},
 }
 </script>
