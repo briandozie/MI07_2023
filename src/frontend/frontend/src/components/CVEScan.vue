@@ -59,7 +59,7 @@
 							class="form-select w-75"
 							id="scanTypeInput"
 							aria-label="Default select example"
-							v-model="cveScanForm.scanType"
+							v-model="cveScanForm.script"
 						>
 							<option disabled value="">Select CVE Script</option>
 							<option value="vulners">Vulners</option>
