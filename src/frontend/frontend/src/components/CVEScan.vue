@@ -54,16 +54,16 @@
 						</div>
 
 						<!-- Scan type dropdown menu -->
-						<label for="scanTypeInput" class="form-label">Scan Type</label>
+						<label for="scanTypeInput" class="form-label">CVE Script</label>
 						<select
 							class="form-select w-75"
 							id="scanTypeInput"
 							aria-label="Default select example"
 							v-model="cveScanForm.scanType"
 						>
-							<option disabled value="">Select Scan Type</option>
-							<option value="sV">TCP</option>
-							<option value="sU">UDP</option>
+							<option disabled value="">Select CVE Script</option>
+							<option value="vulners">Vulners</option>
+							<!-- <option value="sU">UDP</option> -->
 						</select>
 
 						<!-- Run button -->
@@ -130,7 +130,8 @@ export default {
 		return {
 			cveScanForm: {
 				ipAddress: "",
-				scanType: "",
+				scanType: "sV",
+				script: "",
 			},
 			result: "",
 			eventLog: "",
@@ -158,7 +159,7 @@ export default {
 	},
 	methods: {
 		// POST Function
-		scanPorts(payload) {
+		scanCVE(payload) {
 			const path = "http://localhost:5000/cveScan/"
 			this.startTimer() // start timer
 			this.initStatus()
@@ -181,8 +182,9 @@ export default {
 				})
 		},
 		initForm() {
-			this.portScanForm.ipAddress = ""
-			this.portScanForm.scanType = ""
+			this.cveScanForm.ipAddress = ""
+			this.cveScanForm.scanType = "sV"
+			this.cveScanForm.script = ""
 		},
 		initStatus() {
 			this.eventLog = ""
@@ -193,9 +195,10 @@ export default {
 			const payload = {
 				ipAddress: this.cveScanForm.ipAddress,
 				scanType: this.cveScanForm.scanType,
+				script: this.cveScanForm.script,
 			}
 			console.log(payload)
-			this.scanPorts(payload)
+			this.scanCVE(payload)
 			this.initForm()
 		},
 		startTimer() {
