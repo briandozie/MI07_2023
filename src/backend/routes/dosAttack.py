@@ -3,6 +3,5 @@ import nmap
 
 dosAttack = Blueprint("dosAttack", __name__, url_prefix="/dosAttack")
 
-@dosAttack.post("/")
-def slowlorisDosAttack():
-    
+# @dosAttack.post("/")
+#   # def slowlorisDosAttack():
