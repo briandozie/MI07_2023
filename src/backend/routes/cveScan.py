@@ -16,6 +16,6 @@ def scanTargetCVE():
                           shell=True, text=True, stdout=subprocess.PIPE).stdout.splitlines()
     
     # Function to remove \t in list elements (Needs refinement)
-    #result = ' '.join(subList.replace('\t', '    ') for subList in cveList)
+    result = '\n'.join(subList.replace('\t', '    ') for subList in cveList)
 
-    return cveList
+    return result
