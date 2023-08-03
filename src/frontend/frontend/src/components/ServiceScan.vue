@@ -34,79 +34,93 @@
 			</div>
 		</nav>
 
-		<!-- Page Title -->
-		<h1>Service Scan</h1>
+		<div class="container">
+			<div id="topRow" class="row">
+				<div class="col">
+					<!-- Page Title -->
+					<h1>Service Scan</h1>
 
-		<form @submit="onSubmit">
-			<!-- Target network input text field -->
-			<div class="mb-3">
-				<label for="targetNetworkInput" class="form-label"
-					>Target Network</label
-				>
-				<input
-					type="text"
-					class="form-control"
-					id="targetNetworkInput"
-					placeholder="IP address"
-					v-model="serviceScanForm.ipAddress"
-				/>
+					<form @submit="onSubmit">
+						<!-- Target network input text field -->
+						<div class="mb-3">
+							<label for="targetNetworkInput" class="form-label"
+								>Target Network</label
+							>
+							<input
+								type="text"
+								class="form-control"
+								id="targetNetworkInput"
+								placeholder="IP address"
+								v-model="serviceScanForm.ipAddress"
+							/>
+						</div>
+
+						<!-- Scan type dropdown menu -->
+						<label for="scanTypeInput" class="form-label">Scan Type</label>
+						<select
+							class="form-select"
+							id="scanTypeInput"
+							aria-label="Default select example"
+							v-model="serviceScanForm.scanType"
+						>
+							<option disabled value="">Select Scan Type</option>
+							<option value="sV">TCP</option>
+						</select>
+
+						<!-- Run button -->
+						<div class="run-button">
+							<button type="submit" class="btn btn-primary">Run</button>
+							<!-- <button type="submit" class="btn btn-primary float-end">Run</button> -->
+						</div>
+					</form>
+				</div>
+				<div class="col">
+					<!-- Event Log -->
+					<div class="row">
+						<div class="col-md-4">
+							<label for="eventLog" class="form-label">Event Log</label>
+						</div>
+						<div class="col-md-8">
+							<div class="d-flex justify-content-between align-items-center">
+								<!-- Progress Bar Column -->
+								<div class="flex-grow-1">
+									<div
+										v-show="display"
+										class="progress"
+										role="progressbar"
+										style="height: 10px"
+									>
+										<div
+											class="progress-bar progress-bar-striped progress-bar-animated"
+											style="width: 100%"
+										></div>
+									</div>
+								</div>
+								<!-- Text Column -->
+								<div class="d-flex align-items-center ml-2">
+									<!-- Timer -->
+									<span v-show="display" id="timer">{{
+										formattedElapsedTime
+									}}</span>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div id="eventCard" class="card">
+						<div id="eventLogBox" class="card-body">{{ eventLog }}</div>
+					</div>
+				</div>
 			</div>
-
-			<!-- Scan type dropdown menu -->
-			<label for="scanTypeInput" class="form-label">Scan Type</label>
-			<select
-				class="form-select"
-				id="scanTypeInput"
-				aria-label="Default select example"
-				v-model="serviceScanForm.scanType"
-			>
-				<option disabled value="">Select Scan Type</option>
-				<option value="sV">TCP</option>
-			</select>
-
-			<!-- Run button -->
-			<div class="run-button">
-				<button type="submit" class="btn btn-primary">Run</button>
-				<!-- <button type="submit" class="btn btn-primary float-end">Run</button> -->
-			</div>
-		</form>
-
-		<!-- Scan Result -->
-		<label for="resultOutput" class="form-label">Scan Result</label>
-		<div class="card">
-			<div class="card-body">
-				<div v-if="result && result.length > 0">
-					<!-- Display the scan result as a list of items -->
-					<div
-						class="scan-result-item"
-						v-for="(item, index) in result"
-						:key="index"
-					>
-						<div class="scan-result-item-row">
-							<span class="scan-result-item-label">Host:</span>
-							<span class="scan-result-item-value">{{ item.host }}</span>
-						</div>
-						<div class="scan-result-item-row">
-							<span class="scan-result-item-label">Port:</span>
-							<span class="scan-result-item-value">{{ item.port }}</span>
-						</div>
-						<div class="scan-result-item-row">
-							<span class="scan-result-item-label">Name:</span>
-							<span class="scan-result-item-value">{{ item.name }}</span>
-						</div>
-						<div class="scan-result-item-row">
-							<span class="scan-result-item-label">Product:</span>
-							<span class="scan-result-item-value">{{ item.product }}</span>
-						</div>
-						<div class="scan-result-item-row">
-							<span class="scan-result-item-label">Extrainfo:</span>
-							<span class="scan-result-item-value">{{ item.extrainfo }}</span>
-						</div>
-						<div class="scan-result-item-row">
-							<span class="scan-result-item-label">Version:</span>
-							<span class="scan-result-item-value">{{ item.version }}</span>
-						</div>
-						<div class="scan-result-divider"></div>
+			<div id="bottomRow" class="row">
+				<div class="col">
+					<!-- Scan Result -->
+					<label for="resultOutput" class="form-label">Scan Result</label>
+					<div id="resultOutputBox" class="card">
+						<div class="card-body">{{ result }}</div>
+						<pre v-if="scanPerformed && formattedResults !== ''">{{
+							formattedResults
+						}}</pre>
+						<div v-else></div>
 					</div>
 				</div>
 			</div>
@@ -124,26 +138,92 @@ export default {
 				ipAddress: "",
 				scanType: "",
 			},
-			result: "",
+			result: [], // initialized result as an array
+			eventLog: "",
+			display: false,
+			startTime: 0,
+			elapsedTime: 0,
+			isRunning: false,
+			scanPerformed: false, // Add the scanPerformed flag
 		}
+	},
+	computed: {
+		formattedElapsedTime() {
+			const minutes = Math.floor(this.elapsedTime / 60)
+			const seconds = this.elapsedTime % 60
+			return `${minutes.toString().padStart(2, "0")}:${seconds
+				.toString()
+				.padStart(2, "0")}`
+		},
+		formattedElapsedTimeEventLog() {
+			const minutes = Math.floor(this.elapsedTime / 60)
+			const seconds = this.elapsedTime % 60
+			return `${minutes.toString().padStart(1, "0")} minute(s) and ${seconds
+				.toString()
+				.padStart(1, "0")} second(s)`
+		},
+		formattedResults() {
+			if (
+				!this.result ||
+				!Array.isArray(this.result) ||
+				this.result.length === 0
+			) {
+				return ""
+			}
+			const columnWidth = 15
+			let formatted = ""
+
+			formatted += "Host".padEnd(columnWidth)
+			formatted += "Port".padEnd(columnWidth)
+			formatted += "Name".padEnd(columnWidth)
+			formatted += "Product".padEnd(columnWidth)
+			formatted += "Extrainfo".padEnd(columnWidth)
+			formatted += "Version\n".padEnd(columnWidth)
+
+			this.result.forEach((item) => {
+				formatted += `${item.host.padEnd(columnWidth)}`
+				formatted += `${item.port.padEnd(columnWidth)}`
+				formatted += `${item.name.padEnd(columnWidth)}`
+				formatted += `${item.product.padEnd(columnWidth)}`
+				formatted += `${item.extrainfo.padEnd(columnWidth)}`
+				formatted += `${item.version}\n`.padEnd(columnWidth)
+			})
+
+			return formatted
+		},
 	},
 	methods: {
 		// POST Function
 		scanServices(payload) {
 			const path = "http://localhost:5000/serviceScan/"
+			this.startTimer() // start timer
+			this.initStatus()
+			this.eventLog += `Scan started on network "${this.serviceScanForm.ipAddress}"\n`
+			this.display = true
 			axios
 				.post(path, payload)
 				.then((res) => {
 					console.log(res.data)
 					this.result = res.data
+					this.eventLog += `Scan completed successfully in ${this.formattedElapsedTimeEventLog}\n`
+					this.scanPerformed = true // Set scanPerformed to true after scan completes
 				})
 				.catch((err) => {
 					console.log(err)
+				})
+				.finally(() => {
+					this.display = false
+					this.stopTimer()
+					this.resetTimer()
 				})
 		},
 		initForm() {
 			this.serviceScanForm.ipAddress = ""
 			this.serviceScanForm.scanType = ""
+		},
+		initStatus() {
+			this.eventLog = ""
+			this.result = ""
 		},
 		onSubmit(e) {
 			e.preventDefault()
@@ -155,8 +235,30 @@ export default {
 			this.scanServices(payload)
 			this.initForm()
 		},
+		startTimer() {
+			if (!this.isRunning) {
+				this.isRunning = true
+				this.startTime = Date.now() - this.elapsedTime * 1000
+				this.updateTimer()
+			}
+		},
+		stopTimer() {
+			if (this.isRunning) {
+				this.isRunning = false
+				clearInterval(this.timerInterval)
+			}
+		},
+		resetTimer() {
+			this.isRunning = false
+			this.elapsedTime = 0
+			clearInterval(this.timerInterval)
+		},
+		updateTimer() {
+			this.timerInterval = setInterval(() => {
+				this.elapsedTime = Math.floor((Date.now() - this.startTime) / 1000)
+			}, 1000)
+		},
 	},
-
 	created() {},
 }
 </script>
@@ -167,8 +269,10 @@ export default {
 }
 h1 {
 	display: block;
-	padding-top: 10px;
-	margin-left: 15px;
+}
+form {
+	padding-top: 30px;
+	margin-left: 50px;
 }
 .btn-primary {
 	min-width: 100px;
@@ -180,5 +284,33 @@ h1 {
 }
 .card {
 	min-height: 100px;
+}
+#topRow {
+	padding-top: 50px;
+}
+#bottomRow {
+	padding-top: 50px;
+}
+#eventCard {
+	min-height: 300px;
+	max-height: 300px;
+}
+.card-body {
+	white-space: pre-wrap;
+}
+#resultOutputBox {
+	margin-bottom: 50px;
+	font-family: monospace;
+}
+#timer {
+	text-align: right;
+	padding-left: 15px;
+}
+.progress-bar-container {
+	display: flex;
+	align-items: center;
+}
+.progress-bar-container .progress {
+	flex: 1;
 }
 </style>

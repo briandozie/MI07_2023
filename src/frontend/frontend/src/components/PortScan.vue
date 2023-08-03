@@ -34,48 +34,94 @@
 			</div>
 		</nav>
 
-		<!-- Page Title -->
-		<h1>Port Scan</h1>
+		<div class="container">
+			<div id="topRow" class="row">
+				<div class="col">
+					<!-- Page Title -->
+					<h1>Port Scan</h1>
 
-		<form @submit="onSubmit">
-			<!-- Target network input text field -->
-			<div class="mb-3">
-				<label for="targetNetworkInput" class="form-label"
-					>Target Network</label
-				>
-				<input
-					type="text"
-					class="form-control"
-					id="targetNetworkInput"
-					placeholder="IP address"
-					v-model="portScanForm.ipAddress"
-				/>
+					<form @submit="onSubmit">
+						<!-- Target network input text field -->
+						<div class="mb-3 w-75">
+							<label for="targetNetworkInput" class="form-label"
+								>Target Network</label
+							>
+							<input
+								type="text"
+								class="form-control"
+								id="targetNetworkInput"
+								placeholder="IP address"
+								v-model="portScanForm.ipAddress"
+							/>
+						</div>
+
+						<!-- Scan type dropdown menu -->
+						<label for="scanTypeInput" class="form-label">Scan Type</label>
+						<select
+							class="form-select w-75"
+							id="scanTypeInput"
+							aria-label="Default select example"
+							v-model="portScanForm.scanType"
+						>
+							<option disabled value="">Select Scan Type</option>
+							<option value="Pn">TCP</option>
+							<option value="sU">UDP</option>
+						</select>
+
+						<!-- Run button -->
+						<div class="run-button">
+							<button type="submit" class="btn btn-primary" :disabled="display">
+								Run
+							</button>
+						</div>
+					</form>
+				</div>
+				<div class="col">
+					<!-- Event Log -->
+					<div class="row">
+						<div class="col-md-4">
+							<label for="eventLog" class="form-label">Event Log</label>
+						</div>
+						<div class="col-md-8">
+							<div class="d-flex justify-content-between align-items-center">
+								<!-- Progress Bar Column -->
+								<div class="flex-grow-1">
+									<div
+										v-show="display"
+										class="progress"
+										role="progressbar"
+										style="height: 10px"
+									>
+										<div
+											class="progress-bar progress-bar-striped progress-bar-animated"
+											style="width: 100%"
+										></div>
+									</div>
+								</div>
+								<!-- Text Column -->
+								<div class="d-flex align-items-center ml-2">
+									<!-- Timer -->
+									<span v-show="display" id="timer">{{
+										formattedElapsedTime
+									}}</span>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div id="eventCard" class="card">
+						<div id="eventLogBox" class="card-body">{{ eventLog }}</div>
+					</div>
+				</div>
 			</div>
-
-			<!-- Scan type dropdown menu -->
-			<label for="scanTypeInput" class="form-label">Scan Type</label>
-			<select
-				class="form-select"
-				id="scanTypeInput"
-				aria-label="Default select example"
-				v-model="portScanForm.scanType"
-			>
-				<option disabled value="">Select Scan Type</option>
-				<option value="sV">TCP</option>
-				<option value="sU">UDP</option>
-			</select>
-
-			<!-- Run button -->
-			<div class="run-button">
-				<button type="submit" class="btn btn-primary">Run</button>
-				<!-- <button type="submit" class="btn btn-primary float-end">Run</button> -->
+			<div id="bottomRow" class="row">
+				<div class="col">
+					<!-- Scan Result -->
+					<label for="resultOutput" class="form-label">Scan Result</label>
+					<div id="resultOutputBox" class="card">
+						<div class="card-body">{{ result }}</div>
+					</div>
+				</div>
 			</div>
-		</form>
-
-		<!-- Scan Result -->
-		<label for="resultOutput" class="form-label">Scan Result</label>
-		<div class="card">
-			<div class="card-body">{{ result }}</div>
 		</div>
 	</div>
 </template>
@@ -91,25 +137,60 @@ export default {
 				scanType: "",
 			},
 			result: "",
+			eventLog: "",
+			display: false,
+			isRunning: false,
+			startTime: 0,
+			elapsedTime: 0,
 		}
+	},
+	computed: {
+		formattedElapsedTime() {
+			const minutes = Math.floor(this.elapsedTime / 60)
+			const seconds = this.elapsedTime % 60
+			return `${minutes.toString().padStart(2, "0")}:${seconds
+				.toString()
+				.padStart(2, "0")}`
+		},
+		formattedElapsedTimeEventLog() {
+			const minutes = Math.floor(this.elapsedTime / 60)
+			const seconds = this.elapsedTime % 60
+			return `${minutes.toString().padStart(1, "0")} minute(s) and ${seconds
+				.toString()
+				.padStart(1, "0")} second(s)`
+		},
 	},
 	methods: {
 		// POST Function
 		scanPorts(payload) {
 			const path = "http://localhost:5000/portScan/"
+			this.startTimer() // start timer
+			this.initStatus()
+			this.eventLog += `Scan started on network "${this.portScanForm.ipAddress}"\n`
+			this.display = true
 			axios
 				.post(path, payload)
 				.then((res) => {
 					console.log(res.data)
 					this.result = res.data
+					this.eventLog += `Scan completed successfully in ${this.formattedElapsedTimeEventLog}\n`
 				})
 				.catch((err) => {
 					console.log(err)
+				})
+				.finally(() => {
+					this.display = false
+					this.stopTimer()
+					this.resetTimer()
 				})
 		},
 		initForm() {
 			this.portScanForm.ipAddress = ""
 			this.portScanForm.scanType = ""
+		},
+		initStatus() {
+			this.eventLog = ""
+			this.result = ""
 		},
 		onSubmit(e) {
 			e.preventDefault()
@@ -119,7 +200,30 @@ export default {
 			}
 			console.log(payload)
 			this.scanPorts(payload)
-			this, this.initForm()
+			this.initForm()
+		},
+		startTimer() {
+			if (!this.isRunning) {
+				this.isRunning = true
+				this.startTime = Date.now() - this.elapsedTime * 1000
+				this.updateTimer()
+			}
+		},
+		stopTimer() {
+			if (this.isRunning) {
+				this.isRunning = false
+				clearInterval(this.timerInterval)
+			}
+		},
+		resetTimer() {
+			this.isRunning = false
+			this.elapsedTime = 0
+			clearInterval(this.timerInterval)
+		},
+		updateTimer() {
+			this.timerInterval = setInterval(() => {
+				this.elapsedTime = Math.floor((Date.now() - this.startTime) / 1000)
+			}, 1000)
 		},
 	},
 	created() {},
@@ -132,18 +236,48 @@ export default {
 }
 h1 {
 	display: block;
-	padding-top: 10px;
-	margin-left: 15px;
+}
+form {
+	padding-top: 30px;
+	margin-left: 50px;
 }
 .btn-primary {
 	min-width: 100px;
 	max-width: 100px;
 }
 .run-button {
-	padding-top: 50px;
-	padding-bottom: 30px;
+	padding-top: 53px;
+	padding-right: 20px;
+	text-align: right;
 }
 .card {
 	min-height: 100px;
+}
+#topRow {
+	padding-top: 50px;
+}
+#bottomRow {
+	padding-top: 50px;
+}
+#eventCard {
+	min-height: 300px;
+	max-height: 300px;
+}
+.card-body {
+	white-space: pre-wrap;
+}
+#resultOutputBox {
+	margin-bottom: 50px;
+}
+#timer {
+	text-align: right;
+	padding-left: 15px;
+}
+.progress-bar-container {
+	display: flex;
+	align-items: center;
+}
+.progress-bar-container .progress {
+	flex: 1;
 }
 </style>
