@@ -192,7 +192,7 @@ export default {
 			const path = "http://localhost:5000/dosAttack/"
 			this.startTimer() // start timer
 			this.initStatus()
-			this.eventLog += `DoS Attack (${payload.attackType}) started on network "${payload.ipAddress} for ${payload.duration} second(s)"\n`
+			this.eventLog += `DoS Attack (${payload.attackType}) started on network "${payload.ipAddress}" for ${payload.duration} second(s)"\n`
 			this.display = true
 			axios
 				.post(path, payload)
