@@ -70,7 +70,7 @@
 							v-model="ipScanForm.scanType"
 						>
 							<option disabled value="">Select Scan Type</option>
-							<option value="Pn">TCP</option>
+							<option value="sn">TCP</option>
 							<option value="sn">UDP</option>
 						</select>
 
@@ -224,7 +224,7 @@ export default {
 				this.startTimer() // start timer
 				this.initStatus()
 				this.display = true
-
+				console.log(payload)
 				axios
 					.post(path, payload)
 					.then((res) => {
@@ -287,7 +287,7 @@ export default {
 				subnetMask: this.ipScanForm.subnetMask,
 				scanType: this.ipScanForm.scanType,
 			}
-			console.log(payload)
+
 			this.scanIPs(payload)
 			this.initForm()
 		},
