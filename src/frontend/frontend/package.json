@@ -38,6 +38,9 @@
       "eslint:recommended",
       "plugin:prettier/recommended"
     ],
+    "plugins": [
+      "prettier"
+    ],
     "parserOptions": {
       "parser": "@babel/eslint-parser"
     },

@@ -23,7 +23,7 @@
 			<div class="container-fluid navbar-expand">
 				<div class="nav nav-underline">
 					<router-link to="/cve" class="nav-link">CVE Scan</router-link>
-					<router-link to="/Service" class="nav-link active"
+					<router-link to="/service" class="nav-link active"
 						>Service Scan</router-link
 					>
 					<router-link to="/ip" class="nav-link">IP Scan</router-link>
