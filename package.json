@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "bootstrap-vue": "^2.23.1",
+    "jw-vue-pagination": "^1.0.3",
+    "mdb-ui-kit": "^6.4.1",
+    "mdb-vue-ui-kit": "^4.0.0"
+  }
+}

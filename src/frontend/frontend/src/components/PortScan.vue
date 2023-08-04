@@ -117,9 +117,27 @@
 				<div class="col">
 					<!-- Scan Result -->
 					<label for="resultOutput" class="form-label">Scan Result</label>
-					<div id="resultOutputBox" class="card">
+					<table id="outputTable" class="table table-hover">
+						<thead>
+							<tr>
+								<th scope="col">Port</th>
+								<th scope="col">Status</th>
+								<th scope="col">Protocol</th>
+								<th scope="col">Host</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr v-for="result in scanResult.ports" :key="result.port">
+								<td>{{ result.port }}</td>
+								<td>{{ result.status }}</td>
+								<td>{{ result.protocol }}</td>
+								<td>{{ result.host }}</td>
+							</tr>
+						</tbody>
+					</table>
+					<!-- <div id="resultOutputBox" class="card">
 						<div class="card-body">{{ result }}</div>
-					</div>
+					</div> -->
 				</div>
 			</div>
 		</div>
@@ -136,7 +154,7 @@ export default {
 				ipAddress: "",
 				scanType: "",
 			},
-			result: "",
+			scanResult: {},
 			eventLog: "",
 			display: false,
 			isRunning: false,
@@ -172,7 +190,7 @@ export default {
 				.post(path, payload)
 				.then((res) => {
 					console.log(res.data)
-					this.result = res.data
+					this.scanResult = res.data
 					this.eventLog += `Scan completed successfully in ${this.formattedElapsedTimeEventLog}\n`
 				})
 				.catch((err) => {
