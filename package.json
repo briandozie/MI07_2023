@@ -3,6 +3,9 @@
     "bootstrap-vue": "^2.23.1",
     "jw-vue-pagination": "^1.0.3",
     "mdb-ui-kit": "^6.4.1",
-    "mdb-vue-ui-kit": "^4.0.0"
+    "mdb-vue-ui-kit": "^4.0.0",
+    "vue-pagination-2": "^3.1.0",
+    "vue-pagination-3": "^2.0.0-beta01",
+    "vuejs-paginate-next": "^1.0.2"
   }
 }

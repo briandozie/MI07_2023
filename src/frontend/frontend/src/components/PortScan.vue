@@ -135,9 +135,6 @@
 							</tr>
 						</tbody>
 					</table>
-					<!-- <div id="resultOutputBox" class="card">
-						<div class="card-body">{{ result }}</div>
-					</div> -->
 				</div>
 			</div>
 		</div>
