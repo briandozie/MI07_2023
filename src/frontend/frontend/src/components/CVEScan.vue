@@ -115,7 +115,10 @@
 					<!-- Scan Result -->
 					<label for="resultOutput" class="form-label">Scan Result</label>
 					<div id="resultOutputBox" class="card">
-						<div class="card-body">{{ result }}</div>
+						<div class="card-body">
+							<!-- Call the method to render clickable links within the result -->
+							<div v-html="renderClickableLinks(result)"></div>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -181,6 +184,17 @@ export default {
 					this.stopTimer()
 					this.resetTimer()
 				})
+		},
+		// Method to identify links in output using regular expression
+		renderClickableLinks(text) {
+			const urlPattern = /https?:\/\/[^\s/$.?#].[^\s]*/gi
+
+			//Replace URLs with anchor elements
+			const resultWithLinks = text.replace(urlPattern, (url) => {
+				return `<a class="custom-link" href="${url}" target="_blank">${url}</a>`
+			})
+
+			return resultWithLinks
 		},
 		initForm() {
 			this.cveScanForm.ipAddress = ""
@@ -279,5 +293,13 @@ form {
 }
 .progress-bar-container .progress {
 	flex: 1;
+}
+.custom-link {
+	color: #007bff;
+	text-decoration: underline;
+	cursor: pointer;
+}
+.custom-link:hover {
+	color: #0056b3;
 }
 </style>

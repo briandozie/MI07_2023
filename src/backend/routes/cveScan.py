@@ -15,7 +15,8 @@ def scanTargetCVE():
     cveList = subprocess.run(["powershell", f"nmap -{scanType} --script {script} {ipAddress}"], 
                           shell=True, text=True, stdout=subprocess.PIPE).stdout.splitlines()
     
-    # Function to remove \t in list elements (Needs refinement)
+    # Takes only the results for easier formatting
+    cveList = cveList[4:-2]
     result = '\n'.join(subList.replace('\t', '    ') for subList in cveList)
 
     return result
