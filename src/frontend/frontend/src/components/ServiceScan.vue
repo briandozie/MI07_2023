@@ -127,7 +127,7 @@
 							</tr>
 						</thead>
 						<tbody>
-							<tr v-for="result in scanResult.ports" :key="result.port">
+							<tr v-for="result in result.ports" :key="result.port">
 								<td>{{ result.host }}</td>
 								<td>{{ result.port }}</td>
 								<td>{{ result.name }}</td>
