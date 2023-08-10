@@ -115,13 +115,28 @@
 				<div class="col">
 					<!-- Scan Result -->
 					<label for="resultOutput" class="form-label">Scan Result</label>
-					<div id="resultOutputBox" class="card">
-						<div class="card-body">{{ result }}</div>
-						<pre v-if="scanPerformed && formattedResults !== ''">{{
-							formattedResults
-						}}</pre>
-						<div v-else></div>
-					</div>
+					<table id="outputTable" class="table table-hover">
+						<thead>
+							<tr>
+								<th scope="col">Host</th>
+								<th scope="col">Port</th>
+								<th scope="col">Name</th>
+								<th scope="col">Product</th>
+								<th scope="col">Extrainfo</th>
+								<th scope="col">Version</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr v-for="result in scanResult.ports" :key="result.port">
+								<td>{{ result.host }}</td>
+								<td>{{ result.port }}</td>
+								<td>{{ result.name }}</td>
+								<td>{{ result.product }}</td>
+								<td>{{ result.extrainfo }}</td>
+								<td>{{ result.version }}</td>
+							</tr>
+						</tbody>
+					</table>
 				</div>
 			</div>
 		</div>
@@ -138,13 +153,12 @@ export default {
 				ipAddress: "",
 				scanType: "",
 			},
-			result: [], // initialized result as an array
+			result: {},
 			eventLog: "",
 			display: false,
 			startTime: 0,
 			elapsedTime: 0,
 			isRunning: false,
-			scanPerformed: false, // Add the scanPerformed flag
 		}
 	},
 	computed: {
@@ -162,35 +176,6 @@ export default {
 				.toString()
 				.padStart(1, "0")} second(s)`
 		},
-		formattedResults() {
-			if (
-				!this.result ||
-				!Array.isArray(this.result) ||
-				this.result.length === 0
-			) {
-				return ""
-			}
-			const columnWidth = 15
-			let formatted = ""
-
-			formatted += "Host".padEnd(columnWidth)
-			formatted += "Port".padEnd(columnWidth)
-			formatted += "Name".padEnd(columnWidth)
-			formatted += "Product".padEnd(columnWidth)
-			formatted += "Extrainfo".padEnd(columnWidth)
-			formatted += "Version\n".padEnd(columnWidth)
-
-			this.result.forEach((item) => {
-				formatted += `${item.host.padEnd(columnWidth)}`
-				formatted += `${item.port.padEnd(columnWidth)}`
-				formatted += `${item.name.padEnd(columnWidth)}`
-				formatted += `${item.product.padEnd(columnWidth)}`
-				formatted += `${item.extrainfo.padEnd(columnWidth)}`
-				formatted += `${item.version}\n`.padEnd(columnWidth)
-			})
-
-			return formatted
-		},
 	},
 	methods: {
 		// POST Function
@@ -206,7 +191,6 @@ export default {
 					console.log(res.data)
 					this.result = res.data
 					this.eventLog += `Scan completed successfully in ${this.formattedElapsedTimeEventLog}\n`
-					this.scanPerformed = true // Set scanPerformed to true after scan completes
 				})
 				.catch((err) => {
 					console.log(err)
@@ -279,8 +263,9 @@ form {
 	max-width: 100px;
 }
 .run-button {
-	padding-top: 50px;
-	padding-bottom: 30px;
+	padding-top: 53px;
+	padding-bottom: 20px;
+	text-align: right;
 }
 .card {
 	min-height: 100px;
@@ -300,7 +285,6 @@ form {
 }
 #resultOutputBox {
 	margin-bottom: 50px;
-	font-family: monospace;
 }
 #timer {
 	text-align: right;

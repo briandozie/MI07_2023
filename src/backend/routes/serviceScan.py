@@ -36,20 +36,3 @@ def ServiceScan():
     finalJson = {'ports': ports, 'total': totalNumber}
 
     return finalJson
-
-    # Pad empty elements to match category length
-    for row_data in rows_data:
-        for i, element in enumerate(row_data):
-            if element == "":
-                row_data[i] = " " * (max_lengths[i] - len(categories[i]))
-            else:
-                max_lengths[i] = max(max_lengths[i], len(element))
-    
-    
-    # Build output string
-    output = ""
-    output += "".join(category.ljust(max_lengths[i] + 2) for i, category in enumerate(categories)) + "\n"
-    for row_data in rows_data:
-        output += "".join(element.ljust(max_lengths[i] + 2) for i, element in enumerate(row_data)) + "\n"
-
-    return output
