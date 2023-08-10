@@ -187,6 +187,7 @@ export default {
 				const path = "http://localhost:5000/ipScan/"
 				this.startTimer() // start timer
 				this.initStatus()
+				this.eventLog += `Scan started on network "${ipAddresses}"\n`
 				this.display = true
 
 				axios
@@ -215,13 +216,14 @@ export default {
 					// Otherwise, it's a single IP address.
 					payload = { ipAddress: input }
 				}
-
+				const ipInfo = payload.ipRange || payload.ipAddress
 				payload.subnetMask = this.ipScanForm.subnetMask
 				payload.scanType = this.ipScanForm.scanType
 
 				const path = "http://localhost:5000/ipScan/"
 				this.startTimer() // start timer
 				this.initStatus()
+				this.eventLog += `Scan started on network "${ipInfo}"\n`
 				this.display = true
 				console.log(payload)
 				axios
