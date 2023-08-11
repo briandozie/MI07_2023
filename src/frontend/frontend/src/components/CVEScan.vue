@@ -62,8 +62,8 @@
 							v-model="cveScanForm.script"
 						>
 							<option disabled value="">Select CVE Script</option>
-							<option value="vulners">Vulners</option>
 							<option value="vuln">Vuln</option>
+							<option value="vulners">Vulners</option>
 							<!-- <option value="sU">UDP</option> -->
 						</select>
 
