@@ -115,10 +115,23 @@
 					<!-- Scan Result -->
 					<label for="resultOutput" class="form-label">Scan Result</label>
 					<div id="resultOutputBox" class="card">
-						<div class="card-body">
-							<!-- Call the method to render clickable links within the result -->
-							<div v-html="renderClickableLinks(result)"></div>
-						</div>
+						<table class="table table-hover">
+							<thead>
+								<tr>
+									<th scope="col">Host</th>
+									<th scope="col">Port</th>
+									<th scope="col">CVE</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr v-for="(item, index) in result" :key="index">
+									<td>{{ item.host }}</td>
+									<td>{{ item.port }}</td>
+									<!-- Call the method to render clickable links within the result -->
+									<td v-html="renderClickableLinks(item.cve)"></td>
+								</tr>
+							</tbody>
+						</table>
 					</div>
 				</div>
 			</div>
@@ -137,7 +150,7 @@ export default {
 				scanType: "sV",
 				script: "",
 			},
-			result: "",
+			result: {},
 			eventLog: "",
 			display: false,
 			isRunning: false,
