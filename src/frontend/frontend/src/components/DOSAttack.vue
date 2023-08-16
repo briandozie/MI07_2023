@@ -95,7 +95,7 @@
 						</select>
 
 						<!-- Target network input text field -->
-						<div class="mb-3 w-75">
+						<div id="packetSize" class="mb-3 w-75">
 							<label for="packetSizeInput" class="form-label"
 								>Packet Size</label
 							>
@@ -206,16 +206,17 @@ export default {
 	methods: {
 		// POST Function
 		dosAttack(payload) {
-			const path = "http://localhost:5000/dosAttack/"
+			const dosPath = "http://localhost:5000/dosAttack/"
+			const latencyPath = "http://localhost:5000/dosAttack/latency"
 			this.startTimer() // start timer
 			this.initStatus()
 			this.eventLog += `DoS Attack (${payload.attackType}) started on network "${payload.ipAddress}" for ${payload.duration} second(s)"\n`
 			this.display = true
 			axios
-				.post(path, payload)
+				.post(dosPath, payload)
 				.then((res) => {
 					console.log(res.data)
-					this.result = res.data
+					// this.result = res.data
 					this.eventLog += `DoS Attack ended after ${this.formattedElapsedTimeEventLog}\n`
 				})
 				.catch((err) => {
@@ -226,6 +227,32 @@ export default {
 					this.stopTimer()
 					this.resetTimer()
 				})
+			const currentTime = new Date()
+			const endTime = new Date(currentTime.getTime() + payload.duration * 1000)
+			this.checkLatency(latencyPath, payload, endTime)
+		},
+		checkLatency(latencyPath, payload, endTime) {
+			axios
+				.post(latencyPath, { ipAddress: payload.ipAddress })
+				.then((res) => {
+					console.log(res.data)
+					this.result = res.data
+				})
+				.catch((err) => {
+					console.log(err)
+				})
+				.finally(() => {})
+			// console.log(this.hasRemainingDuration(payload.duration))
+			// if (this.hasRemainingDuration(payload.duration))
+			console.log(new Date().getTime() < endTime.getTime())
+			if (new Date().getTime() < endTime.getTime()) {
+				setTimeout(this.checkLatency, 5000, latencyPath, payload, endTime)
+			}
+		},
+		hasRemainingDuration(duration) {
+			const currentTime = new Date()
+			const endTime = new Date(currentTime.getTime() + duration * 1000)
+			return currentTime < endTime
 		},
 		initForm() {
 			this.dosAttackForm.ipAddress = ""
@@ -307,6 +334,9 @@ form {
 }
 #bottomRow {
 	padding-top: 50px;
+}
+#packetSize {
+	padding-top: 20px;
 }
 #eventCard {
 	min-height: 300px;
