@@ -80,17 +80,33 @@
 							</div>
 						</div>
 
-						<!-- Scan type dropdown menu -->
-						<label for="scanTypeInput" class="form-label">Attack Type</label>
+						<!-- Attack type dropdown menu -->
+						<label for="attackTypeInput" class="form-label">Attack Type</label>
 						<select
 							class="form-select w-75"
-							id="scanTypeInput"
+							id="attackTypeInput"
 							aria-label="Default select example"
 							v-model="dosAttackForm.attackType"
 						>
 							<option disabled value="">Select Attack Type</option>
-							<option value="TCP Flood">TCP Flood</option>
+							<option value="-S">SYN Flood</option>
+							<option value="--udp">UDP Flood</option>
+							<option value="--icmp">ICMP Flood</option>
 						</select>
+
+						<!-- Target network input text field -->
+						<div class="mb-3 w-75">
+							<label for="packetSizeInput" class="form-label"
+								>Packet Size</label
+							>
+							<input
+								type="text"
+								class="form-control"
+								id="packetSizeInput"
+								placeholder="Number of bytes"
+								v-model="dosAttackForm.packetSize"
+							/>
+						</div>
 
 						<!-- Run button -->
 						<div class="run-button">
@@ -161,6 +177,7 @@ export default {
 				portNumber: "",
 				attackType: "",
 				duration: "",
+				packetSize: "",
 			},
 			result: "",
 			eventLog: "",
@@ -215,6 +232,7 @@ export default {
 			this.dosAttackForm.attackType = ""
 			this.dosAttackForm.portNumber = ""
 			this.dosAttackForm.duration = ""
+			this.dosAttackForm.packetSize = ""
 		},
 		initStatus() {
 			this.eventLog = ""
@@ -227,6 +245,7 @@ export default {
 				portNumber: this.dosAttackForm.portNumber,
 				attackType: this.dosAttackForm.attackType,
 				duration: this.dosAttackForm.duration,
+				packetSize: this.dosAttackForm.packetSize,
 			}
 			console.log(payload)
 			this.dosAttack(payload)
