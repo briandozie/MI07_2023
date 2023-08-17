@@ -156,20 +156,31 @@
 			<div id="bottomRow" class="row">
 				<div class="col">
 					<!-- Scan Result -->
-					<label for="resultOutput" class="form-label">Scan Result</label>
+					<label for="resultOutput" class="form-label">Network Latency</label>
 					<div id="resultOutputBox" class="card">
-						<div class="card-body">{{ result }}</div>
+						<div class="card-body">
+							<div class="scrollable">
+								{{ result }}
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
+			<div></div>
 		</div>
 	</div>
 </template>
 
 <script>
+import { Chart, registerables } from "chart.js"
 import axios from "axios"
+
+Chart.register(...registerables)
+
 export default {
 	name: "DOSAttack",
+	// components: { LineChart },
+
 	data() {
 		return {
 			dosAttackForm: {
@@ -210,20 +221,26 @@ export default {
 			const latencyPath = "http://localhost:5000/dosAttack/latency"
 			this.startTimer() // start timer
 			this.initStatus()
-			this.eventLog += `DoS Attack (${payload.attackType}) started on network "${payload.ipAddress}" for ${payload.duration} second(s)"\n`
+			this.eventLog +=
+				this.getCurrentTimestamp() +
+				` DoS Attack (${payload.attackType}) started on network "${payload.ipAddress}" for ${payload.duration} second(s)"\n`
+			this.eventLog +=
+				this.getCurrentTimestamp() +
+				` Flooding network with packets of ${payload.packetSize} data byte(s)\n`
 			this.display = true
 			axios
 				.post(dosPath, payload)
 				.then((res) => {
-					console.log(res.data)
-					// this.result = res.data
-					this.eventLog += `DoS Attack ended after ${this.formattedElapsedTimeEventLog}\n`
+					this.eventLog +=
+						this.getCurrentTimestamp() +
+						` DoS Attack ended after ${this.formattedElapsedTimeEventLog}\n`
 				})
 				.catch((err) => {
 					console.log(err)
 				})
 				.finally(() => {
 					this.display = false
+					this.initForm()
 					this.stopTimer()
 					this.resetTimer()
 				})
@@ -235,24 +252,23 @@ export default {
 			axios
 				.post(latencyPath, { ipAddress: payload.ipAddress })
 				.then((res) => {
-					console.log(res.data)
-					this.result = res.data
+					this.result += res.data + "\n"
 				})
 				.catch((err) => {
 					console.log(err)
 				})
 				.finally(() => {})
-			// console.log(this.hasRemainingDuration(payload.duration))
-			// if (this.hasRemainingDuration(payload.duration))
-			console.log(new Date().getTime() < endTime.getTime())
 			if (new Date().getTime() < endTime.getTime()) {
 				setTimeout(this.checkLatency, 5000, latencyPath, payload, endTime)
 			}
 		},
-		hasRemainingDuration(duration) {
-			const currentTime = new Date()
-			const endTime = new Date(currentTime.getTime() + duration * 1000)
-			return currentTime < endTime
+		getCurrentTimestamp() {
+			const now = new Date()
+			const hours = now.getHours().toString().padStart(2, "0")
+			const minutes = now.getMinutes().toString().padStart(2, "0")
+			const seconds = now.getSeconds().toString().padStart(2, "0")
+
+			return `[${hours}:${minutes}:${seconds}]`
 		},
 		initForm() {
 			this.dosAttackForm.ipAddress = ""
@@ -274,9 +290,7 @@ export default {
 				duration: this.dosAttackForm.duration,
 				packetSize: this.dosAttackForm.packetSize,
 			}
-			console.log(payload)
 			this.dosAttack(payload)
-			this.initForm()
 		},
 		startTimer() {
 			if (!this.isRunning) {
@@ -358,5 +372,9 @@ form {
 }
 .progress-bar-container .progress {
 	flex: 1;
+}
+.scrollable {
+	overflow-y: auto;
+	max-height: 300px;
 }
 </style>
