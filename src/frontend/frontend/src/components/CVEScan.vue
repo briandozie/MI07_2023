@@ -132,7 +132,10 @@
 										<td>{{ entry.service }}</td>
 										<td>
 											<ul>
-												<li v-for="(cve, cveIndex) in entry.cves" :key="cveIndex">
+												<li
+													v-for="(cve, cveIndex) in entry.cves"
+													:key="cveIndex"
+												>
 													<a :href="cve.link" target="_blank">{{ cve.id }}</a>
 												</li>
 											</ul>
@@ -159,7 +162,8 @@ export default {
 				scanType: "sV",
 				script: "",
 			},
-			result: {},
+			result: "",
+			cveScanResult: [],
 			eventLog: "",
 			display: false,
 			isRunning: false,
@@ -197,6 +201,7 @@ export default {
 					console.log(res.data)
 					this.result = res.data
 					this.eventLog += `Scan completed successfully in ${this.formattedElapsedTimeEventLog}\n`
+					this.parseCveScanOutput()
 				})
 				.catch((err) => {
 					console.log(err)
@@ -217,6 +222,42 @@ export default {
 			})
 
 			return resultWithLinks
+		},
+		// Method to parse the output into Arrays
+		parseCveScanOutput() {
+			const lines = this.result.split("\n")
+			let currentEntry = {}
+
+			for (const line of lines) {
+				const parts = line.split(/\s+/)
+				if (parts.length >= 3 && parts[0].endsWith("/tcp")) {
+					//If current entry has data, push it to the array
+					//before starting a new one
+					if (Object.keys(currentEntry).length > 0) {
+						this.cveScanResult.push(currentEntry)
+					}
+
+					// Start a new entry
+					currentEntry = {
+						port: parts[0],
+						state: parts[1],
+						service: parts[2],
+						cves: [],
+					}
+					//this.cveScanResult.push(currentEntry)
+				} else if (line.includes("http://vulners.com/cve/")) {
+					// Parse CVE lines
+					const cveParts = line.split(/\s+/)
+					const cveId = cveParts[1]
+					const cveLink = cveParts[3]
+					currentEntry.cves.push({ id: cveId, link: cveLink })
+				}
+			}
+
+			if (Object.keys(currentEntry).length > 0) {
+				this.cveScanResult.push(currentEntry)
+			}
+			console.log("cveScanResult:", this.cveScanResult)
 		},
 		initForm() {
 			this.cveScanForm.ipAddress = ""
