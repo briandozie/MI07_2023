@@ -115,23 +115,32 @@
 					<!-- Scan Result -->
 					<label for="resultOutput" class="form-label">Scan Result</label>
 					<div id="resultOutputBox" class="card">
-						<table class="table table-hover">
-							<thead>
-								<tr>
-									<th scope="col">Host</th>
-									<th scope="col">Port</th>
-									<th scope="col">CVE</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr v-for="(item, index) in result" :key="index">
-									<td>{{ item.host }}</td>
-									<td>{{ item.port }}</td>
-									<!-- Call the method to render clickable links within the result -->
-									<td v-html="renderClickableLinks(item.cve)"></td>
-								</tr>
-							</tbody>
-						</table>
+						<div class="card-body">
+							<table class="table table-hover">
+								<thead>
+									<tr>
+										<th>Port</th>
+										<th>State</th>
+										<th>Service</th>
+										<th>CVEs</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr v-for="(entry, index) in cveScanResult" :key="index">
+										<td>{{ entry.port }}</td>
+										<td>{{ entry.state }}</td>
+										<td>{{ entry.service }}</td>
+										<td>
+											<ul>
+												<li v-for="(cve, cveIndex) in entry.cves" :key="cveIndex">
+													<a :href="cve.link" target="_blank">{{ cve.id }}</a>
+												</li>
+											</ul>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
 					</div>
 				</div>
 			</div>
