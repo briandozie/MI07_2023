@@ -42,7 +42,7 @@
 
 					<form @submit="onSubmit">
 						<!-- Target network input text field -->
-						<div class="mb-3">
+						<div class="mb-3 w-75">
 							<label for="targetNetworkInput" class="form-label"
 								>Target Network</label
 							>
@@ -58,7 +58,7 @@
 						<!-- Scan type dropdown menu -->
 						<label for="scanTypeInput" class="form-label">Scan Type</label>
 						<select
-							class="form-select"
+							class="form-select w-75"
 							id="scanTypeInput"
 							aria-label="Default select example"
 							v-model="serviceScanForm.scanType"
