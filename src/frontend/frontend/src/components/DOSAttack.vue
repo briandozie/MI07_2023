@@ -231,6 +231,7 @@ export default {
 			axios
 				.post(dosPath, payload)
 				.then((res) => {
+					console.log(res.data)
 					this.eventLog +=
 						this.getCurrentTimestamp() +
 						` DoS Attack ended after ${this.formattedElapsedTimeEventLog}\n`
