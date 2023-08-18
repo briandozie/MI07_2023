@@ -245,8 +245,9 @@ export default {
 						cves: [],
 					}
 					//this.cveScanResult.push(currentEntry)
-				} else if (line.includes("http://vulners.com/cve/")) {
+				} else if (line.match(/https?:\/\/vulners\.com\/cve\/\S+/)) {
 					// Parse CVE lines
+					console.log("Found CVE Line:", line)
 					const cveParts = line.split(/\s+/)
 					const cveId = cveParts[1]
 					const cveLink = cveParts[3]
