@@ -132,6 +132,7 @@
 										<td>{{ entry.service }}</td>
 										<td>
 											<ul>
+												<!-- Iterate through the cve list of each port -->
 												<li
 													v-for="(cve, cveIndex) in entry.cves"
 													:key="cveIndex"
@@ -244,17 +245,28 @@ export default {
 						service: parts[2],
 						cves: [],
 					}
-					//this.cveScanResult.push(currentEntry)
 				} else if (line.match(/https?:\/\/vulners\.com\/cve\/\S+/)) {
 					// Parse CVE lines
-					console.log("Found CVE Line:", line)
 					const cveParts = line.split(/\s+/)
 					const cveId = cveParts[1]
 					const cveLink = cveParts[3]
 					currentEntry.cves.push({ id: cveId, link: cveLink })
+				} else if (line.match(/https?:\/\/cve\.mitre\.org\/\S+/)) {
+					// Parse links from http://cve.mitre.org/
+					const cveParts = line.split(/\s+/)
+					const cveDesc = "Mitre Link" //Placeholder Description
+					const cveLink = cveParts[1]
+					currentEntry.cves.push({ id: cveDesc, link: cveLink })
+				} else if (line.match(/https?:\/\/seclists\.org\/\S+/)) {
+					// Parse links from http://seclists.org/
+					const cveParts = line.split(/\s+/)
+					const cveDesc = "SecLists Link" //Placeholder Description
+					const cveLink = cveParts[1]
+					currentEntry.cves.push({ id: cveDesc, link: cveLink })
 				}
 			}
 
+			// Push the last entry to the result array once the loop ends
 			if (Object.keys(currentEntry).length > 0) {
 				this.cveScanResult.push(currentEntry)
 			}
