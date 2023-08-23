@@ -64,13 +64,15 @@
 							v-model="portScanForm.scanType"
 						>
 							<option disabled value="">Select Scan Type</option>
-							<option value="sV">TCP</option>
+							<option value="Pn">TCP</option>
 							<option value="sU">UDP</option>
 						</select>
 
 						<!-- Run button -->
 						<div class="run-button">
-							<button type="submit" class="btn btn-primary">Run</button>
+							<button type="submit" class="btn btn-primary" :disabled="display">
+								Run
+							</button>
 						</div>
 					</form>
 				</div>
@@ -115,9 +117,24 @@
 				<div class="col">
 					<!-- Scan Result -->
 					<label for="resultOutput" class="form-label">Scan Result</label>
-					<div id="resultOutputBox" class="card">
-						<div class="card-body">{{ result }}</div>
-					</div>
+					<table id="outputTable" class="table table-hover">
+						<thead>
+							<tr>
+								<th scope="col">Port</th>
+								<th scope="col">Status</th>
+								<th scope="col">Protocol</th>
+								<th scope="col">Host</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr v-for="result in scanResult.ports" :key="result.port">
+								<td>{{ result.port }}</td>
+								<td>{{ result.status }}</td>
+								<td>{{ result.protocol }}</td>
+								<td>{{ result.host }}</td>
+							</tr>
+						</tbody>
+					</table>
 				</div>
 			</div>
 		</div>
@@ -134,7 +151,7 @@ export default {
 				ipAddress: "",
 				scanType: "",
 			},
-			result: "",
+			scanResult: {},
 			eventLog: "",
 			display: false,
 			isRunning: false,
@@ -161,7 +178,7 @@ export default {
 	methods: {
 		// POST Function
 		scanPorts(payload) {
-			const path = "http://localhost:5000/portScan/"
+			const path = "http://127.0.0.1:5000/portScan/"
 			this.startTimer() // start timer
 			this.initStatus()
 			this.eventLog += `Scan started on network "${this.portScanForm.ipAddress}"\n`
@@ -170,7 +187,7 @@ export default {
 				.post(path, payload)
 				.then((res) => {
 					console.log(res.data)
-					this.result = res.data
+					this.scanResult = res.data
 					this.eventLog += `Scan completed successfully in ${this.formattedElapsedTimeEventLog}\n`
 				})
 				.catch((err) => {
