@@ -10,6 +10,7 @@ from routes.portScan import portScan
 from routes.cveScan import cveScan
 from routes.serviceScan import serviceScan
 from routes.dosAttack import dosAttack
+from routes.ddosAttack import ddosAttack
 
 # connecting to MongoDB Atlas cloud database
 cluster = os.getenv("DATABASE_URL")
@@ -26,3 +27,4 @@ app.register_blueprint(portScan)
 app.register_blueprint(cveScan)
 app.register_blueprint(serviceScan)
 app.register_blueprint(dosAttack)
+app.register_blueprint(ddosAttack)
