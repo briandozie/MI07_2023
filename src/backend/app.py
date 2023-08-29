@@ -3,6 +3,11 @@ from flask import Flask
 from flask_cors import CORS
 from pymongo import MongoClient
 
+# connecting to MongoDB Atlas cloud database
+cluster = os.getenv("DATABASE_URL")
+client = MongoClient(cluster)
+db = client["IDS_TEST"]
+
 # importing routes
 from routes.homePage import homePage
 from routes.ipScan import ipScan
@@ -12,10 +17,6 @@ from routes.serviceScan import serviceScan
 from routes.dosAttack import dosAttack
 from routes.ddosAttack import ddosAttack
 
-# connecting to MongoDB Atlas cloud database
-cluster = os.getenv("DATABASE_URL")
-client = MongoClient(cluster)
-db = client.IDS_TEST
 
 app = Flask(__name__) # creating flask app
 CORS(app, resources={r"/*":{'origins':"*"}})
