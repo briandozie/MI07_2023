@@ -1,5 +1,6 @@
 from flask import Blueprint, request
 import nmap
+from app import db
 portScan = Blueprint("portScan", __name__, url_prefix="/portScan")
 
 @portScan.post("/")
@@ -9,9 +10,13 @@ def PortScan():
     ipAddress = data["ipAddress"]
     scanType = data["scanType"]
     
+    # retrieve command from database
+    command = getCommand("PORTSCAN", scanType)
+    print(command)
+
     # Scan for open ports 
     nm = nmap.PortScanner() 
-    nm.scan(hosts=f"{ipAddress}", arguments=f"-{scanType}")
+    nm.scan(hosts=f"{ipAddress}", arguments=command)
     
     # extract the indexes for the columns
     rows = nm.csv().strip().split("\n")
@@ -36,3 +41,12 @@ def PortScan():
     finalJson = {'ports': ports, 'total': totalNumber}
 
     return finalJson
+
+def getCommand(operation, type):
+    collection = db["commands"]
+    x = collection.find_one({
+        "operation" : operation,
+        "type": type,
+        })
+
+    return x["command"]
