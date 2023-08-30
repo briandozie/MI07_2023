@@ -241,9 +241,18 @@
 				<div class="col">
 					<!-- Scan Result -->
 					<label for="resultOutput" class="form-label">Scan Result</label>
-					<div id="resultOutputBox" class="card">
-						<div class="card-body">{{ result }}</div>
-					</div>
+					<table id="outputTable" class="table table-hover">
+						<thead>
+							<tr>
+								<th scope="col">IP</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr v-for="result in scanResult" :key="result">
+								<td>{{ result }}</td>
+							</tr>
+						</tbody>
+					</table>
 				</div>
 			</div>
 		</div>
@@ -271,7 +280,7 @@ export default {
 				selectedRadio2: "btnradio2",
 				selectedRadio3: "btnradio3",
 			},
-			result: "",
+			scanResult: "",
 			eventLog: "",
 			display: false,
 			isRunning: false,
@@ -319,7 +328,7 @@ export default {
 			}
 		},
 		resetForm() {
-			this.result = ""
+			this.scanResult = ""
 			this.eventLog = ""
 		},
 
@@ -423,7 +432,7 @@ export default {
 				.post(path, payload)
 				.then((res) => {
 					console.log(res.data)
-					this.result = res.data
+					this.scanResult = res.data
 					this.eventLog += `Scan completed successfully in ${this.formattedElapsedTimeEventLog}\n`
 				})
 				.catch((err) => {
@@ -451,7 +460,7 @@ export default {
 		},
 		initStatus() {
 			this.eventLog = ""
-			this.result = ""
+			this.scanResult = ""
 		},
 		onSubmit(e) {
 			e.preventDefault()
