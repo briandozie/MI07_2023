@@ -12,27 +12,12 @@ def PortScan():
     
     # retrieve command from database
     command = getCommand("PORTSCAN", scanType)
-    print(command)
 
     # Scan for open ports 
     nm = nmap.PortScanner() 
     nm.scan(hosts=f"{ipAddress}", arguments=command)
     
-    # extract the indexes for the columns
-    rows = nm.csv().strip().split("\n")
-    categories = rows[0].split(";")
-    max_lengths = [len(category) for category in categories]
-    rows_data = [row.split(";") for row in rows[1:]]
-
-    # Only keep specified columns
-    keep_columns = ["host", "protocol", "port", "state"]
-    keep_indices = [categories.index(col) for col in keep_columns]
-    categories = [categories[i] for i in keep_indices]
-    max_lengths = [max_lengths[i] for i in keep_indices]
-    rows_data = [[row[i] for i in keep_indices] for row in rows_data]
-
-    # Convert the list of lists to a list of dictionaries
-    ports = [{'host': item[0], 'protocol': item[1], 'port': item[2], 'status': item[3]} for item in rows_data]
+    ports = formatScanResult(nm)
 
     # Calculate the total number of items
     totalNumber = len(ports)
@@ -50,3 +35,22 @@ def getCommand(operation, type):
         })
 
     return x["command"]
+
+def formatScanResult(scanner):
+    # extract the indexes for the columns
+    rows = scanner.csv().strip().split("\n")
+    categories = rows[0].split(";")
+    max_lengths = [len(category) for category in categories]
+    rows_data = [row.split(";") for row in rows[1:]]
+
+    # Only keep specified columns
+    keep_columns = ["host", "protocol", "port", "state"]
+    keep_indices = [categories.index(col) for col in keep_columns]
+    categories = [categories[i] for i in keep_indices]
+    max_lengths = [max_lengths[i] for i in keep_indices]
+    rows_data = [[row[i] for i in keep_indices] for row in rows_data]
+
+    # Convert the list of lists to a list of dictionaries
+    ports = [{'host': item[0], 'protocol': item[1], 'port': item[2], 'status': item[3]} for item in rows_data]
+
+    return ports
