@@ -11,7 +11,7 @@ def ServiceScan():
     
     # Scan for open ports 
     nm = nmap.PortScanner() 
-    nm.scan(hosts=f"{ipAddress}", arguments=f"-{scanType}")
+    nm.scan(hosts=f"{ipAddress}", arguments=f"-{scanType} -D RND:30")
     
     # extract the indexes for the columns
     rows = nm.csv().strip().split("\n")
