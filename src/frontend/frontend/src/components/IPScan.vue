@@ -189,7 +189,7 @@
 							v-model="ipScanForm.scanType"
 						>
 							<option disabled value="">Select Scan Type</option>
-							<option value="sn">sn</option>
+							<option value="sS">sS</option>
 						</select>
 
 						<!-- Run button -->
