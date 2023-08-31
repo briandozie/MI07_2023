@@ -407,7 +407,7 @@ export default {
 				const ipAddresses = input2.split(",").map((ip) => ip.trim())
 
 				if (this.selectedRadio2 === "btnradio2") {
-					// Multiple IP option is selected, include additionalInputs
+					
 					const additionalIPs = this.ipScanForm.additionalInputs.filter(
 						(ip) => ip.trim() !== ""
 					)
