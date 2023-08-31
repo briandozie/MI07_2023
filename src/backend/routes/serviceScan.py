@@ -1,5 +1,6 @@
 from flask import Blueprint, request
 import nmap
+from app import db
 serviceScan = Blueprint("serviceScan", __name__, url_prefix="/serviceScan")
 
 @serviceScan.post("/")
@@ -9,12 +10,35 @@ def ServiceScan():
     ipAddress = data["ipAddress"]
     scanType = data["scanType"]
     
+    # retrieve command from database
+    command = getCommand("SERVICESCAN", scanType)
+
     # Scan for open ports 
-    nm = nmap.PortScanner() 
-    nm.scan(hosts=f"{ipAddress}", arguments=f"-{scanType}")
+    nm = nmap.PortScanner()
+    nm.scan(hosts=f"{ipAddress}", arguments=command)
+
+    ports = formatScanResult(nm)
+
+    # Calculate the total number of items
+    totalNumber = len(ports)
+
+    # Create the final JSON structure
+    finalJson = {'ports': ports, 'total': totalNumber}
+
+    return finalJson
+
+def getCommand(operation, type):
+    collection = db["commands"]
+    x = collection.find_one({
+        "operation" : operation,
+        "type": type,
+        })
     
+    return x["command"]
+
+def formatScanResult(scanner):
     # extract the indexes for the columns
-    rows = nm.csv().strip().split("\n")
+    rows = scanner.csv().strip().split("\n")
     categories = rows[0].split(";")
     max_lengths = [len(category) for category in categories]
     rows_data = [row.split(";") for row in rows[1:]]
@@ -29,10 +53,4 @@ def ServiceScan():
     # Convert the list of lists to a list of dictionaries
     ports = [{'host': item[0], 'protocol': item[1], 'port': item[2], 'product': item[3], 'extrainfo': item[4], 'version': item[5]} for item in rows_data]
 
-    # Calculate the total number of items
-    totalNumber = len(ports)
-
-    # Create the final JSON structure
-    finalJson = {'ports': ports, 'total': totalNumber}
-
-    return finalJson
+    return ports
