@@ -189,7 +189,7 @@
 							v-model="ipScanForm.scanType"
 						>
 							<option disabled value="">Select Scan Type</option>
-							<option value="sS">sS</option>
+							<option value="sS">TCP SYN (Stealth)</option>
 						</select>
 
 						<!-- Run button -->
@@ -407,7 +407,6 @@ export default {
 				const ipAddresses = input2.split(",").map((ip) => ip.trim())
 
 				if (this.selectedRadio2 === "btnradio2") {
-					
 					const additionalIPs = this.ipScanForm.additionalInputs.filter(
 						(ip) => ip.trim() !== ""
 					)
