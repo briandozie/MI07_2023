@@ -11,7 +11,7 @@ def scanTargetCVE():
     script = data["script"]
 
     # Scan for CVE in target and store it in a list
-    cveList = subprocess.run([f"nmap -{scanType} -D RND,RND,ME --script {script} {ipAddress}"], 
+    cveList = subprocess.run([f"nmap -{scanType} -D RND:10 --script {script} {ipAddress}"], 
                           shell=True, text=True, stdout=subprocess.PIPE).stdout.splitlines()
     
     # Takes only the results for easier formatting
