@@ -160,7 +160,6 @@ export default {
 		return {
 			cveScanForm: {
 				ipAddress: "",
-				scanType: "sV",
 				script: "",
 			},
 			result: "",
@@ -274,7 +273,6 @@ export default {
 		},
 		initForm() {
 			this.cveScanForm.ipAddress = ""
-			this.cveScanForm.scanType = "sV"
 			this.cveScanForm.script = ""
 		},
 		initStatus() {
@@ -285,7 +283,6 @@ export default {
 			e.preventDefault()
 			const payload = {
 				ipAddress: this.cveScanForm.ipAddress,
-				scanType: this.cveScanForm.scanType,
 				script: this.cveScanForm.script,
 			}
 			console.log(payload)
