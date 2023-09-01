@@ -278,6 +278,7 @@ export default {
 		initStatus() {
 			this.eventLog = ""
 			this.result = ""
+			this.cveScanResult = []
 		},
 		onSubmit(e) {
 			e.preventDefault()
