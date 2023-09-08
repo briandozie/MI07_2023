@@ -64,8 +64,8 @@
 							v-model="portScanForm.scanType"
 						>
 							<option disabled value="">Select Scan Type</option>
-							<option value="Pn">TCP</option>
-							<option value="sU">UDP</option>
+							<option value="TCP">TCP</option>
+							<option value="UDP">UDP</option>
 						</select>
 
 						<!-- Run button -->
@@ -178,7 +178,7 @@ export default {
 	methods: {
 		// POST Function
 		scanPorts(payload) {
-			const path = "http://localhost:5000/portScan/"
+			const path = "http://127.0.0.1:5000/portScan/"
 			this.startTimer() // start timer
 			this.initStatus()
 			this.eventLog += `Scan started on network "${this.portScanForm.ipAddress}"\n`

@@ -35,22 +35,141 @@
 				<div class="col">
 					<!-- Page Title -->
 					<h1>IP Scan</h1>
+					<!-- Button Group -->
+					<div
+						class="btn-group btn-group-sm"
+						role="group"
+						aria-label="Small button group"
+					>
+						<!-- Single IP Button Group -->
+						<input
+							type="radio"
+							class="btn-check"
+							name="btnradio"
+							id="btnradio1"
+							autocomplete="off"
+							v-model="selectedRadio1"
+							value="btnradio1"
+							@change="setDefaultInputVisibility"
+						/>
+						<label class="btn btn-outline-primary" for="btnradio1"
+							>Single IP</label
+						>
+						<!-- Multiple IP Button Group -->
+						<input
+							type="radio"
+							class="btn-check"
+							name="btnradio"
+							id="btnradio2"
+							autocomplete="off"
+							v-model="selectedRadio2"
+							value="btnradio2"
+							@change="handleInputRadioChange2"
+						/>
+
+						<label class="btn btn-outline-primary" for="btnradio2"
+							>Multiple IP</label
+						>
+						<!-- IP Range Button Group -->
+						<input
+							type="radio"
+							class="btn-check"
+							name="btnradio"
+							id="btnradio3"
+							autocomplete="off"
+							v-model="selectedRadio3"
+							value="btnradio3"
+							@change="handleInputRadioChange3"
+						/>
+						<label class="btn btn-outline-primary" for="btnradio3"
+							>IP Range</label
+						>
+					</div>
 
 					<form @submit="onSubmit">
-						<!-- Target network input text field -->
+						<!-- Target network input text field  v-if="selectedRadio === 'btnradio1'" -->
 						<div class="mb-3 w-75">
-							<label for="inputValue" class="form-label">Target Network</label>
+							<label for="inputValue1" class="form-label">Target Network</label>
+							<!-- For Single IP Only -->
 							<input
 								type="text"
 								class="form-control"
-								id="inputValue"
-								placeholder="IP range, multiple IP addresses, or a single IP address"
-								v-model="ipScanForm.inputValue"
-								@input="handleInput"
+								id="inputValue1"
+								placeholder="Single IP address"
+								v-model="ipScanForm.inputValue1"
+								@input="handleInputRadioChange1"
+								v-if="showInputField1"
 							/>
+							<!-- For Multiple IP Only -->
+							<div class="input-group">
+								<input
+									type="text"
+									class="form-control"
+									id="inputValue2"
+									placeholder="IP address"
+									v-model="ipScanForm.inputValue2"
+									@input="handleInputRadioChange2"
+									v-if="showInputField2"
+								/>
+								<!-- Button to add new input field -->
+								<div class="input-group-append" v-if="showInputField2">
+									<button
+										class="btn btn-outline-primary"
+										@click.prevent="addIPInput"
+									>
+										+
+									</button>
+								</div>
+							</div>
+							<!-- New input field -->
+							<div
+								v-for="(input, index) in ipScanForm.additionalInputs"
+								:key="index"
+								class="input-group mb-1"
+							>
+								<input
+									type="text"
+									class="form-control mt-1"
+									v-model="ipScanForm.additionalInputs[index]"
+									placeholder="IP address"
+								/>
+								<!-- Button to delete input field -->
+								<div class="input-group-append mt-1">
+									<button
+										type="button"
+										class="btn-close mt-1"
+										@click="removeIPInput(index)"
+									/>
+								</div>
+							</div>
+
+							<!-- For IP Range Only -->
+							<div class="input-group mb-3">
+								<input
+									type="text"
+									class="form-control"
+									id="inputValueStart"
+									placeholder="Start IP"
+									v-model="ipScanForm.inputStart"
+									@input="handleInputRadioChange3"
+									v-if="showInputField3"
+								/>
+								<!-- Separate StartIP and EndIP -->
+								<span class="input-group-text" v-if="showInputField3">-</span>
+								<input
+									type="text"
+									class="form-control"
+									id="inputValueEnd"
+									placeholder="End IP"
+									v-model="ipScanForm.inputEnd"
+									@input="handleInputRadioChange3"
+									v-if="showInputField3"
+								/>
+							</div>
 						</div>
 
-						<div class="mb-3 w-75">
+						<!-- Subnet Mask-->
+						<div class="mb-3 w-75" v-if="showInputField1">
 							<label for="inputValue" class="form-label">Subnet Mask</label>
 							<input
 								type="text"
@@ -70,8 +189,7 @@
 							v-model="ipScanForm.scanType"
 						>
 							<option disabled value="">Select Scan Type</option>
-							<option value="sn">TCP</option>
-							<option value="sn">UDP</option>
+							<option value="sS">TCP SYN (Stealth)</option>
 						</select>
 
 						<!-- Run button -->
@@ -123,9 +241,18 @@
 				<div class="col">
 					<!-- Scan Result -->
 					<label for="resultOutput" class="form-label">Scan Result</label>
-					<div id="resultOutputBox" class="card">
-						<div class="card-body">{{ result }}</div>
-					</div>
+					<table id="outputTable" class="table table-hover">
+						<thead>
+							<tr>
+								<th scope="col">IP</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr v-for="result in scanResult" :key="result">
+								<td>{{ result }}</td>
+							</tr>
+						</tbody>
+					</table>
 				</div>
 			</div>
 		</div>
@@ -140,21 +267,33 @@ export default {
 	data() {
 		return {
 			ipScanForm: {
-				inputValue: "",
+				inputValue1: "",
+				inputValue2: "",
+				inputStart: "",
+				inputEnd: "",
+				additionalInputs: [],
 				ipRange: "",
 				ipAddresses: "",
 				ipAddress: "",
 				subnetMask: "",
 				scanType: "",
+				selectedRadio2: "btnradio2",
+				selectedRadio3: "btnradio3",
 			},
-			result: "",
+			scanResult: "",
 			eventLog: "",
 			display: false,
 			isRunning: false,
 			startTime: 0,
 			elapsedTime: 0,
+
+			selectedRadio1: "btnradio1",
+			showInputField1: true,
+			showInputField2: true,
+			showInputField3: true,
 		}
 	},
+
 	computed: {
 		formattedElapsedTime() {
 			const minutes = Math.floor(this.elapsedTime / 60)
@@ -171,116 +310,164 @@ export default {
 				.padStart(1, "0")} second(s)`
 		},
 	},
+
 	methods: {
-		// POST Function
-		scanIPs() {
-			const input = this.ipScanForm.inputValue.trim()
-			const ipAddresses = input.split(",").map((ip) => ip.trim())
+		setDefaultInputVisibility() {
+			if (this.selectedRadio1 === "btnradio1") {
+				this.showInputField1 = true
+				this.showInputField2 = false
+				this.showInputField3 = false
+			} else if (this.selectedRadio1 === "btnradio2") {
+				this.showInputField1 = false
+				this.showInputField2 = true
+				this.showInputField3 = false
+			} else if (this.selectedRadio1 === "btnradio3") {
+				this.showInputField1 = false
+				this.showInputField2 = false
+				this.showInputField3 = true
+			}
+		},
+		resetForm() {
+			this.scanResult = ""
+			this.eventLog = ""
+		},
 
-			if (ipAddresses.length > 1) {
-				// If there are multiple IP addresses, use the `ipAddresses` property in the payload.
-				const payload = {
-					ipAddresses: ipAddresses,
-					subnetMask: this.ipScanForm.subnetMask,
-					scanType: this.ipScanForm.scanType,
-				}
+		handleInputRadioChange1() {
+			if (this.selectedRadio1 === "btnradio1") {
+				this.showInputField1 = true
+				this.showInputField2 = false
+				this.showInputField3 = false
+				const input2Array = this.ipScanForm.inputValue2
+					.split(",")
+					.map((ip) => ip.trim())
 
-				const path = "http://localhost:5000/ipScan/"
-				this.startTimer() // start timer
-				this.initStatus()
-				this.display = true
-
-				axios
-					.post(path, payload)
-					.then((res) => {
-						console.log(res.data)
-						this.result = res.data
-						this.eventLog += `Scan completed successfully in ${this.formattedElapsedTimeEventLog}\n`
-					})
-					.catch((err) => {
-						console.log(err)
-					})
-					.finally(() => {
-						this.display = false
-						this.stopTimer()
-						this.resetTimer()
-					})
-			} else {
-				// If it's not multiple IP addresses, follow the previous logic.
-				let payload = {}
-
-				if (input.includes("-")) {
-					// If input contains a hyphen, it's an IP range.
-					payload = { ipRange: input }
+				if (input2Array.length > 0) {
+					this.ipScanForm.additionalInputs = input2Array.slice(1)
+					this.ipScanForm.inputValue2 = input2Array[0]
 				} else {
-					// Otherwise, it's a single IP address.
-					payload = { ipAddress: input }
+					this.ipScanForm.additionalInputs = []
+					this.ipScanForm.inputValue2 = ""
 				}
-
-				payload.subnetMask = this.ipScanForm.subnetMask
-				payload.scanType = this.ipScanForm.scanType
-
-				const path = "http://localhost:5000/ipScan/"
-				this.startTimer() // start timer
-				this.initStatus()
-				this.display = true
-				console.log(payload)
-				axios
-					.post(path, payload)
-					.then((res) => {
-						console.log(res.data)
-						this.result = res.data
-						this.eventLog += `Scan completed successfully in ${this.formattedElapsedTimeEventLog}\n`
-					})
-					.catch((err) => {
-						console.log(err)
-					})
-					.finally(() => {
-						this.display = false
-						this.stopTimer()
-						this.resetTimer()
-					})
+				this.ipScanForm.inputValue2 = ""
+				this.ipScanForm.inputStart = ""
+				this.ipScanForm.inputEnd = ""
+				this.resetForm()
+			} else {
+				this.showInputField1 = false
+			}
+		},
+		handleInputRadioChange2() {
+			if (this.selectedRadio2 === "btnradio2") {
+				this.showInputField2 = true
+				this.showInputField1 = false
+				this.showInputField3 = false
+				if (this.ipScanForm.additionalInputs.length > 0) {
+					this.ipScanForm.inputValue2 = this.ipScanForm.additionalInputs[0]
+					this.ipScanForm.additionalInputs.splice(0, 1)
+				}
+				this.ipScanForm.inputValue1 = ""
+				this.ipScanForm.inputStart = ""
+				this.ipScanForm.inputEnd = ""
+				this.resetForm()
+			} else {
+				this.showInputField2 = false
 			}
 		},
 
-		// handleInput() {
-		// 	const input = this.ipScanForm.inputValue.trim()
+		handleInputRadioChange3() {
+			if (this.selectedRadio3 === "btnradio3") {
+				this.showInputField3 = true
+				this.showInputField1 = false
+				this.showInputField2 = false
+				this.ipScanForm.inputValue1 = ""
+				this.ipScanForm.inputValue2 = ""
+				this.resetForm()
+			} else {
+				this.showInputField3 = false
+			}
+		},
 
-		// 	if (input.includes(",")) {
-		// 		// If input contains a comma, it's multiple IP addresses.
-		// 		this.ipScanForm.ipAddresses = input
-		// 		this.ipScanForm.ipRange = ""
-		// 		this.ipScanForm.ipAddress = ""
-		// 	} else if (input.includes("-")) {
-		// 		// If input contains a hyphen, it's an IP range.
-		// 		const [startIP, endIP] = input.split("-")
-		// 		this.ipScanForm.ipRange = `${startIP.trim()}-${endIP.trim()}`
-		// 		this.ipScanForm.ipAddresses = ""
-		// 		this.ipScanForm.ipAddress = ""
-		// 	} else {
-		// 		// Otherwise, it's a single IP address.
-		// 		this.ipScanForm.ipAddress = input
-		// 		this.ipScanForm.ipRange = ""
-		// 		this.ipScanForm.ipAddresses = ""
-		// 	}
-		// },
+		// POST Function
+		scanIPs() {
+			const input1 = this.ipScanForm.inputValue1.trim()
+			const input2 = this.ipScanForm.inputValue2.trim()
+			const start = this.ipScanForm.inputStart.trim()
+			const end = this.ipScanForm.inputEnd.trim()
+
+			let payload = {}
+
+			if (start && end) {
+				payload = {
+					ipRange: `${start}-${end}`,
+				}
+			} else if (input1) {
+				// single IP address.
+				payload = { ipAddress: input1 }
+			} else if (input2) {
+				const ipAddresses = input2.split(",").map((ip) => ip.trim())
+
+				if (this.selectedRadio2 === "btnradio2") {
+					const additionalIPs = this.ipScanForm.additionalInputs.filter(
+						(ip) => ip.trim() !== ""
+					)
+					payload = { ipAddresses: [...ipAddresses, ...additionalIPs] }
+				} else {
+					payload = { ipAddresses }
+				}
+			} else {
+				console.error("Invalid input provided.")
+			}
+			const ipInfo = payload.ipRange || payload.ipAddress || payload.ipAddresses
+			payload.subnetMask = this.ipScanForm.subnetMask
+			payload.scanType = this.ipScanForm.scanType
+
+			const path = "http://localhost:5000/ipScan/"
+			this.startTimer()
+			this.initStatus()
+			this.eventLog += `Scan started on network "${ipInfo}"\n`
+			this.display = true
+			console.log(payload)
+			axios
+				.post(path, payload)
+				.then((res) => {
+					console.log(res.data)
+					this.scanResult = res.data
+					this.eventLog += `Scan completed successfully in ${this.formattedElapsedTimeEventLog}\n`
+				})
+				.catch((err) => {
+					console.log(err)
+				})
+				.finally(() => {
+					this.display = false
+					this.stopTimer()
+					this.resetTimer()
+				})
+			// }
+		},
 
 		initForm() {
-			this.ipScanForm.inputValue = ""
+			this.ipScanForm.inputValue1 = ""
+			this.ipScanForm.inputValue2 = ""
+			this.ipScanForm.inputStart = ""
+			this.ipScanForm.inputEnd = ""
 			this.ipScanForm.ipAddress = ""
 			this.ipScanForm.ipRange = ""
 			this.ipScanForm.ipAddresses = ""
 			this.ipScanForm.subnetMask = ""
 			this.ipScanForm.scanType = ""
+			this.ipScanForm.additionalInputs = []
 		},
 		initStatus() {
 			this.eventLog = ""
-			this.result = ""
+			this.scanResult = ""
 		},
 		onSubmit(e) {
 			e.preventDefault()
 			const payload = {
-				inputValue: this.ipScanForm.inputValue,
+				inputValue1: this.ipScanForm.inputValue1,
+				inputValue2: this.ipScanForm.inputValue2,
+				inputStart: this.ipScanForm.inputStart,
+				inputEnd: this.ipScanForm.inputEnd,
 				ipAddress: this.ipScanForm.ipAddress,
 				ipRange: this.ipScanForm.ipRange,
 				ipAddresses: this.ipScanForm.ipAddresses,
@@ -314,8 +501,16 @@ export default {
 				this.elapsedTime = Math.floor((Date.now() - this.startTime) / 1000)
 			}, 1000)
 		},
+		addIPInput() {
+			this.ipScanForm.additionalInputs.push("")
+		},
+		removeIPInput(index) {
+			this.ipScanForm.additionalInputs.splice(index, 1)
+		},
 	},
-	created() {},
+	created() {
+		this.setDefaultInputVisibility()
+	},
 }
 </script>
 <style>
