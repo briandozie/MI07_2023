@@ -109,11 +109,28 @@
 							/>
 						</div>
 
-						<!-- Run button -->
-						<div class="run-button">
-							<button type="submit" class="btn btn-primary" :disabled="display">
-								Run
-							</button>
+						<div class="button-container">
+							<!-- Download bot script button -->
+							<div class="run-button">
+								<button
+									@click="downloadBotnetScript"
+									class="btn btn-secondary"
+									:disabled="display"
+								>
+									Download Botnet Script
+								</button>
+							</div>
+
+							<!-- Run button -->
+							<div class="run-button">
+								<button
+									@click="runDDOS"
+									class="btn btn-primary"
+									:disabled="display"
+								>
+									Run
+								</button>
+							</div>
 						</div>
 					</form>
 				</div>
@@ -283,7 +300,7 @@ export default {
 			this.eventLog = ""
 			this.result = ""
 		},
-		onSubmit(e) {
+		runDDOS(e) {
 			e.preventDefault()
 			const payload = {
 				ipAddress: this.ddosAttackForm.ipAddress,
@@ -317,12 +334,47 @@ export default {
 				this.elapsedTime = Math.floor((Date.now() - this.startTime) / 1000)
 			}, 1000)
 		},
+		downloadBotnetScript(e) {
+			e.preventDefault()
+			const botnetScriptPath = "http://localhost:5000/ddosAttack/botnet"
+			// Make an HTTP request to your backend API to fetch the Python file content
+			// Replace 'your-api-endpoint' with the actual URL of your API endpoint
+			axios
+				.get(botnetScriptPath)
+				.then((response) => {
+					const pythonFileContent = response.data
+
+					// Create a Blob with the Python file content
+					const blob = new Blob([pythonFileContent], { type: "text/plain" })
+
+					// Create a temporary URL for the Blob
+					const url = URL.createObjectURL(blob)
+
+					// Create an anchor element to trigger the download
+					const a = document.createElement("a")
+					a.href = url
+					a.download = "botnet.py" // Replace with your desired file name
+					document.body.appendChild(a)
+					a.click()
+
+					// Clean up
+					URL.revokeObjectURL(url)
+					document.body.removeChild(a)
+				})
+				.catch((error) => {
+					console.error("Error fetching Python file:", error)
+				})
+		},
 	},
 	created() {},
 }
 </script>
 
 <style>
+.button-container {
+	display: flex; /* Use a flex container to place buttons side by side */
+	justify-content: flex-end;
+}
 .navbar {
 	height: 50px;
 }
@@ -336,11 +388,6 @@ form {
 .btn-primary {
 	min-width: 100px;
 	max-width: 100px;
-}
-.run-button {
-	padding-top: 53px;
-	padding-right: 20px;
-	text-align: right;
 }
 .card {
 	min-height: 100px;
