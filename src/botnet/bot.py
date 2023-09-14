@@ -4,7 +4,7 @@ import subprocess
 import time
 import signal
 
-target_host = "192.168.6.22"
+target_host = ""
 target_port = 1046
 
 while True:

