@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify
+from utilities.databaseFunc import *
 import signal
 import subprocess
 import time
@@ -30,6 +31,8 @@ def SYNFloodAttack():
     attack.start()
     attack.join()
 
+    logActivityDOS("DOS ATTACK", data)
+
     return ""
 
 @dosAttack.post("/latency")
@@ -50,16 +53,6 @@ def checkLatency():
         return '[PING SUCCESS] ' + line
     else:
         return '[PING FAILED] ' + line
-
-
-def getCommand(operation, type):
-    collection = db["commands"]
-    x = collection.find_one({
-        "operation" : operation,
-        "type": type,
-        })
-
-    return x["command"]
 
 def dos(command, duration):
     dosCommand = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True, text=True, preexec_fn=os.setsid)

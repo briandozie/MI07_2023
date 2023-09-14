@@ -288,6 +288,10 @@ export default {
 				ipAddress: this.dosAttackForm.ipAddress,
 				portNumber: this.dosAttackForm.portNumber,
 				attackType: this.dosAttackForm.attackType,
+				attackTypeLabel:
+					document.getElementById("attackTypeInput").options[
+						document.getElementById("attackTypeInput").selectedIndex
+					].textContent,
 				duration: this.dosAttackForm.duration,
 				packetSize: this.dosAttackForm.packetSize,
 			}

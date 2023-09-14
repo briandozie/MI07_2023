@@ -20,3 +20,23 @@ def logActivity(activity, targetIP, scanType, json):
         'target': targetIP,
         'result': json,
     })
+
+def logActivityDOS(activity, data):
+    ipAddress = data["ipAddress"]
+    portNumber = data["portNumber"]
+    packetSize = data["packetSize"]
+    attackType = data["attackTypeLabel"]
+    duration = int(data["duration"])
+
+    collection = db["activity"]
+    collection.insert_one({
+      'date': datetime.now().strftime("%d/%m/%Y"),
+      'time': datetime.now().strftime("%H:%M:%S"),
+      'activity': activity,
+      'type': attackType,
+      'ip': ipAddress,
+      'port': portNumber,
+      'duration': duration,
+      'packetSize': packetSize,
+      'result': {},
+  })

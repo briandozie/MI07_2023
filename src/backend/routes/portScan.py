@@ -1,5 +1,5 @@
 from flask import Blueprint, request
-from routes.utilities import *
+from utilities.databaseFunc import *
 import nmap
 
 portScan = Blueprint("portScan", __name__, url_prefix="/portScan")

