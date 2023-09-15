@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from pymongo import MongoClient
 from app import db
+from utilities.databaseFunc import *
 import subprocess
 
 cveScan = Blueprint("cveScan", __name__, url_prefix="/cveScan")
@@ -25,8 +26,9 @@ def scanTargetCVE():
     cveList = cveList[4:-2]
     result = '\n'.join(subList.replace('\t', '    ') for subList in cveList)
    
-    # Convert final output into JSON format for frontend formatting
-    return jsonify(result)
+    logActivity("CVE SCAN", ipAddress, script, result)
+    
+    return jsonify(result) # Convert final output into JSON format for frontend formatting
 
 def getCommand(operation):
     collection = db["commands"]
