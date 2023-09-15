@@ -21,7 +21,7 @@ def logActivity(activity, targetIP, scanType, json):
         'result': json,
     })
 
-def logActivityDOS(activity, data):
+def logActivityDOS(activity, data, latency):
     ipAddress = data["ipAddress"]
     portNumber = data["portNumber"]
     packetSize = data["packetSize"]
@@ -38,5 +38,5 @@ def logActivityDOS(activity, data):
       'port': portNumber,
       'duration': duration,
       'packetSize': packetSize,
-      'result': {},
+      'result': latency,
   })

@@ -7,8 +7,10 @@ import os
 from pymongo import MongoClient
 from app import db
 import threading
+from multiprocessing import Process
 
 dosAttack = Blueprint("dosAttack", __name__, url_prefix="/dosAttack")
+latencyPingList = []
 
 @dosAttack.post("/")
 def SYNFloodAttack():
@@ -18,6 +20,7 @@ def SYNFloodAttack():
     packetSize = data["packetSize"]
     attackType = data["attackType"]
     duration = int(data["duration"])
+    latencyPingList.clear()
 
     command = getCommand("DOS", "PINGFLOOD")
     command = command.format(
@@ -31,7 +34,8 @@ def SYNFloodAttack():
     attack.start()
     attack.join()
 
-    logActivityDOS("DOS ATTACK", data)
+    
+    logActivityDOS("DOS ATTACK", data, latencyPingList)
 
     return ""
 
@@ -43,6 +47,18 @@ def checkLatency():
     command = getCommand("PING", "LATENCY")
     command = command.format(ipAddress=ipAddress)
 
+    result = []
+
+    ping = threading.Thread(target=latency, args=(command, result))
+    ping.start()
+    ping.join()
+
+    print('this is the latency list \n', latencyPingList)
+
+    return latencyPingList[-1]
+
+    
+def latency(command, result):
     pingCommand = subprocess.Popen(command, stdout=subprocess.PIPE, text=True, shell=True)
     output, _ = pingCommand.communicate()  # Capture the output and wait for the process to finish
 
@@ -50,9 +66,9 @@ def checkLatency():
     line = lines[1]
 
     if "time" in line:
-        return '[PING SUCCESS] ' + line
+        latencyPingList.append('[PING SUCCESS] ' + line)
     else:
-        return '[PING FAILED] ' + line
+        latencyPingList.append('[PING FAILED] ' + line)
 
 def dos(command, duration):
     dosCommand = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True, text=True, preexec_fn=os.setsid)

