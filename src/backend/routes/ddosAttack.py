@@ -1,4 +1,5 @@
 from flask import Blueprint, request
+from utilities.databaseFunc import *
 import subprocess
 import time
 import socket
@@ -7,6 +8,7 @@ from app import db
 import sys
 
 ddosAttack = Blueprint("ddosAttack", __name__, url_prefix="/ddosAttack")
+latencyPingList = []
 
 @ddosAttack.post("/")
 def DDOSAttack():
@@ -16,6 +18,7 @@ def DDOSAttack():
     packetSize = data["packetSize"]
     attackType = data["attackType"]
     duration = data["duration"]
+    latencyPingList.clear()
 
     command = getCommand("DDOS", "PINGFLOOD")
     command = command.format(
@@ -29,6 +32,9 @@ def DDOSAttack():
     bots = threading.Thread(target=botnet, args=(command, duration))
     bots.start()
     bots.join()
+
+    print('this is the latency list \n' + latencyPingList)
+    logActivityDOS("DDOS ATTACK", data, latencyPingList)
 
     return ""
 
@@ -47,9 +53,11 @@ def checkLatency():
     line = lines[1]
 
     if "time" in line:
-        return '[PING SUCCESS] ' + line
+        latencyPingList.append('[PING SUCCESS] ' + line)
     else:
-        return '[PING FAILED] ' + line
+        latencyPingList.append('[PING FAILED] ' + line)
+
+    return latencyPingList[-1]
     
 @ddosAttack.get("/botnet")
 def getBotnetScript():
@@ -108,12 +116,3 @@ def getIpAddress():
     ip = s.getsockname()[0]
     s.close()
     return ip
-
-def getCommand(operation, type):
-    collection = db["commands"]
-    x = collection.find_one({
-        "operation" : operation,
-        "type": type,
-        })
-
-    return x["command"]

@@ -1,4 +1,5 @@
 from flask import Blueprint, request
+from utilities.databaseFunc import *
 import nmap
 
 ipScan = Blueprint("ipScan", __name__, url_prefix="/ipScan")
@@ -17,6 +18,9 @@ def scanIpAddress():
         nm = nmap.PortScanner()
         nm.scan(hosts=f"{ipAddress}/{subnetMask}", arguments=f"-{scanType} -D RND:30")
         hostList = nm.all_hosts()
+
+        logActivity("IP SCAN SINGLE", ipAddress + "/" + subnetMask, scanType, hostList)
+
         return hostList
     
     elif "ipAddresses" in data:
@@ -29,6 +33,9 @@ def scanIpAddress():
         for ipAddress in ipAddresses:
             nm.scan(hosts=ipAddress, arguments=f"-{scanType} -D RND:30")
             hostList.extend(nm.all_hosts())
+
+        logActivity("IP SCAN MULTIPLE", ipAddresses, scanType, hostList)
+
         return hostList
     
     elif "ipRange" in data:
@@ -39,6 +46,9 @@ def scanIpAddress():
         nm = nmap.PortScanner()
         nm.scan(hosts=f"{startIP}-{endIP}", arguments=f"-{scanType} -D RND:30")
         hostList = nm.all_hosts()
+
+        logActivity("IP SCAN RANGE", ipRange, scanType, hostList)
+
         return hostList
     else:
         return "Invalid request format"
