@@ -16,6 +16,7 @@ from routes.cveScan import cveScan
 from routes.serviceScan import serviceScan
 from routes.dosAttack import dosAttack
 from routes.ddosAttack import ddosAttack
+from routes.dashboard import dashboard
 
 app = Flask(__name__) # creating flask app
 CORS(app, resources={r"/*":{'origins':"*"}})
@@ -28,6 +29,7 @@ app.register_blueprint(cveScan)
 app.register_blueprint(serviceScan)
 app.register_blueprint(dosAttack)
 app.register_blueprint(ddosAttack)
+app.register_blueprint(dashboard)
 
 # if __name__ == "__main__":
 #     app.run(host="192.168.6.22", port=5000)
