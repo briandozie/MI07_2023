@@ -43,7 +43,14 @@
 						<h1>Type</h1>
 						<p>{{ activity.type }}</p>
 						<h1>Target Network</h1>
-						<p>{{ activity.target }}</p>
+						<p v-if="activity.activity != 'IP SCAN MULTIPLE'">
+							{{ activity.target }}
+						</p>
+						<ul v-if="activity.activity === 'IP SCAN MULTIPLE'">
+							<li v-for="(ip, index) in activity.target" :key="index">
+								{{ ip }}
+							</li>
+						</ul>
 					</div>
 					<div v-if="dosAttack" class="col-4">
 						<h1>Duration</h1>

@@ -53,8 +53,6 @@ def checkLatency():
     ping.start()
     ping.join()
 
-    print('this is the latency list \n', latencyPingList)
-
     return latencyPingList[-1]
 
     

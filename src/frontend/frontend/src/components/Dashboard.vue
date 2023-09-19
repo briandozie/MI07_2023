@@ -66,7 +66,16 @@
 								<td>{{ activity.activity }}</td>
 								<td>{{ activity.date }}</td>
 								<td>{{ activity.time }}</td>
-								<td>{{ activity.target }}</td>
+								<td v-if="activity.activity != 'IP SCAN MULTIPLE'">
+									{{ activity.target }}
+								</td>
+								<td v-if="activity.activity === 'IP SCAN MULTIPLE'">
+									<ul>
+										<li v-for="(ip, index) in activity.target" :key="index">
+											{{ ip }}
+										</li>
+									</ul>
+								</td>
 							</tr>
 						</tbody>
 					</table>
@@ -111,7 +120,7 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 .navbar {
 	height: 50px;
 }
@@ -126,5 +135,9 @@ h1 {
 }
 #content {
 	padding-top: 50px;
+}
+ul {
+	list-style-type: none; /* Remove bullets */
+	padding: 0; /* Remove padding */
 }
 </style>
