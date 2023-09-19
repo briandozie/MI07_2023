@@ -11,7 +11,7 @@ def getHistory():
      "activity" : 1,
      "date": 1,
      "time": 1,
-     "target": 1}).sort([("_id", -1)]).limit(5)
+     "target": 1}).sort([("_id", -1)]).limit(10)
 
   # Create an empty list to store the documents
   historyData = []
@@ -27,12 +27,6 @@ def getHistoryDetails(id):
   collection = db["activity"]
   queryResult = collection.find_one({ "_id" : ObjectId(id)},
     {
-     "activity" : 1,
-     "type": 1,
-     "date": 1,
-     "time": 1,
-     "target": 1,
-     "result": 1,
-     "_id": 0
+     "_id": 0,
     })
   return queryResult
