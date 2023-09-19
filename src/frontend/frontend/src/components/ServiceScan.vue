@@ -53,6 +53,10 @@
 								placeholder="IP address"
 								v-model="serviceScanForm.ipAddress"
 							/>
+							<!-- Display IP Address Error Message -->
+							<div v-if="inputErrors.ipAddress" class="text-danger">
+								{{ inputErrors.ipAddress }}
+							</div>
 						</div>
 
 						<!-- Scan type dropdown menu -->
@@ -66,6 +70,10 @@
 							<option disabled value="">Select Scan Type</option>
 							<option value="TCP">TCP</option>
 						</select>
+						<!-- Display Scan Type Error Message -->
+						<div v-if="inputErrors.scanType" class="text-danger">
+							{{ inputErrors.scanType }}
+						</div>
 
 						<!-- Run button -->
 						<div class="run-button">
@@ -153,6 +161,10 @@ export default {
 				ipAddress: "",
 				scanType: "",
 			},
+			inputErrors: {
+				ipAddress: "",
+				scanType: "",
+			},
 			result: {},
 			eventLog: "",
 			display: false,
@@ -201,6 +213,23 @@ export default {
 					this.resetTimer()
 				})
 		},
+		// Error handling
+		validateForm() {
+			let isValid = true
+			this.inputErrors = {} // Clear previous error messages
+
+			if (!this.serviceScanForm.ipAddress.trim()) {
+				this.inputErrors.ipAddress = "IP address is required."
+				isValid = false
+			}
+
+			if (!this.serviceScanForm.scanType) {
+				this.inputErrors.scanType = "Scan type is required."
+				isValid = false
+			}
+
+			return isValid
+		},
 		initForm() {
 			this.serviceScanForm.ipAddress = ""
 			this.serviceScanForm.scanType = ""
@@ -211,13 +240,15 @@ export default {
 		},
 		onSubmit(e) {
 			e.preventDefault()
-			const payload = {
-				ipAddress: this.serviceScanForm.ipAddress,
-				scanType: this.serviceScanForm.scanType,
+			if (this.validateForm()) {
+				const payload = {
+					ipAddress: this.serviceScanForm.ipAddress,
+					scanType: this.serviceScanForm.scanType,
+				}
+				console.log(payload)
+				this.scanServices(payload)
+				this.initForm()
 			}
-			console.log(payload)
-			this.scanServices(payload)
-			this.initForm()
 		},
 		startTimer() {
 			if (!this.isRunning) {
