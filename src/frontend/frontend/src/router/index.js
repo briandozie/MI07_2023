@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router"
+import Login from "../components/Login.vue"
 import Home from "../components/Home.vue"
 import CVEScan from "../components/CVEScan.vue"
 import ServiceScan from "../components/ServiceScan.vue"
@@ -8,6 +9,11 @@ import DDOSAttack from "../components/DDOSAttack.vue"
 import DOSAttack from "../components/DOSAttack.vue"
 
 const routes = [
+	{
+		path: "/login",
+		name: "Login",
+		component: Login,
+	},
 	{
 		path: "/home",
 		name: "Home",
