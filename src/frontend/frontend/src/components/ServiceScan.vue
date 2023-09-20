@@ -221,6 +221,9 @@ export default {
 			if (!this.serviceScanForm.ipAddress.trim()) {
 				this.inputErrors.ipAddress = "IP address is required."
 				isValid = false
+			} else if (!/^\d+$/.test(this.serviceScanForm.ipAddress.trim())) {
+				this.inputErrors.ipAddress = "IP address must contain only integers."
+				isValid = false
 			}
 
 			if (!this.serviceScanForm.scanType) {

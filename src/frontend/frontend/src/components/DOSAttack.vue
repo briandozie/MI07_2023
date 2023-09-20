@@ -50,6 +50,10 @@
 								placeholder="IP address"
 								v-model="dosAttackForm.ipAddress"
 							/>
+							<!-- Display IP Address Error Message -->
+							<div v-if="inputErrors.ipAddress" class="text-danger">
+								{{ inputErrors.ipAddress }}
+							</div>
 						</div>
 
 						<!-- Target Port and Duration fields on the same line -->
@@ -66,6 +70,10 @@
 									placeholder="Port Number"
 									v-model="dosAttackForm.portNumber"
 								/>
+								<!-- Display Port Number Error Message -->
+								<div v-if="inputErrors.portNumber" class="text-danger">
+									{{ inputErrors.portNumber }}
+								</div>
 							</div>
 							<div class="col-md-6">
 								<!-- Timeout input text field -->
@@ -77,6 +85,10 @@
 									placeholder="Timeout (seconds)"
 									v-model="dosAttackForm.duration"
 								/>
+								<!-- Display TimeOut Duration Error Message -->
+								<div v-if="inputErrors.duration" class="text-danger">
+									{{ inputErrors.duration }}
+								</div>
 							</div>
 						</div>
 
@@ -93,6 +105,10 @@
 							<option value="--udp">UDP Flood</option>
 							<option value="--icmp">ICMP Flood</option>
 						</select>
+						<!-- Display Attack Type Error Message -->
+						<div v-if="inputErrors.attackType" class="text-danger">
+							{{ inputErrors.attackType }}
+						</div>
 
 						<!-- Target network input text field -->
 						<div id="packetSize" class="mb-3 w-75">
@@ -106,6 +122,10 @@
 								placeholder="Number of bytes"
 								v-model="dosAttackForm.packetSize"
 							/>
+							<!-- Display Packet Size Error Message -->
+							<div v-if="inputErrors.packetSize" class="text-danger">
+								{{ inputErrors.packetSize }}
+							</div>
 						</div>
 
 						<!-- Run button -->
@@ -184,6 +204,13 @@ export default {
 	data() {
 		return {
 			dosAttackForm: {
+				ipAddress: "",
+				portNumber: "",
+				attackType: "",
+				duration: "",
+				packetSize: "",
+			},
+			inputErrors: {
 				ipAddress: "",
 				portNumber: "",
 				attackType: "",
@@ -271,6 +298,51 @@ export default {
 
 			return `[${hours}:${minutes}:${seconds}]`
 		},
+		validateForm() {
+			let isValid = true
+			this.inputErrors = {} // Clear previous error messages
+
+			if (!this.dosAttackForm.ipAddress.trim()) {
+				this.inputErrors.ipAddress = "IP address is required."
+				isValid = false
+			} else if (!/^\d+$/.test(this.dosAttackForm.ipAddress.trim())) {
+				this.inputErrors.ipAddress = "IP address must contain only integers."
+				isValid = false
+			}
+
+			if (!this.dosAttackForm.portNumber.trim()) {
+				this.inputErrors.portNumber = "Port Number is required."
+				isValid = false
+			} else if (!/^\d+$/.test(this.dosAttackForm.portNumber)) {
+				this.inputErrors.portNumber =
+					"Port number must be a non-negative integer."
+				isValid = false
+			}
+
+			if (!this.dosAttackForm.attackType) {
+				this.inputErrors.attackType = "Attack type is required."
+				isValid = false
+			}
+
+			if (!this.dosAttackForm.duration.trim()) {
+				this.inputErrors.duration = "Time duration is required."
+				isValid = false
+			} else if (!/^\d+$/.test(this.dosAttackForm.duration)) {
+				this.inputErrors.duration = "Duration must be a non-negative integer."
+				isValid = false
+			}
+
+			if (!this.dosAttackForm.packetSize.trim()) {
+				this.inputErrors.packetSize = "Packet size is required."
+				isValid = false
+			} else if (!/^\d+$/.test(this.dosAttackForm.packetSize)) {
+				this.inputErrors.packetSize =
+					"Packet size must be a non-negative integer."
+				isValid = false
+			}
+
+			return isValid
+		},
 		initForm() {
 			this.dosAttackForm.ipAddress = ""
 			this.dosAttackForm.attackType = ""
@@ -284,18 +356,20 @@ export default {
 		},
 		onSubmit(e) {
 			e.preventDefault()
-			const payload = {
-				ipAddress: this.dosAttackForm.ipAddress,
-				portNumber: this.dosAttackForm.portNumber,
-				attackType: this.dosAttackForm.attackType,
-				attackTypeLabel:
-					document.getElementById("attackTypeInput").options[
-						document.getElementById("attackTypeInput").selectedIndex
-					].textContent,
-				duration: this.dosAttackForm.duration,
-				packetSize: this.dosAttackForm.packetSize,
+			if (this.validateForm()) {
+				const payload = {
+					ipAddress: this.dosAttackForm.ipAddress,
+					portNumber: this.dosAttackForm.portNumber,
+					attackType: this.dosAttackForm.attackType,
+					attackTypeLabel:
+						document.getElementById("attackTypeInput").options[
+							document.getElementById("attackTypeInput").selectedIndex
+						].textContent,
+					duration: this.dosAttackForm.duration,
+					packetSize: this.dosAttackForm.packetSize,
+				}
+				this.dosAttack(payload)
 			}
-			this.dosAttack(payload)
 		},
 		startTimer() {
 			if (!this.isRunning) {

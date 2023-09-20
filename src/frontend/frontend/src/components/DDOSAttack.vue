@@ -51,6 +51,10 @@
 								placeholder="IP address"
 								v-model="ddosAttackForm.ipAddress"
 							/>
+							<!-- Display IP Address Error Message -->
+							<div v-if="inputErrors.ipAddress" class="text-danger">
+								{{ inputErrors.ipAddress }}
+							</div>
 						</div>
 
 						<!-- Target Port and Duration fields on the same line -->
@@ -67,6 +71,10 @@
 									placeholder="Port Number"
 									v-model="ddosAttackForm.portNumber"
 								/>
+								<!-- Display Port Number Error Message -->
+								<div v-if="inputErrors.portNumber" class="text-danger">
+									{{ inputErrors.portNumber }}
+								</div>
 							</div>
 							<div class="col-md-6">
 								<!-- Timeout input text field -->
@@ -78,6 +86,10 @@
 									placeholder="Timeout (seconds)"
 									v-model="ddosAttackForm.duration"
 								/>
+								<!-- Display TimeOut Duration Error Message -->
+								<div v-if="inputErrors.duration" class="text-danger">
+									{{ inputErrors.duration }}
+								</div>
 							</div>
 						</div>
 
@@ -94,6 +106,10 @@
 							<option value="--udp">UDP Flood</option>
 							<option value="--icmp">ICMP Flood</option>
 						</select>
+						<!-- Display Attack Type Error Message -->
+						<div v-if="inputErrors.attackType" class="text-danger">
+							{{ inputErrors.attackType }}
+						</div>
 
 						<!-- Target network input text field -->
 						<div id="packetSize" class="mb-3 w-75">
@@ -107,6 +123,10 @@
 								placeholder="Number of bytes"
 								v-model="ddosAttackForm.packetSize"
 							/>
+							<!-- Display Packet Size Error Message -->
+							<div v-if="inputErrors.packetSize" class="text-danger">
+								{{ inputErrors.packetSize }}
+							</div>
 						</div>
 
 						<div class="button-container">
@@ -208,6 +228,13 @@ export default {
 				duration: "",
 				packetSize: "",
 			},
+			inputErrors: {
+				ipAddress: "",
+				portNumber: "",
+				attackType: "",
+				duration: "",
+				packetSize: "",
+			},
 			result: "",
 			eventLog: "",
 			display: false,
@@ -289,6 +316,51 @@ export default {
 
 			return `[${hours}:${minutes}:${seconds}]`
 		},
+		validateForm() {
+			let isValid = true
+			this.inputErrors = {} // Clear previous error messages
+
+			if (!this.ddosAttackForm.ipAddress.trim()) {
+				this.inputErrors.ipAddress = "IP address is required."
+				isValid = false
+			} else if (!/^\d+$/.test(this.ddosAttackForm.ipAddress.trim())) {
+				this.inputErrors.ipAddress = "IP address must contain only integers."
+				isValid = false
+			}
+
+			if (!this.ddosAttackForm.portNumber.trim()) {
+				this.inputErrors.portNumber = "Port Number is required."
+				isValid = false
+			} else if (!/^\d+$/.test(this.ddosAttackForm.portNumber)) {
+				this.inputErrors.portNumber =
+					"Port number must be a non-negative integer."
+				isValid = false
+			}
+
+			if (!this.ddosAttackForm.attackType) {
+				this.inputErrors.attackType = "Attack type is required."
+				isValid = false
+			}
+
+			if (!this.ddosAttackForm.duration.trim()) {
+				this.inputErrors.duration = "Time duration is required."
+				isValid = false
+			} else if (!/^\d+$/.test(this.ddosAttackForm.duration)) {
+				this.inputErrors.duration = "Duration must be a non-negative integer."
+				isValid = false
+			}
+
+			if (!this.ddosAttackForm.packetSize.trim()) {
+				this.inputErrors.packetSize = "Packet size is required."
+				isValid = false
+			} else if (!/^\d+$/.test(this.ddosAttackForm.packetSize)) {
+				this.inputErrors.packetSize =
+					"Packet size must be a non-negative integer."
+				isValid = false
+			}
+
+			return isValid
+		},
 		initForm() {
 			this.ddosAttackForm.ipAddress = ""
 			this.ddosAttackForm.attackType = ""
@@ -302,14 +374,16 @@ export default {
 		},
 		runDDOS(e) {
 			e.preventDefault()
-			const payload = {
-				ipAddress: this.ddosAttackForm.ipAddress,
-				portNumber: this.ddosAttackForm.portNumber,
-				attackType: this.ddosAttackForm.attackType,
-				duration: this.ddosAttackForm.duration,
-				packetSize: this.ddosAttackForm.packetSize,
+			if (this.validateForm()) {
+				const payload = {
+					ipAddress: this.ddosAttackForm.ipAddress,
+					portNumber: this.ddosAttackForm.portNumber,
+					attackType: this.ddosAttackForm.attackType,
+					duration: this.ddosAttackForm.duration,
+					packetSize: this.ddosAttackForm.packetSize,
+				}
+				this.ddosAttack(payload)
 			}
-			this.ddosAttack(payload)
 		},
 		startTimer() {
 			if (!this.isRunning) {
