@@ -268,7 +268,7 @@
 
 <script>
 import axios from "axios"
-
+import { getCurrentTimestamp } from "../shared/utilities.js"
 export default {
 	name: "IPScan",
 	data() {
@@ -435,7 +435,8 @@ export default {
 			const path = "http://localhost:5000/ipScan/"
 			this.startTimer()
 			this.initStatus()
-			this.eventLog += `Scan started on network "${ipInfo}"\n`
+			this.eventLog +=
+				getCurrentTimestamp() + ` Scan started on network "${ipInfo}"\n`
 			this.display = true
 			console.log(payload)
 			axios
@@ -443,7 +444,9 @@ export default {
 				.then((res) => {
 					console.log(res.data)
 					this.scanResult = res.data
-					this.eventLog += `Scan completed successfully in ${this.formattedElapsedTimeEventLog}\n`
+					this.eventLog +=
+						getCurrentTimestamp() +
+						` Scan completed successfully in ${this.formattedElapsedTimeEventLog}\n`
 				})
 				.catch((err) => {
 					console.log(err)

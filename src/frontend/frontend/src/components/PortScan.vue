@@ -150,6 +150,7 @@
 
 <script>
 import axios from "axios"
+import { getCurrentTimestamp } from "../shared/utilities.js"
 export default {
 	name: "PortScan",
 	data() {
@@ -188,14 +189,18 @@ export default {
 			const path = "http://127.0.0.1:5000/portScan/"
 			this.startTimer() // start timer
 			this.initStatus()
-			this.eventLog += `Scan started on network "${this.portScanForm.ipAddress}"\n`
+			this.eventLog +=
+				getCurrentTimestamp() +
+				` Scan started on network "${this.portScanForm.ipAddress}"\n`
 			this.display = true
 			axios
 				.post(path, payload)
 				.then((res) => {
 					console.log(res.data)
 					this.scanResult = res.data
-					this.eventLog += `Scan completed successfully in ${this.formattedElapsedTimeEventLog}\n`
+					this.eventLog +=
+						getCurrentTimestamp() +
+						` Scan completed successfully in ${this.formattedElapsedTimeEventLog}\n`
 				})
 				.catch((err) => {
 					console.log(err)

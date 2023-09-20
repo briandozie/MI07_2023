@@ -159,6 +159,7 @@
 
 <script>
 import axios from "axios"
+import { getCurrentTimestamp } from "../shared/utilities.js"
 export default {
 	name: "CVEScan",
 	data() {
@@ -198,14 +199,18 @@ export default {
 			const path = "http://localhost:5000/cveScan/"
 			this.startTimer() // start timer
 			this.initStatus()
-			this.eventLog += `Scan started on network "${this.cveScanForm.ipAddress}"\n`
+			this.eventLog +=
+				getCurrentTimestamp() +
+				` Scan started on network "${this.cveScanForm.ipAddress}"\n`
 			this.display = true
 			axios
 				.post(path, payload)
 				.then((res) => {
 					console.log(res.data)
 					this.result = res.data
-					this.eventLog += `Scan completed successfully in ${this.formattedElapsedTimeEventLog}\n`
+					this.eventLog +=
+						getCurrentTimestamp() +
+						` Scan completed successfully in ${this.formattedElapsedTimeEventLog}\n`
 					this.parseCveScanOutput()
 				})
 				.catch((err) => {
