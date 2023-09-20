@@ -29,7 +29,7 @@
 			<!-- Secondary Navigation Bar -->
 			<nav class="navbar bg-secondary" data-bs-theme="dark">
 				<div class="container-fluid navbar-expand">
-					<div class="nav nav-underline">
+					<ul class="nav nav-underline">
 						<router-link to="/cve" class="nav-link">CVE Scan</router-link>
 						<router-link to="/service" class="nav-link"
 							>Service Scan</router-link
@@ -38,10 +38,12 @@
 						<router-link to="/port" class="nav-link">Port Scan</router-link>
 						<router-link to="/dos" class="nav-link">DoS Attack</router-link>
 						<router-link to="/ddos" class="nav-link">DDoS Attack</router-link>
+					</ul>
+					<ul class="nav nav-underline ms-auto">
 						<router-link to="/dashboard" class="nav-link active"
 							>Dashboard</router-link
 						>
-					</div>
+					</ul>
 				</div>
 			</nav>
 
