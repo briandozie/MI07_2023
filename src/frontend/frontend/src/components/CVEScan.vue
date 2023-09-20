@@ -72,7 +72,9 @@
 
 						<!-- Run button -->
 						<div class="run-button">
-							<button type="submit" class="btn btn-primary">Run</button>
+							<button type="submit" class="btn btn-primary" :disabled="display">
+								Run
+							</button>
 						</div>
 					</form>
 				</div>
