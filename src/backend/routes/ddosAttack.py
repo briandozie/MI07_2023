@@ -33,7 +33,6 @@ def DDOSAttack():
     bots.start()
     bots.join()
 
-    print('this is the latency list \n' + latencyPingList)
     logActivityDOS("DDOS ATTACK", data, latencyPingList)
 
     return ""

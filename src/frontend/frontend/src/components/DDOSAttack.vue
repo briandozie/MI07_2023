@@ -311,6 +311,10 @@ export default {
 				attackType: this.ddosAttackForm.attackType,
 				duration: this.ddosAttackForm.duration,
 				packetSize: this.ddosAttackForm.packetSize,
+				attackTypeLabel:
+					document.getElementById("attackTypeInput").options[
+						document.getElementById("attackTypeInput").selectedIndex
+					].textContent,
 			}
 			this.ddosAttack(payload)
 		},
