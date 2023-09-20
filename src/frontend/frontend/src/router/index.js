@@ -6,6 +6,8 @@ import PortScan from "../components/PortScan.vue"
 import IPScan from "../components/IPScan.vue"
 import DDOSAttack from "../components/DDOSAttack.vue"
 import DOSAttack from "../components/DOSAttack.vue"
+import Dashboard from "../components/Dashboard.vue"
+import HistoryDetail from "../components/HistoryDetail.vue"
 
 const routes = [
 	{
@@ -49,6 +51,18 @@ const routes = [
 		name: "DDOSAttack",
 		meta: { title: "DDoS Attack" },
 		component: DDOSAttack,
+	},
+	{
+		path: "/dashboard",
+		name: "DASHBOARD",
+		meta: { title: "Dashboard" },
+		component: Dashboard,
+	},
+	{
+		path: "/history/:id", // Use a dynamic route parameter to pass the row id
+		name: "historyDetail",
+		meta: { title: "History Details" },
+		component: HistoryDetail,
 	},
 ]
 

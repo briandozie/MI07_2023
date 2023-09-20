@@ -34,7 +34,7 @@ def logActivityDOS(activity, data, latency):
       'time': datetime.now().strftime("%H:%M:%S"),
       'activity': activity,
       'type': attackType,
-      'ip': ipAddress,
+      'target': ipAddress,
       'port': portNumber,
       'duration': duration,
       'packetSize': packetSize,

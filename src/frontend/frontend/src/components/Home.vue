@@ -26,7 +26,7 @@
 					<router-link to="/port" class="nav-link">Port Scan</router-link>
 					<router-link to="/dos" class="nav-link">DoS Attack</router-link>
 					<router-link to="/ddos" class="nav-link">DDoS Attack</router-link>
-					<!-- <router-link to="/dashboard" class="nav-link">Daskboard</router-link> -->
+					<router-link to="/dashboard" class="nav-link">Dashboard</router-link>
 				</div>
 			</div>
 		</nav>

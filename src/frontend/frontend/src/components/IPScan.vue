@@ -420,6 +420,10 @@ export default {
 			const ipInfo = payload.ipRange || payload.ipAddress || payload.ipAddresses
 			payload.subnetMask = this.ipScanForm.subnetMask
 			payload.scanType = this.ipScanForm.scanType
+			payload.scanTypeLabel =
+				document.getElementById("scanTypeInput").options[
+					document.getElementById("scanTypeInput").selectedIndex
+				].textContent
 
 			const path = "http://localhost:5000/ipScan/"
 			this.startTimer()
@@ -474,7 +478,7 @@ export default {
 				subnetMask: this.ipScanForm.subnetMask,
 				scanType: this.ipScanForm.scanType,
 			}
-
+			console.log(payload)
 			this.scanIPs(payload)
 			this.initForm()
 		},
