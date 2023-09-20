@@ -120,24 +120,28 @@
 				<div class="col">
 					<!-- Scan Result -->
 					<label for="resultOutput" class="form-label">Scan Result</label>
-					<table id="outputTable" class="table table-hover">
-						<thead>
-							<tr>
-								<th scope="col">Port</th>
-								<th scope="col">Status</th>
-								<th scope="col">Protocol</th>
-								<th scope="col">Host</th>
-							</tr>
-						</thead>
-						<tbody>
-							<tr v-for="result in scanResult.ports" :key="result.port">
-								<td>{{ result.port }}</td>
-								<td>{{ result.status }}</td>
-								<td>{{ result.protocol }}</td>
-								<td>{{ result.host }}</td>
-							</tr>
-						</tbody>
-					</table>
+					<div class="card">
+						<div class="card-body">
+							<table id="outputTable" class="table table-hover">
+								<thead>
+									<tr>
+										<th scope="col">Port</th>
+										<th scope="col">Status</th>
+										<th scope="col">Protocol</th>
+										<th scope="col">Host</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr v-for="result in scanResult.ports" :key="result.port">
+										<td>{{ result.port }}</td>
+										<td>{{ result.status }}</td>
+										<td>{{ result.protocol }}</td>
+										<td>{{ result.host }}</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>

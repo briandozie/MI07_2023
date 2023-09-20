@@ -118,28 +118,32 @@
 				<div class="col">
 					<!-- Scan Result -->
 					<label for="resultOutput" class="form-label">Scan Result</label>
-					<table id="outputTable" class="table table-hover">
-						<thead>
-							<tr>
-								<th scope="col">Host</th>
-								<th scope="col">Port</th>
-								<th scope="col">Name</th>
-								<th scope="col">Product</th>
-								<th scope="col">Extrainfo</th>
-								<th scope="col">Version</th>
-							</tr>
-						</thead>
-						<tbody>
-							<tr v-for="result in result.ports" :key="result.port">
-								<td>{{ result.host }}</td>
-								<td>{{ result.port }}</td>
-								<td>{{ result.name }}</td>
-								<td>{{ result.product }}</td>
-								<td>{{ result.extrainfo }}</td>
-								<td>{{ result.version }}</td>
-							</tr>
-						</tbody>
-					</table>
+					<div class="card">
+						<div class="card-body">
+							<table id="outputTable" class="table table-hover">
+								<thead>
+									<tr>
+										<th scope="col">Host</th>
+										<th scope="col">Port</th>
+										<th scope="col">Name</th>
+										<th scope="col">Product</th>
+										<th scope="col">Extrainfo</th>
+										<th scope="col">Version</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr v-for="result in result.ports" :key="result.port">
+										<td>{{ result.host }}</td>
+										<td>{{ result.port }}</td>
+										<td>{{ result.name }}</td>
+										<td>{{ result.product }}</td>
+										<td>{{ result.extrainfo }}</td>
+										<td>{{ result.version }}</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>
