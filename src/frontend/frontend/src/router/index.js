@@ -12,6 +12,7 @@ const routes = [
 	{
 		path: "/login",
 		name: "Login",
+		meta: { title: "SDN Intrusion & Penetration System" },
 		component: Login,
 	},
 	{

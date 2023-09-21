@@ -14,7 +14,7 @@ def login():
 
     if user:
         # Create session with username upon successful login
-        session["username"] = username
+        # session["username"] = username
         return jsonify(message="Login Successful")
     else:
         # In case of failed login, display error message and return
@@ -23,8 +23,8 @@ def login():
 
 def getUser(username, password):
     users_collection = db["user"]
-    x = users_collection.find_one({
+    user = users_collection.find_one({
         "username" : username,
         "password" : password,
     })
-    return x["user"]
+    return user
