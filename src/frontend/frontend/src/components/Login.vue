@@ -71,6 +71,7 @@ export default {
 				.catch((error) => {
 					if (error.response.status === 401) {
 						// Handle 401 Unauthorized error
+						alert("Invalid username or password.")
 						this.errorMessage = "Unauthorized: Invalid username or password"
 					} else {
 						// Catch any unrelated errors
