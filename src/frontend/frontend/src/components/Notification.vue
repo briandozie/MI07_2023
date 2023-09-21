@@ -24,7 +24,7 @@ export default {
 		},
 	},
 	watch: {
-		isVisible(newValue) {
+		message(newValue) {
 			if (newValue) {
 				setTimeout(() => {
 					this.isVisible = false

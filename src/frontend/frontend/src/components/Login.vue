@@ -28,30 +28,27 @@
 				<button type="submit">Login</button>
 			</form>
 		</div>
-
-		<!-- Success and Error Messages -->
-		<Notification :message="notificationMessage" />
-		<Notification :type="notificationType" />
 	</div>
 </template>
 
 <script>
 import axios from "axios"
-import Notification from "./Notification.vue"
-
+// import Notification from "./Notification.vue"
+// import { BModal } from "bootstrap-vue"
 export default {
 	name: "Login",
-	components: {
-		Notification,
-	},
+	// components: {
+	// 	BModal,
+	// },
 	data() {
 		return {
 			userField: {
 				username: "",
 				password: "",
 			},
-			notificationMessage: "",
-			notificationType: "",
+			successMessage: null,
+			errorMessage: null,
+			// popupMessage: null,
 		}
 	},
 	methods: {
@@ -66,32 +63,36 @@ export default {
 					// Check Response from Backend
 					if (res.status == 200) {
 						// Success message upon login
-						this.notificationMessage = "Login Successful!"
-						this.notificationType = "success"
+						this.successMessage = "Login Successful!"
+						// this.popupMessage = res.data.message
 						// Redirect to Home upon successful login
 						this.$router.push("/home")
 					} else {
 						// Display error message otherwise
 						this.errorMessage = "Invalid username or password"
-						this.notificationType = "error"
+						//this.popupMessage = res.data.message
 					}
 				})
 				.catch((error) => {
 					if (error.response.status === 401) {
 						// Handle 401 Unauthorized error
 						this.errorMessage = "Unauthorized: Invalid username or password"
-						this.notificationType = "error"
+
+						// this.popupMessage = "Unauthorized: Invalid username or password"
 					} else {
 						// Catch any unrelated errors
 						console.error("An error occurred:", error)
 						this.errorMessage = "An error was encountered during login"
-						this.notificationType = "error"
+
+						// this.popupMessage = "An error was encountered during login"
 					}
 				})
 		},
 		initForm() {
 			this.userField.username = ""
 			this.userField.password = ""
+
+			// this.popupMessage = null
 		},
 		onSubmit(e) {
 			e.preventDefault()
