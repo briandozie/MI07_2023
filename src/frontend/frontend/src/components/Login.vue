@@ -28,20 +28,30 @@
 				<button type="submit">Login</button>
 			</form>
 		</div>
+
+		<!-- Success and Error Messages -->
+		<Notification :message="notificationMessage" />
+		<Notification :type="notificationType" />
 	</div>
 </template>
 
 <script>
 import axios from "axios"
+import Notification from "./Notification.vue"
+
 export default {
 	name: "Login",
+	components: {
+		Notification,
+	},
 	data() {
 		return {
 			userField: {
 				username: "",
 				password: "",
 			},
-			//isAuthenticated: false,
+			notificationMessage: "",
+			notificationType: "",
 		}
 	},
 	methods: {
@@ -55,11 +65,15 @@ export default {
 
 					// Check Response from Backend
 					if (res.status == 200) {
+						// Success message upon login
+						this.notificationMessage = "Login Successful!"
+						this.notificationType = "success"
 						// Redirect to Home upon successful login
 						this.$router.push("/home")
 					} else {
 						// Display error message otherwise
-						this.error = "Invalid username or password"
+						this.errorMessage = "Invalid username or password"
+						this.notificationType = "error"
 					}
 				})
 				.catch((err) => {
