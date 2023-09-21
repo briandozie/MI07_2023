@@ -76,10 +76,17 @@ export default {
 						this.notificationType = "error"
 					}
 				})
-				.catch((err) => {
-					console.log(err)
-					// Catch any unrelated errors
-					this.error = "An error was encountered during login"
+				.catch((error) => {
+					if (error.response.status === 401) {
+						// Handle 401 Unauthorized error
+						this.errorMessage = "Unauthorized: Invalid username or password"
+						this.notificationType = "error"
+					} else {
+						// Catch any unrelated errors
+						console.error("An error occurred:", error)
+						this.errorMessage = "An error was encountered during login"
+						this.notificationType = "error"
+					}
 				})
 		},
 		initForm() {
