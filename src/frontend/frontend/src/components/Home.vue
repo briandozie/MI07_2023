@@ -1,12 +1,14 @@
 <template>
 	<div>
 		<nav
+			id="primaryNav"
 			class="navbar bg-dark border-bottom border-bottom-dark"
 			data-bs-theme="dark"
 		>
 			<div class="container-fluid">
 				<router-link class="navbar-brand" to="/home"
-					>SDN Intrusion & Penetration System</router-link
+					><img id="cm-logo" src="../assets/cm_logo_color_200.png" alt="" />SDN
+					Intrusion & Penetration System</router-link
 				>
 				<a class="navbar-brand ms-auto" href="#">
 					<i class="bi bi-gear"></i>
@@ -17,7 +19,7 @@
 			</div>
 		</nav>
 
-		<nav class="navbar bg-secondary" data-bs-theme="dark">
+		<nav id="secondaryNav" class="navbar bg-secondary" data-bs-theme="dark">
 			<div class="container-fluid navbar-expand">
 				<ul class="nav nav-underline">
 					<router-link to="/cve" class="nav-link">CVE Scan</router-link>
@@ -68,8 +70,11 @@
 </script>
 
 <style>
-.navbar {
-	height: 50px;
+#cm-logo {
+	padding-right: 15px;
+}
+#primaryNav {
+	height: 80px;
 }
 p {
 	display: block;
