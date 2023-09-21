@@ -38,6 +38,14 @@
 		</nav>
 
 		<div class="container">
+			<!-- Loading indicator -->
+			<div v-if="isLoading" class="text-center mt-3">
+				<div class="spinner-border" role="status">
+					<span class="visually-hidden">Loading...</span>
+				</div>
+				<p>Loading...</p>
+			</div>
+
 			<label for="historyLog" class="form-label">History Details</label>
 			<div class="card">
 				<div class="row">
@@ -184,6 +192,7 @@ export default {
 	name: "HistoryDetail",
 	data() {
 		return {
+			isLoading: false,
 			activity: {},
 			cveScanResult: [],
 			latencyResult: "",
@@ -197,6 +206,7 @@ export default {
 	methods: {
 		getHistoryDetails(id) {
 			const path = `http://127.0.0.1:5000/dashboard/history/${id}`
+			this.isLoading = true // Show loading indicator
 			axios
 				.get(path)
 				.then((res) => {
@@ -228,7 +238,9 @@ export default {
 				.catch((err) => {
 					console.log(err)
 				})
-				.finally(() => {})
+				.finally(() => {
+					this.isLoading = false
+				})
 		},
 		// Method to identify links in output using regular expression
 		renderClickableLinks(text) {

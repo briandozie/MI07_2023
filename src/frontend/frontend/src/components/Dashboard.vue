@@ -42,6 +42,14 @@
 		<div id="content" class="container">
 			<label for="historyLog" class="form-label">History Log</label>
 			<div id="historyOutputBox" class="card card-body">
+				<!-- Loading indicator -->
+				<div v-if="isLoading" class="text-center mt-3">
+					<div class="spinner-border" role="status">
+						<span class="visually-hidden">Loading...</span>
+					</div>
+					<p>Loading...</p>
+				</div>
+
 				<table id="historyLogTable" class="table table-hover">
 					<thead>
 						<tr>
@@ -75,6 +83,7 @@
 				</table>
 			</div>
 			<p class="right-align">{{ paginationInfo }}</p>
+
 			<!-- Pagination controls -->
 			<nav aria-label="Page navigation example">
 				<ul class="pagination justify-content-end">
@@ -118,6 +127,7 @@ export default {
 	name: "Dashboard",
 	data() {
 		return {
+			isLoading: false,
 			historyLog: [],
 			itemsPerPage: 10, // Number of items per page
 			currentPage: 1,
@@ -157,6 +167,7 @@ export default {
 	methods: {
 		getHistory() {
 			const path = "http://127.0.0.1:5000/dashboard/history"
+			this.isLoading = true
 			axios
 				.get(path)
 				.then((res) => {
@@ -166,7 +177,9 @@ export default {
 				.catch((err) => {
 					console.log(err)
 				})
-				.finally(() => {})
+				.finally(() => {
+					this.isLoading = false
+				})
 		},
 		redirectToDetailPage(id) {
 			// Use the `router-link` component to navigate to the detail page
