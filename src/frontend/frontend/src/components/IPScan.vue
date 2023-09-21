@@ -1,14 +1,12 @@
 <template>
 	<div>
 		<nav
-			id="primaryNav"
 			class="navbar bg-dark border-bottom border-bottom-dark"
 			data-bs-theme="dark"
 		>
 			<div class="container-fluid">
 				<router-link class="navbar-brand" to="/home"
-					><img id="cm-logo" src="../assets/cm_logo_color_200.png" alt="" />SDN
-					Intrusion & Penetration System</router-link
+					>SDN Intrusion & Penetration System</router-link
 				>
 				<a class="navbar-brand ms-auto" href="#">
 					<i class="bi bi-gear"></i>
@@ -21,17 +19,14 @@
 
 		<nav class="navbar bg-secondary" data-bs-theme="dark">
 			<div class="container-fluid navbar-expand">
-				<ul class="nav nav-underline">
+				<div class="nav nav-underline">
 					<router-link to="/cve" class="nav-link">CVE Scan</router-link>
 					<router-link to="/service" class="nav-link">Service Scan</router-link>
 					<router-link to="/ip" class="nav-link active">IP Scan</router-link>
 					<router-link to="/port" class="nav-link">Port Scan</router-link>
 					<router-link to="/dos" class="nav-link">DoS Attack</router-link>
 					<router-link to="/ddos" class="nav-link">DDoS Attack</router-link>
-				</ul>
-				<ul class="nav nav-underline ms-auto">
-					<router-link to="/dashboard" class="nav-link">Dashboard</router-link>
-				</ul>
+				</div>
 			</div>
 		</nav>
 
@@ -105,6 +100,12 @@
 								@input="handleInputRadioChange1"
 								v-if="showInputField1"
 							/>
+							<div
+								class="error-message text-danger"
+								v-if="showInputField1 && errors.inputValue1"
+							>
+								{{ errors.inputValue1 }}
+							</div>
 							<!-- For Multiple IP Only -->
 							<div class="input-group">
 								<input
@@ -116,6 +117,7 @@
 									@input="handleInputRadioChange2"
 									v-if="showInputField2"
 								/>
+
 								<!-- Button to add new input field -->
 								<div class="input-group-append" v-if="showInputField2">
 									<button
@@ -147,7 +149,12 @@
 									/>
 								</div>
 							</div>
-
+							<div
+								class="error-message text-danger"
+								v-if="showInputField2 && errors.inputValue2"
+							>
+								{{ errors.inputValue2 }}
+							</div>
 							<!-- For IP Range Only -->
 							<div class="input-group mb-3">
 								<input
@@ -171,6 +178,18 @@
 									v-if="showInputField3"
 								/>
 							</div>
+							<div
+								class="error-message text-danger"
+								v-if="showInputField3 && errors.inputStart"
+							>
+								{{ errors.inputStart }}
+							</div>
+							<div
+								class="error-message text-danger"
+								v-if="showInputField3 && errors.inputEnd"
+							>
+								{{ errors.inputEnd }}
+							</div>
 						</div>
 
 						<!-- Subnet Mask-->
@@ -184,7 +203,12 @@
 								v-model="ipScanForm.subnetMask"
 							/>
 						</div>
-
+						<div
+							class="error-message text-danger"
+							v-if="showInputField1 && errors.subnetMask"
+						>
+							{{ errors.subnetMask }}
+						</div>
 						<!-- Scan type dropdown menu -->
 						<label for="scanTypeInput" class="form-label">Scan Type</label>
 						<select
@@ -196,6 +220,9 @@
 							<option disabled value="">Select Scan Type</option>
 							<option value="sS">TCP SYN (Stealth)</option>
 						</select>
+						<div class="error-message text-danger" v-if="errors.scanType">
+							{{ errors.scanType }}
+						</div>
 
 						<!-- Run button -->
 						<div class="run-button">
@@ -246,22 +273,18 @@
 				<div class="col">
 					<!-- Scan Result -->
 					<label for="resultOutput" class="form-label">Scan Result</label>
-					<div class="card">
-						<div class="card-body">
-							<table id="outputTable" class="table table-hover">
-								<thead>
-									<tr>
-										<th scope="col">IP</th>
-									</tr>
-								</thead>
-								<tbody>
-									<tr v-for="result in scanResult" :key="result">
-										<td>{{ result }}</td>
-									</tr>
-								</tbody>
-							</table>
-						</div>
-					</div>
+					<table id="outputTable" class="table table-hover">
+						<thead>
+							<tr>
+								<th scope="col">IP</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr v-for="result in scanResult" :key="result">
+								<td>{{ result }}</td>
+							</tr>
+						</tbody>
+					</table>
 				</div>
 			</div>
 		</div>
@@ -270,7 +293,7 @@
 
 <script>
 import axios from "axios"
-import { getCurrentTimestamp } from "../shared/utilities.js"
+
 export default {
 	name: "IPScan",
 	data() {
@@ -281,13 +304,19 @@ export default {
 				inputStart: "",
 				inputEnd: "",
 				additionalInputs: [],
-				ipRange: "",
-				ipAddresses: "",
-				ipAddress: "",
 				subnetMask: "",
 				scanType: "",
 				selectedRadio2: "btnradio2",
 				selectedRadio3: "btnradio3",
+				errorMessage: null,
+			},
+			errors: {
+				inputValue1: null,
+				inputValue2: null,
+				inputStart: null,
+				inputEnd: null,
+				subnetMask: null,
+				scanType: null,
 			},
 			scanResult: "",
 			eventLog: "",
@@ -321,45 +350,66 @@ export default {
 	},
 
 	methods: {
-		setDefaultInputVisibility() {
-			if (this.selectedRadio1 === "btnradio1") {
-				this.showInputField1 = true
-				this.showInputField2 = false
-				this.showInputField3 = false
-			} else if (this.selectedRadio1 === "btnradio2") {
-				this.showInputField1 = false
-				this.showInputField2 = true
-				this.showInputField3 = false
-			} else if (this.selectedRadio1 === "btnradio3") {
-				this.showInputField1 = false
-				this.showInputField2 = false
-				this.showInputField3 = true
+		validateInputValue1() {
+			// let isValid = true
+			this.errors = {}
+			if (!this.ipScanForm.inputValue1.trim()) {
+				this.errors.inputValue1 = "Input Value 1 is required."
+			} else {
+				this.errors.inputValue1 = null // No error
+			}
+		},
+		validateInputValue2() {
+			if (!this.ipScanForm.inputValue2.trim()) {
+				this.errors.inputValue2 = "Input Value 2 is required."
+			} else {
+				this.errors.inputValue2 = null // No error
+			}
+		},
+		validateInputStart() {
+			if (!this.ipScanForm.inputStart.trim()) {
+				this.errors.inputStart = "Input Value S is required."
+			} else {
+				this.errors.inputStart = null // No error
+			}
+		},
+		validateInputEnd() {
+			if (!this.ipScanForm.inputEnd.trim()) {
+				this.errors.inputEnd = "Input Value E is required."
+			} else {
+				this.errors.inputEnd = null // No error
+			}
+		},
+		validateInputSM() {
+			if (!this.ipScanForm.subnetMask.trim()) {
+				this.errors.subnetMask = "Input Value E is required."
+			} else {
+				this.errors.subnetMask = null // No error
+			}
+		},
+		validateInputST() {
+			if (!this.ipScanForm.scanType.trim()) {
+				this.errors.scanType = "Input Value E is required."
+			} else {
+				this.errors.scanType = null // No error
 			}
 		},
 		resetForm() {
 			this.scanResult = ""
 			this.eventLog = ""
+			this.ipScanForm.additionalInputs = []
 		},
 
-		handleInputRadioChange1() {
+		setDefaultInputVisibility() {
 			if (this.selectedRadio1 === "btnradio1") {
 				this.showInputField1 = true
 				this.showInputField2 = false
 				this.showInputField3 = false
-				const input2Array = this.ipScanForm.inputValue2
-					.split(",")
-					.map((ip) => ip.trim())
 
-				if (input2Array.length > 0) {
-					this.ipScanForm.additionalInputs = input2Array.slice(1)
-					this.ipScanForm.inputValue2 = input2Array[0]
-				} else {
-					this.ipScanForm.additionalInputs = []
-					this.ipScanForm.inputValue2 = ""
-				}
-				this.ipScanForm.inputValue2 = ""
 				this.ipScanForm.inputStart = ""
 				this.ipScanForm.inputEnd = ""
+				this.ipScanForm.inputValue2 = ""
+				this.ipScanForm.additionalInputs = []
 				this.resetForm()
 			} else {
 				this.showInputField1 = false
@@ -377,6 +427,7 @@ export default {
 				this.ipScanForm.inputValue1 = ""
 				this.ipScanForm.inputStart = ""
 				this.ipScanForm.inputEnd = ""
+
 				this.resetForm()
 			} else {
 				this.showInputField2 = false
@@ -390,6 +441,7 @@ export default {
 				this.showInputField2 = false
 				this.ipScanForm.inputValue1 = ""
 				this.ipScanForm.inputValue2 = ""
+				this.ipScanForm.additionalInputs = []
 				this.resetForm()
 			} else {
 				this.showInputField3 = false
@@ -402,7 +454,12 @@ export default {
 			const input2 = this.ipScanForm.inputValue2.trim()
 			const start = this.ipScanForm.inputStart.trim()
 			const end = this.ipScanForm.inputEnd.trim()
-
+			// if (!input1 && !input2 && !start && !end) {
+			// 	// No valid input provided, display an error message instead of starting the scan.
+			// 	this.eventLog +=
+			// 		"No valid input provided. Please enter an IP address or range.\n"
+			// 	return
+			// }
 			let payload = {}
 
 			if (start && end) {
@@ -429,16 +486,11 @@ export default {
 			const ipInfo = payload.ipRange || payload.ipAddress || payload.ipAddresses
 			payload.subnetMask = this.ipScanForm.subnetMask
 			payload.scanType = this.ipScanForm.scanType
-			payload.scanTypeLabel =
-				document.getElementById("scanTypeInput").options[
-					document.getElementById("scanTypeInput").selectedIndex
-				].textContent
 
 			const path = "http://localhost:5000/ipScan/"
 			this.startTimer()
 			this.initStatus()
-			this.eventLog +=
-				getCurrentTimestamp() + ` Scan started on network "${ipInfo}"\n`
+			this.eventLog += `Scan started on network "${ipInfo}"\n`
 			this.display = true
 			console.log(payload)
 			axios
@@ -446,9 +498,7 @@ export default {
 				.then((res) => {
 					console.log(res.data)
 					this.scanResult = res.data
-					this.eventLog +=
-						getCurrentTimestamp() +
-						` Scan completed successfully in ${this.formattedElapsedTimeEventLog}\n`
+					this.eventLog += `Scan completed successfully in ${this.formattedElapsedTimeEventLog}\n`
 				})
 				.catch((err) => {
 					console.log(err)
@@ -458,7 +508,6 @@ export default {
 					this.stopTimer()
 					this.resetTimer()
 				})
-			// }
 		},
 
 		initForm() {
@@ -466,9 +515,6 @@ export default {
 			this.ipScanForm.inputValue2 = ""
 			this.ipScanForm.inputStart = ""
 			this.ipScanForm.inputEnd = ""
-			this.ipScanForm.ipAddress = ""
-			this.ipScanForm.ipRange = ""
-			this.ipScanForm.ipAddresses = ""
 			this.ipScanForm.subnetMask = ""
 			this.ipScanForm.scanType = ""
 			this.ipScanForm.additionalInputs = []
@@ -479,21 +525,34 @@ export default {
 		},
 		onSubmit(e) {
 			e.preventDefault()
-			const payload = {
-				inputValue1: this.ipScanForm.inputValue1,
-				inputValue2: this.ipScanForm.inputValue2,
-				inputStart: this.ipScanForm.inputStart,
-				inputEnd: this.ipScanForm.inputEnd,
-				ipAddress: this.ipScanForm.ipAddress,
-				ipRange: this.ipScanForm.ipRange,
-				ipAddresses: this.ipScanForm.ipAddresses,
-				subnetMask: this.ipScanForm.subnetMask,
-				scanType: this.ipScanForm.scanType,
+			if (
+				(this.validateInputValue1() &&
+					this.validateInputSM() &&
+					this.validateInputST()) ||
+				(this.validateInputValue2() && this.validateInputST()) ||
+				(this.validateInputStart() &&
+					this.validateInputEnd() &&
+					this.validateInputST())
+			) {
+				const payload = {
+					inputValue1: this.ipScanForm.inputValue1,
+					inputValue2: this.ipScanForm.inputValue2,
+					inputStart: this.ipScanForm.inputStart,
+					inputEnd: this.ipScanForm.inputEnd,
+					subnetMask: this.ipScanForm.subnetMask,
+					scanType: this.ipScanForm.scanType,
+				}
+				// this.validateInputValue1()
+				// this.validateInputValue2()
+				// this.validateInputStart()
+				// this.validateInputEnd()
+				// this.validateInputSM()
+				// this.validateInputST()
+				this.scanIPs(payload)
+				this.initForm()
 			}
-			console.log(payload)
-			this.scanIPs(payload)
-			this.initForm()
 		},
+
 		startTimer() {
 			if (!this.isRunning) {
 				this.isRunning = true
