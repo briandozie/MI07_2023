@@ -10,6 +10,10 @@ import DOSAttack from "../components/DOSAttack.vue"
 
 const routes = [
 	{
+		path: "/",
+		redirect: "/login", // Redirect default path to login page
+	},
+	{
 		path: "/login",
 		name: "Login",
 		meta: { title: "SDN Intrusion & Penetration System" },
