@@ -1,129 +1,115 @@
 <template>
-	<head>
-		<link
-			rel="stylesheet"
-			type="text/css"
-			href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css"
-		/>
-	</head>
-	<body>
-		<!-- Primary Navigation Bar -->
-		<div>
-			<nav
-				id="primaryNav"
-				class="navbar bg-dark border-bottom border-bottom-dark"
-				data-bs-theme="dark"
-			>
-				<div class="container-fluid">
-					<router-link class="navbar-brand" to="/home"
-						><img
-							id="cm-logo"
-							src="../assets/cm_logo_color_200.png"
-							alt=""
-						/>SDN Intrusion & Penetration System</router-link
-					>
-					<a class="navbar-brand ms-auto" href="#">
-						<i class="bi bi-gear"></i>
-					</a>
-					<a class="navbar-brand mS-auto" href="#">
-						<i class="bi bi-person"></i>
-					</a>
-				</div>
-			</nav>
-
-			<!-- Secondary Navigation Bar -->
-			<nav class="navbar bg-secondary" data-bs-theme="dark">
-				<div class="container-fluid navbar-expand">
-					<ul class="nav nav-underline">
-						<router-link to="/cve" class="nav-link">CVE Scan</router-link>
-						<router-link to="/service" class="nav-link"
-							>Service Scan</router-link
-						>
-						<router-link to="/ip" class="nav-link">IP Scan</router-link>
-						<router-link to="/port" class="nav-link">Port Scan</router-link>
-						<router-link to="/dos" class="nav-link">DoS Attack</router-link>
-						<router-link to="/ddos" class="nav-link">DDoS Attack</router-link>
-					</ul>
-					<ul class="nav nav-underline ms-auto">
-						<router-link to="/dashboard" class="nav-link active"
-							>Dashboard</router-link
-						>
-					</ul>
-				</div>
-			</nav>
-
-			<div id="content" class="container">
-				<label for="historyLog" class="form-label">History Log</label>
-				<div id="historyOutputBox" class="card card-body">
-					<table id="historyLogTable" class="table table-hover">
-						<thead>
-							<tr>
-								<th scope="col">Type</th>
-								<th scope="col">Date</th>
-								<th scope="col">Time</th>
-								<th scope="col">Target</th>
-							</tr>
-						</thead>
-						<tbody>
-							<tr
-								v-for="activity in paginatedHistoryLog"
-								:key="activity._id"
-								@click="redirectToDetailPage(activity._id)"
-							>
-								<td>{{ activity.activity }}</td>
-								<td>{{ activity.date }}</td>
-								<td>{{ activity.time }}</td>
-								<td v-if="activity.activity != 'IP SCAN MULTIPLE'">
-									{{ activity.target }}
-								</td>
-								<td v-if="activity.activity === 'IP SCAN MULTIPLE'">
-									<ul>
-										<li v-for="(ip, index) in activity.target" :key="index">
-											{{ ip }}
-										</li>
-									</ul>
-								</td>
-							</tr>
-						</tbody>
-					</table>
-				</div>
-				<p class="right-align">{{ paginationInfo }}</p>
-				<!-- Pagination controls -->
-				<nav aria-label="Page navigation example">
-					<ul class="pagination justify-content-end">
-						<li class="page-item" :class="{ disabled: currentPage === 1 }">
-							<a
-								class="page-link"
-								href="#"
-								@click="prevPage"
-								aria-label="Previous"
-							>
-								<span aria-hidden="true">&laquo;</span>
-							</a>
-						</li>
-						<li
-							class="page-item"
-							v-for="page in pages"
-							:key="page"
-							:class="{ active: currentPage === page }"
-						>
-							<a class="page-link" href="#" @click="setCurrentPage(page)">{{
-								page
-							}}</a>
-						</li>
-						<li
-							class="page-item"
-							:class="{ disabled: currentPage === totalPages }"
-						>
-							<a class="page-link" href="#" @click="nextPage" aria-label="Next">
-								<span aria-hidden="true">&raquo;</span>
-							</a>
-						</li>
-					</ul>
-				</nav>
+	<!-- Primary Navigation Bar -->
+	<div>
+		<nav
+			id="primaryNav"
+			class="navbar bg-dark border-bottom border-bottom-dark"
+			data-bs-theme="dark"
+		>
+			<div class="container-fluid">
+				<router-link class="navbar-brand" to="/home"
+					><img id="cm-logo" src="../assets/cm_logo_color_200.png" alt="" />SDN
+					Intrusion & Penetration System</router-link
+				>
+				<a class="navbar-brand ms-auto" href="#">
+					<i class="bi bi-gear"></i>
+				</a>
+				<a class="navbar-brand mS-auto" href="#">
+					<i class="bi bi-person"></i>
+				</a>
 			</div>
+		</nav>
+
+		<!-- Secondary Navigation Bar -->
+		<nav class="navbar bg-secondary" data-bs-theme="dark">
+			<div class="container-fluid navbar-expand">
+				<ul class="nav nav-underline">
+					<router-link to="/cve" class="nav-link">CVE Scan</router-link>
+					<router-link to="/service" class="nav-link">Service Scan</router-link>
+					<router-link to="/ip" class="nav-link">IP Scan</router-link>
+					<router-link to="/port" class="nav-link">Port Scan</router-link>
+					<router-link to="/dos" class="nav-link">DoS Attack</router-link>
+					<router-link to="/ddos" class="nav-link">DDoS Attack</router-link>
+				</ul>
+				<ul class="nav nav-underline ms-auto">
+					<router-link to="/dashboard" class="nav-link active"
+						>Dashboard</router-link
+					>
+				</ul>
+			</div>
+		</nav>
+
+		<div id="content" class="container">
+			<label for="historyLog" class="form-label">History Log</label>
+			<div id="historyOutputBox" class="card card-body">
+				<table id="historyLogTable" class="table table-hover">
+					<thead>
+						<tr>
+							<th scope="col">Type</th>
+							<th scope="col">Date</th>
+							<th scope="col">Time</th>
+							<th scope="col">Target</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr
+							v-for="activity in paginatedHistoryLog"
+							:key="activity._id"
+							@click="redirectToDetailPage(activity._id)"
+						>
+							<td>{{ activity.activity }}</td>
+							<td>{{ activity.date }}</td>
+							<td>{{ activity.time }}</td>
+							<td v-if="activity.activity != 'IP SCAN MULTIPLE'">
+								{{ activity.target }}
+							</td>
+							<td v-if="activity.activity === 'IP SCAN MULTIPLE'">
+								<ul>
+									<li v-for="(ip, index) in activity.target" :key="index">
+										{{ ip }}
+									</li>
+								</ul>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			<p class="right-align">{{ paginationInfo }}</p>
+			<!-- Pagination controls -->
+			<nav aria-label="Page navigation example">
+				<ul class="pagination justify-content-end">
+					<li class="page-item" :class="{ disabled: currentPage === 1 }">
+						<a
+							class="page-link"
+							href="#"
+							@click="prevPage"
+							aria-label="Previous"
+						>
+							<span aria-hidden="true">&laquo;</span>
+						</a>
+					</li>
+					<li
+						class="page-item"
+						v-for="page in pages"
+						:key="page"
+						:class="{ active: currentPage === page }"
+					>
+						<a class="page-link" href="#" @click="setCurrentPage(page)">{{
+							page
+						}}</a>
+					</li>
+					<li
+						class="page-item"
+						:class="{ disabled: currentPage === totalPages }"
+					>
+						<a class="page-link" href="#" @click="nextPage" aria-label="Next">
+							<span aria-hidden="true">&raquo;</span>
+						</a>
+					</li>
+				</ul>
+			</nav>
 		</div>
-	</body>
+	</div>
 </template>
 
 <script>
@@ -132,7 +118,7 @@ export default {
 	name: "Dashboard",
 	data() {
 		return {
-			historyLog: [], // Your historical log data
+			historyLog: [],
 			itemsPerPage: 10, // Number of items per page
 			currentPage: 1,
 		}
