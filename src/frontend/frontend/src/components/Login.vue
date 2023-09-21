@@ -33,13 +33,8 @@
 
 <script>
 import axios from "axios"
-// import Notification from "./Notification.vue"
-// import { BModal } from "bootstrap-vue"
 export default {
 	name: "Login",
-	// components: {
-	// 	BModal,
-	// },
 	data() {
 		return {
 			userField: {
@@ -48,7 +43,6 @@ export default {
 			},
 			successMessage: null,
 			errorMessage: null,
-			// popupMessage: null,
 		}
 	},
 	methods: {
@@ -62,37 +56,32 @@ export default {
 
 					// Check Response from Backend
 					if (res.status == 200) {
-						// Success message upon login
+						// Placeholder token for authenticated users
+						const authToken = "userToken123"
+						localStorage.setItem("authToken", authToken) //Store token in localStorage
+
+						// Success message upon login and redirect to home page
 						this.successMessage = "Login Successful!"
-						// this.popupMessage = res.data.message
-						// Redirect to Home upon successful login
 						this.$router.push("/home")
 					} else {
 						// Display error message otherwise
 						this.errorMessage = "Invalid username or password"
-						//this.popupMessage = res.data.message
 					}
 				})
 				.catch((error) => {
 					if (error.response.status === 401) {
 						// Handle 401 Unauthorized error
 						this.errorMessage = "Unauthorized: Invalid username or password"
-
-						// this.popupMessage = "Unauthorized: Invalid username or password"
 					} else {
 						// Catch any unrelated errors
 						console.error("An error occurred:", error)
 						this.errorMessage = "An error was encountered during login"
-
-						// this.popupMessage = "An error was encountered during login"
 					}
 				})
 		},
 		initForm() {
 			this.userField.username = ""
 			this.userField.password = ""
-
-			// this.popupMessage = null
 		},
 		onSubmit(e) {
 			e.preventDefault()

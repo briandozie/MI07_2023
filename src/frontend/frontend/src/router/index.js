@@ -16,8 +16,17 @@ const routes = [
 	{
 		path: "/login",
 		name: "Login",
-		meta: { title: "SDN Intrusion & Penetration System" },
+		meta: { title: "Login" },
 		component: Login,
+		beforeEnter: (to, from, next) => {
+			if (from.path !== "/") {
+				alert("You have been logged out")
+
+				// Removes the user token from localStorage upon logout
+				removeAuthToken()
+			}
+			next()
+		},
 	},
 	{
 		path: "/home",
@@ -69,8 +78,29 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-	document.title = to.meta.title
-	next()
+	// Checks to see if user is authenticated or not
+	const isAuthenticated = checkAuthenticationStatus()
+	// If user is unauthenticated, redirect to login page
+	if (to.name !== "Login" && !isAuthenticated) {
+		next({ name: "Login" })
+	} else {
+		document.title = to.meta.title
+		next()
+	}
 })
+
+function checkAuthenticationStatus() {
+	// Retrive token from localStorage
+	const authToken = localStorage.getItem("authToken")
+
+	//Checks to see if authToken is valid
+	const isAuthenticated = !!authToken
+	return isAuthenticated
+}
+
+function removeAuthToken() {
+	//Removes user token from localStorage
+	localStorage.removeItem("authToken")
+}
 
 export default router
