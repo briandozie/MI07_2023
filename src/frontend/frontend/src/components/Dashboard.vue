@@ -66,7 +66,7 @@
 						</thead>
 						<tbody>
 							<tr
-								v-for="activity in historyLog"
+								v-for="activity in paginatedHistoryLog"
 								:key="activity._id"
 								@click="redirectToDetailPage(activity._id)"
 							>
@@ -87,6 +87,40 @@
 						</tbody>
 					</table>
 				</div>
+				<p class="right-align">{{ paginationInfo }}</p>
+				<!-- Pagination controls -->
+				<nav aria-label="Page navigation example">
+					<ul class="pagination justify-content-end">
+						<li class="page-item" :class="{ disabled: currentPage === 1 }">
+							<a
+								class="page-link"
+								href="#"
+								@click="prevPage"
+								aria-label="Previous"
+							>
+								<span aria-hidden="true">&laquo;</span>
+							</a>
+						</li>
+						<li
+							class="page-item"
+							v-for="page in pages"
+							:key="page"
+							:class="{ active: currentPage === page }"
+						>
+							<a class="page-link" href="#" @click="setCurrentPage(page)">{{
+								page
+							}}</a>
+						</li>
+						<li
+							class="page-item"
+							:class="{ disabled: currentPage === totalPages }"
+						>
+							<a class="page-link" href="#" @click="nextPage" aria-label="Next">
+								<span aria-hidden="true">&raquo;</span>
+							</a>
+						</li>
+					</ul>
+				</nav>
 			</div>
 		</div>
 	</body>
@@ -98,10 +132,42 @@ export default {
 	name: "Dashboard",
 	data() {
 		return {
-			historyLog: {},
+			historyLog: [], // Your historical log data
+			itemsPerPage: 10, // Number of items per page
+			currentPage: 1,
 		}
 	},
-	computed: {},
+	computed: {
+		// Calculate the total number of pages
+		totalPages() {
+			return Math.ceil(this.historyLog.length / this.itemsPerPage)
+		},
+		// Calculate the array of page numbers for display
+		pages() {
+			const pages = []
+			for (let i = 1; i <= this.totalPages; i++) {
+				pages.push(i)
+			}
+			return pages
+		},
+		// Calculate the current page's data
+		paginatedHistoryLog() {
+			const startIndex = (this.currentPage - 1) * this.itemsPerPage
+			const endIndex = startIndex + this.itemsPerPage
+			return this.historyLog.slice(startIndex, endIndex)
+		},
+		// Calculate the "showing X-Y of Z result(s)" message
+		paginationInfo() {
+			const startIndex = (this.currentPage - 1) * this.itemsPerPage + 1
+			const endIndex = Math.min(
+				startIndex + this.itemsPerPage - 1,
+				this.historyLog.length
+			)
+			const totalResults = this.historyLog.length
+
+			return `Showing ${startIndex}-${endIndex} of ${totalResults} result(s)`
+		},
+	},
 	methods: {
 		getHistory() {
 			const path = "http://127.0.0.1:5000/dashboard/history"
@@ -119,6 +185,22 @@ export default {
 		redirectToDetailPage(id) {
 			// Use the `router-link` component to navigate to the detail page
 			this.$router.push({ name: "historyDetail", params: { id } })
+		},
+		// Change to the previous page
+		prevPage() {
+			if (this.currentPage > 1) {
+				this.currentPage--
+			}
+		},
+		// Change to the next page
+		nextPage() {
+			if (this.currentPage < this.totalPages) {
+				this.currentPage++
+			}
+		},
+		// Set the current page
+		setCurrentPage(page) {
+			this.currentPage = page
 		},
 	},
 	mounted() {
@@ -138,7 +220,7 @@ h1 {
 	white-space: pre-wrap;
 }
 #historyOutputBox {
-	margin-bottom: 50px;
+	margin-bottom: 5px;
 }
 #content {
 	padding-top: 50px;
@@ -146,5 +228,8 @@ h1 {
 ul {
 	list-style-type: none; /* Remove bullets */
 	padding: 0; /* Remove padding */
+}
+.right-align {
+	text-align: right;
 }
 </style>

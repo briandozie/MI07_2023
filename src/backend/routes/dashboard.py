@@ -11,7 +11,7 @@ def getHistory():
      "activity" : 1,
      "date": 1,
      "time": 1,
-     "target": 1}).sort([("_id", -1)]).limit(10)
+     "target": 1}).sort([("_id", -1)])
 
   # Create an empty list to store the documents
   historyData = []
