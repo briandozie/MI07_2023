@@ -1,4 +1,4 @@
-from flask import Blueprint, request, redirect, session
+from flask import Blueprint, request, redirect, session, jsonify
 from pymongo import MongoClient
 from app import db
 
@@ -13,10 +13,13 @@ def login():
     user = getUser(username, password)
 
     if user:
-        session(username)
-        return redirect("/home")
+        # Create session with username upon successful login
+        session["username"] = username
+        return jsonify(message="Login Successful")
     else:
-        return redirect(location="/login", Response="Invalid username or password!")
+        # In case of failed login, display error message and return
+        # a 401 unauthorised status code
+        return jsonify(error="Invalid username or password"), 401 
 
 def getUser(username, password):
     users_collection = db["user"]
