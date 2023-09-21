@@ -299,11 +299,6 @@ export default {
 				selectedRadio2: "btnradio2",
 				selectedRadio3: "btnradio3",
 			},
-			inputErrors: {
-				ipAddress: "",
-				subnetMask: "",
-				scanType: "",
-			},
 			scanResult: "",
 			eventLog: "",
 			display: false,
@@ -475,6 +470,20 @@ export default {
 					this.stopTimer()
 					this.resetTimer()
 				})
+		},
+		validateSingleIP(ip) {
+			// Add your validation logic for a single IP address here
+			return true // Return true if valid, false if not
+		},
+
+		validateMultipleIPs(ips) {
+			// Add your validation logic for multiple IP addresses here
+			return true // Return true if valid, false if not
+		},
+
+		validateIPRange(startIP, endIP) {
+			// Add your validation logic for an IP range here
+			return true // Return true if valid, false if not
 		},
 	},
 
