@@ -9,6 +9,7 @@ client = MongoClient(cluster)
 db = client["IDS_TEST"]
 
 # importing routes
+from routes.loginPage import loginPage
 from routes.homePage import homePage
 from routes.ipScan import ipScan
 from routes.portScan import portScan
@@ -22,6 +23,7 @@ app = Flask(__name__) # creating flask app
 CORS(app, resources={r"/*":{'origins':"*"}})
 
 # registering blueprints for routes
+app.register_blueprint(loginPage)
 app.register_blueprint(homePage)
 app.register_blueprint(ipScan)
 app.register_blueprint(portScan)

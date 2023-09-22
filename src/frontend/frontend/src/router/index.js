@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router"
+import Login from "../components/Login.vue"
 import Home from "../components/Home.vue"
 import CVEScan from "../components/CVEScan.vue"
 import ServiceScan from "../components/ServiceScan.vue"
@@ -11,6 +12,25 @@ import HistoryDetail from "../components/HistoryDetail.vue"
 import Manual from "../components/Manual.vue"
 
 const routes = [
+	{
+		path: "/",
+		redirect: "/login", // Redirect default path to login page
+	},
+	{
+		path: "/login",
+		name: "Login",
+		meta: { title: "Login" },
+		component: Login,
+		beforeEnter: (to, from, next) => {
+			if (from.path !== "/") {
+				alert("You have been logged out")
+
+				// Removes the user token from localStorage upon logout
+				removeAuthToken()
+			}
+			next()
+		},
+	},
 	{
 		path: "/home",
 		name: "Home",
@@ -79,8 +99,29 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-	document.title = to.meta.title
-	next()
+	// Checks to see if user is authenticated or not
+	const isAuthenticated = checkAuthenticationStatus()
+	// If user is unauthenticated, redirect to login page
+	if (to.name !== "Login" && !isAuthenticated) {
+		next({ name: "Login" })
+	} else {
+		document.title = to.meta.title
+		next()
+	}
 })
+
+function checkAuthenticationStatus() {
+	// Retrive token from localStorage
+	const authToken = localStorage.getItem("authToken")
+
+	//Checks to see if authToken is valid
+	const isAuthenticated = !!authToken
+	return isAuthenticated
+}
+
+function removeAuthToken() {
+	//Removes user token from localStorage
+	localStorage.removeItem("authToken")
+}
 
 export default router
