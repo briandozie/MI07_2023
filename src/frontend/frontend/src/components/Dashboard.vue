@@ -1,6 +1,6 @@
 <template>
-	<!-- Primary Navigation Bar -->
 	<div>
+		<!-- Primary Navigation Bar -->
 		<nav
 			id="primaryNav"
 			class="navbar bg-dark border-bottom border-bottom-dark"
