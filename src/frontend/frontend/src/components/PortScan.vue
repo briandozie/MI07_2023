@@ -219,11 +219,10 @@ export default {
 			if (!this.portScanForm.ipAddress.trim()) {
 				this.inputErrors.ipAddress = "IP address is required."
 				isValid = false
-			} else if (!/^\d+$/.test(this.portScanForm.ipAddress.trim())) {
-				this.inputErrors.ipAddress = "IP address must contain only integers."
+			} else if (!/^[\d.]+$/.test(this.portScanForm.ipAddress.trim())) {
+				this.inputErrors.ipAddress = "Invalid IP address format."
 				isValid = false
 			}
-
 			if (!this.portScanForm.scanType) {
 				this.inputErrors.scanType = "Scan type is required."
 				isValid = false

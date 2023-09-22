@@ -101,8 +101,11 @@
 								v-if="showInputField1"
 							/>
 							<!-- Display IP Address Error Message -->
-							<div v-if="inputErrors.ipAddress" class="text-danger">
-								{{ inputErrors.ipAddress }}
+							<div
+								v-if="showInputField1 && inputErrors.SingleipAddress"
+								class="text-danger"
+							>
+								{{ inputErrors.SingleipAddress }}
 							</div>
 							<!-- For Multiple IP Only -->
 							<div class="input-group">
@@ -125,9 +128,6 @@
 									</button>
 								</div>
 							</div>
-							<div v-if="inputErrors.ipAddress" class="text-danger">
-								{{ inputErrors.ipAddress }}
-							</div>
 							<!-- New input field -->
 							<div
 								v-for="(input, index) in ipScanForm.additionalInputs"
@@ -147,6 +147,13 @@
 										class="btn-close mt-1"
 										@click="removeIPInput(index)"
 									/>
+								</div>
+								<!-- Display IP Address Error Message -->
+								<div
+									v-if="showInputField2 && inputErrors.MultipleipAddress"
+									class="text-danger"
+								>
+									{{ inputErrors.MultipleipAddress }}
 								</div>
 							</div>
 
@@ -172,10 +179,18 @@
 									@input="handleInputRadioChange3"
 									v-if="showInputField3"
 								/>
-								<!-- Display IP Address Error Message -->
-								<div v-if="inputErrors.ipAddress" class="text-danger">
-									{{ inputErrors.ipAddress }}
-								</div>
+							</div>
+							<div
+								class="error-message text-danger"
+								v-if="showInputField3 && inputErrors.inputStart"
+							>
+								{{ inputErrors.inputStart }}
+							</div>
+							<div
+								class="error-message text-danger"
+								v-if="showInputField3 && inputErrors.inputEnd"
+							>
+								{{ inputErrors.inputEnd }}
 							</div>
 						</div>
 
@@ -189,10 +204,13 @@
 								placeholder="Subnet mask"
 								v-model="ipScanForm.subnetMask"
 							/>
-							<!-- Display Subnet Mask Error Message -->
-							<div v-if="inputErrors.subnetMask" class="text-danger">
-								{{ inputErrors.subnetMask }}
-							</div>
+						</div>
+						<!-- Display Subnet Mask Error Message -->
+						<div
+							v-if="showInputField1 && inputErrors.subnetMask"
+							class="text-danger"
+						>
+							{{ inputErrors.subnetMask }}
 						</div>
 
 						<!-- Scan type dropdown menu -->
@@ -299,6 +317,15 @@ export default {
 				selectedRadio2: "btnradio2",
 				selectedRadio3: "btnradio3",
 			},
+			inputErrors: {
+				SingleipAddress: "",
+				MultipleipAddress: "",
+				inputStart: "",
+				inputEnd: "",
+				subnetMask: "",
+				scanType: "",
+			},
+
 			scanResult: "",
 			eventLog: "",
 			display: false,
@@ -471,20 +498,30 @@ export default {
 					this.resetTimer()
 				})
 		},
-		validateSingleIP(ip) {
-			// Add your validation logic for a single IP address here
-			return true // Return true if valid, false if not
-		},
+	},
 
-		validateMultipleIPs(ips) {
-			// Add your validation logic for multiple IP addresses here
-			return true // Return true if valid, false if not
-		},
+	// Error handling
+	validateForm() {
+		let isValid = true
+		this.inputErrors = {} // Clear previous error messages
 
-		validateIPRange(startIP, endIP) {
-			// Add your validation logic for an IP range here
-			return true // Return true if valid, false if not
-		},
+		if (!this.ipScanForm.SingleipAddress.trim()) {
+			this.inputErrors.SingleipAddress = "IP address is required."
+			isValid = false
+		} else if (!/^[\d.]+$/.test(this.ipScanForm.SingleipAddress.trim())) {
+			this.inputErrors.SingleipAddress = "Invalid IP address format."
+			isValid = false
+		}
+
+		if (!this.ipScanForm.MultipleipAddress.trim()) {
+			this.inputErrors.MultipleipAddress = "IP address is required."
+			isValid = false
+		} else if (!/^[\d.]+$/.test(this.ipScanForm.ipAddress.trim())) {
+			this.inputErrors.MultipleipAddress = "Invalid IP address format."
+			isValid = false
+		}
+
+		return isValid
 	},
 
 	initForm() {

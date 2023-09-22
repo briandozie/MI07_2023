@@ -231,8 +231,8 @@ export default {
 			if (!this.cveScanForm.ipAddress.trim()) {
 				this.inputErrors.ipAddress = "IP address is required."
 				isValid = false
-			} else if (!/^\d+$/.test(this.cveScanForm.ipAddress.trim())) {
-				this.inputErrors.ipAddress = "IP address must contain only integers."
+			} else if (!/^[\d.]+$/.test(this.cveScanForm.ipAddress.trim())) {
+				this.inputErrors.ipAddress = "Invalid IP address format."
 				isValid = false
 			}
 
