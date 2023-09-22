@@ -10,6 +10,7 @@ def scanIpAddress():
     data = request.get_json()
     
     scanType = data["scanType"]
+    scanTypeLabel = data["scanTypeLabel"]
 
     if "ipAddress" in data:
         ipAddress = data["ipAddress"]
@@ -19,7 +20,7 @@ def scanIpAddress():
         nm.scan(hosts=f"{ipAddress}/{subnetMask}", arguments=f"-{scanType} -D RND:30")
         hostList = nm.all_hosts()
 
-        logActivity("IP SCAN SINGLE", ipAddress + "/" + subnetMask, scanType, hostList)
+        logActivity("IP SCAN SINGLE", ipAddress + "/" + subnetMask, scanTypeLabel, hostList)
 
         return hostList
     
@@ -34,7 +35,7 @@ def scanIpAddress():
             nm.scan(hosts=ipAddress, arguments=f"-{scanType} -D RND:30")
             hostList.extend(nm.all_hosts())
 
-        logActivity("IP SCAN MULTIPLE", ipAddresses, scanType, hostList)
+        logActivity("IP SCAN MULTIPLE", ipAddresses, scanTypeLabel, hostList)
 
         return hostList
     
@@ -47,7 +48,7 @@ def scanIpAddress():
         nm.scan(hosts=f"{startIP}-{endIP}", arguments=f"-{scanType} -D RND:30")
         hostList = nm.all_hosts()
 
-        logActivity("IP SCAN RANGE", ipRange, scanType, hostList)
+        logActivity("IP SCAN RANGE", ipRange, scanTypeLabel, hostList)
 
         return hostList
     else:

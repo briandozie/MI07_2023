@@ -1,32 +1,42 @@
 <template>
 	<div>
 		<nav
+			id="primaryNav"
 			class="navbar bg-dark border-bottom border-bottom-dark"
 			data-bs-theme="dark"
 		>
 			<div class="container-fluid">
 				<router-link class="navbar-brand" to="/home"
-					>SDN Intrusion & Penetration System</router-link
+					><img id="cm-logo" src="../assets/cm_logo_color_200.png" alt="" />SDN
+					Intrusion & Penetration System</router-link
 				>
-				<a class="navbar-brand ms-auto" href="#">
-					<i class="bi bi-gear"></i>
-				</a>
-				<a class="navbar-brand mS-auto" href="#">
-					<i class="bi bi-person"></i>
-				</a>
+				<div class="d-flex">
+					<a class="navbar-brand ms-auto" href="/manual">
+						<i class="bi bi-info-circle"></i>
+					</a>
+					<a class="navbar-brand ms-auto" href="#">
+						<i class="bi bi-gear"></i>
+					</a>
+					<a class="navbar-brand ms-auto" href="#">
+						<i class="bi bi-person"></i>
+					</a>
+				</div>
 			</div>
 		</nav>
 
 		<nav class="navbar bg-secondary" data-bs-theme="dark">
 			<div class="container-fluid navbar-expand">
-				<div class="nav nav-underline">
+				<ul class="nav nav-underline">
 					<router-link to="/cve" class="nav-link">CVE Scan</router-link>
 					<router-link to="/service" class="nav-link">Service Scan</router-link>
 					<router-link to="/ip" class="nav-link active">IP Scan</router-link>
 					<router-link to="/port" class="nav-link">Port Scan</router-link>
 					<router-link to="/dos" class="nav-link">DoS Attack</router-link>
 					<router-link to="/ddos" class="nav-link">DDoS Attack</router-link>
-				</div>
+				</ul>
+				<ul class="nav nav-underline ms-auto">
+					<router-link to="/dashboard" class="nav-link">Dashboard</router-link>
+				</ul>
 			</div>
 		</nav>
 
@@ -273,18 +283,22 @@
 				<div class="col">
 					<!-- Scan Result -->
 					<label for="resultOutput" class="form-label">Scan Result</label>
-					<table id="outputTable" class="table table-hover">
-						<thead>
-							<tr>
-								<th scope="col">IP</th>
-							</tr>
-						</thead>
-						<tbody>
-							<tr v-for="result in scanResult" :key="result">
-								<td>{{ result }}</td>
-							</tr>
-						</tbody>
-					</table>
+					<div class="card">
+						<div class="card-body">
+							<table id="outputTable" class="table table-hover">
+								<thead>
+									<tr>
+										<th scope="col">IP</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr v-for="result in scanResult" :key="result">
+										<td>{{ result }}</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -293,7 +307,7 @@
 
 <script>
 import axios from "axios"
-
+import { getCurrentTimestamp } from "../shared/utilities.js"
 export default {
 	name: "IPScan",
 	data() {
@@ -501,11 +515,16 @@ export default {
 			const ipInfo = payload.ipRange || payload.ipAddress || payload.ipAddresses
 			payload.subnetMask = this.ipScanForm.subnetMask
 			payload.scanType = this.ipScanForm.scanType
+			payload.scanTypeLabel =
+				document.getElementById("scanTypeInput").options[
+					document.getElementById("scanTypeInput").selectedIndex
+				].textContent
 
 			const path = "http://localhost:5000/ipScan/"
 			this.startTimer()
 			this.initStatus()
-			this.eventLog += `Scan started on network "${ipInfo}"\n`
+			this.eventLog +=
+				getCurrentTimestamp() + ` Scan started on network "${ipInfo}"\n`
 			this.display = true
 			console.log(payload)
 			axios
@@ -513,7 +532,9 @@ export default {
 				.then((res) => {
 					console.log(res.data)
 					this.scanResult = res.data
-					this.eventLog += `Scan completed successfully in ${this.formattedElapsedTimeEventLog}\n`
+					this.eventLog +=
+						getCurrentTimestamp() +
+						` Scan completed successfully in ${this.formattedElapsedTimeEventLog}\n`
 				})
 				.catch((err) => {
 					console.log(err)
