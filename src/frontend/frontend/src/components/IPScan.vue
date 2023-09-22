@@ -100,12 +100,11 @@
 								@input="handleInputRadioChange1"
 								v-if="showInputField1"
 							/>
-							<!-- Display IP Address Error Message -->
 							<div
-								v-if="showInputField1 && inputErrors.SingleipAddress"
-								class="text-danger"
+								class="error-message text-danger"
+								v-if="showInputField1 && errors.inputValue1"
 							>
-								{{ inputErrors.SingleipAddress }}
+								{{ errors.inputValue1 }}
 							</div>
 							<!-- For Multiple IP Only -->
 							<div class="input-group">
@@ -118,6 +117,7 @@
 									@input="handleInputRadioChange2"
 									v-if="showInputField2"
 								/>
+
 								<!-- Button to add new input field -->
 								<div class="input-group-append" v-if="showInputField2">
 									<button
@@ -148,15 +148,13 @@
 										@click="removeIPInput(index)"
 									/>
 								</div>
-								<!-- Display IP Address Error Message -->
-								<div
-									v-if="showInputField2 && inputErrors.MultipleipAddress"
-									class="text-danger"
-								>
-									{{ inputErrors.MultipleipAddress }}
-								</div>
 							</div>
-
+							<div
+								class="error-message text-danger"
+								v-if="showInputField2 && errors.inputValue2"
+							>
+								{{ errors.inputValue2 }}
+							</div>
 							<!-- For IP Range Only -->
 							<div class="input-group mb-3">
 								<input
@@ -182,15 +180,15 @@
 							</div>
 							<div
 								class="error-message text-danger"
-								v-if="showInputField3 && inputErrors.inputStart"
+								v-if="showInputField3 && errors.inputStart"
 							>
-								{{ inputErrors.inputStart }}
+								{{ errors.inputStart }}
 							</div>
 							<div
 								class="error-message text-danger"
-								v-if="showInputField3 && inputErrors.inputEnd"
+								v-if="showInputField3 && errors.inputEnd"
 							>
-								{{ inputErrors.inputEnd }}
+								{{ errors.inputEnd }}
 							</div>
 						</div>
 
@@ -205,14 +203,12 @@
 								v-model="ipScanForm.subnetMask"
 							/>
 						</div>
-						<!-- Display Subnet Mask Error Message -->
 						<div
-							v-if="showInputField1 && inputErrors.subnetMask"
-							class="text-danger"
+							class="error-message text-danger"
+							v-if="showInputField1 && errors.subnetMask"
 						>
-							{{ inputErrors.subnetMask }}
+							{{ errors.subnetMask }}
 						</div>
-
 						<!-- Scan type dropdown menu -->
 						<label for="scanTypeInput" class="form-label">Scan Type</label>
 						<select
@@ -224,9 +220,8 @@
 							<option disabled value="">Select Scan Type</option>
 							<option value="sS">TCP SYN (Stealth)</option>
 						</select>
-						<!-- Display Scan Type Error Message -->
-						<div v-if="inputErrors.scanType" class="text-danger">
-							{{ inputErrors.scanType }}
+						<div class="error-message text-danger" v-if="errors.scanType">
+							{{ errors.scanType }}
 						</div>
 
 						<!-- Run button -->
@@ -309,23 +304,20 @@ export default {
 				inputStart: "",
 				inputEnd: "",
 				additionalInputs: [],
-				ipRange: "",
-				ipAddresses: "",
-				ipAddress: "",
 				subnetMask: "",
 				scanType: "",
 				selectedRadio2: "btnradio2",
 				selectedRadio3: "btnradio3",
+				errorMessage: null,
 			},
-			inputErrors: {
-				SingleipAddress: "",
-				MultipleipAddress: "",
-				inputStart: "",
-				inputEnd: "",
-				subnetMask: "",
-				scanType: "",
+			errors: {
+				inputValue1: null,
+				inputValue2: null,
+				inputStart: null,
+				inputEnd: null,
+				subnetMask: null,
+				scanType: null,
 			},
-
 			scanResult: "",
 			eventLog: "",
 			display: false,
@@ -358,54 +350,70 @@ export default {
 	},
 
 	methods: {
-		setDefaultInputVisibility() {
-			if (this.selectedRadio1 === "btnradio1") {
-				this.showInputField1 = true
-				this.showInputField2 = false
-				this.showInputField3 = false
-			} else if (this.selectedRadio1 === "btnradio2") {
-				this.showInputField1 = false
-				this.showInputField2 = true
-				this.showInputField3 = false
-			} else if (this.selectedRadio1 === "btnradio3") {
-				this.showInputField1 = false
-				this.showInputField2 = false
-				this.showInputField3 = true
+		validateInputValue1() {
+			if (!this.ipScanForm.inputValue1.trim()) {
+				this.errors.inputValue1 = "Input Value 1 is required."
+			} else {
+				this.errors.inputValue1 = null // No error
+			}
+		},
+		validateInputValue2() {
+			if (!this.ipScanForm.inputValue2.trim()) {
+				this.errors.inputValue2 = "Input Value 2 is required."
+			} else {
+				this.errors.inputValue2 = null // No error
+			}
+		},
+		validateInputStart() {
+			if (!this.ipScanForm.inputStart.trim()) {
+				this.errors.inputStart = "Input Value S is required."
+			} else {
+				this.errors.inputStart = null // No error
+			}
+		},
+		validateInputEnd() {
+			if (!this.ipScanForm.inputEnd.trim()) {
+				this.errors.inputEnd = "Input Value E is required."
+			} else {
+				this.errors.inputEnd = null // No error
+			}
+		},
+		validateInputSM() {
+			if (!this.ipScanForm.subnetMask.trim()) {
+				this.errors.subnetMask = "Input Value E is required."
+			} else {
+				this.errors.subnetMask = null // No error
+			}
+		},
+		validateInputST() {
+			if (!this.ipScanForm.scanType.trim()) {
+				this.errors.scanType = "Input Value E is required."
+			} else {
+				this.errors.scanType = null // No error
 			}
 		},
 		resetForm() {
 			this.scanResult = ""
 			this.eventLog = ""
+			this.ipScanForm.additionalInputs = []
 		},
 
-		handleInputRadioChange1() {
+		setDefaultInputVisibility() {
 			if (this.selectedRadio1 === "btnradio1") {
 				this.showInputField1 = true
 				this.showInputField2 = false
 				this.showInputField3 = false
-				const input2Array = this.ipScanForm.inputValue2
-					.split(",")
-					.map((ip) => ip.trim())
 
-				if (
-					!this.ipScanForm.inputValue1 ||
-					!this.isValidIPAddress(this.ipScanForm.inputValue1)
-				) {
-					this.inputErrors.ipAddress = "Please enter a valid IP address."
-				} else {
-					this.inputErrors.ipAddress = ""
-				}
-
-				if (input2Array.length > 0) {
-					this.ipScanForm.additionalInputs = input2Array.slice(1)
-					this.ipScanForm.inputValue2 = input2Array[0]
-				} else {
-					this.ipScanForm.additionalInputs = []
-					this.ipScanForm.inputValue2 = ""
-				}
-				this.ipScanForm.inputValue2 = ""
 				this.ipScanForm.inputStart = ""
 				this.ipScanForm.inputEnd = ""
+				this.ipScanForm.inputValue2 = ""
+				this.ipScanForm.additionalInputs = []
+				this.errors.inputValue1 = null
+				this.errors.inputValue2 = null
+				this.errors.inputStart = null
+				this.errors.inputEnd = null
+				this.errors.subnetMask = null
+				this.errors.scanType = null
 				this.resetForm()
 			} else {
 				this.showInputField1 = false
@@ -423,6 +431,12 @@ export default {
 				this.ipScanForm.inputValue1 = ""
 				this.ipScanForm.inputStart = ""
 				this.ipScanForm.inputEnd = ""
+				this.errors.inputValue1 = null
+				this.errors.inputValue2 = null
+				this.errors.inputStart = null
+				this.errors.inputEnd = null
+				this.errors.subnetMask = null
+				this.errors.scanType = null
 				this.resetForm()
 			} else {
 				this.showInputField2 = false
@@ -436,6 +450,13 @@ export default {
 				this.showInputField2 = false
 				this.ipScanForm.inputValue1 = ""
 				this.ipScanForm.inputValue2 = ""
+				this.ipScanForm.additionalInputs = []
+				this.errors.inputValue1 = null
+				this.errors.inputValue2 = null
+				this.errors.inputStart = null
+				this.errors.inputEnd = null
+				this.errors.subnetMask = null
+				this.errors.scanType = null
 				this.resetForm()
 			} else {
 				this.showInputField3 = false
@@ -448,7 +469,12 @@ export default {
 			const input2 = this.ipScanForm.inputValue2.trim()
 			const start = this.ipScanForm.inputStart.trim()
 			const end = this.ipScanForm.inputEnd.trim()
-
+			// if (!input1 && !input2 && !start && !end) {
+			// 	// No valid input provided, display an error message instead of starting the scan.
+			// 	this.eventLog +=
+			// 		"No valid input provided. Please enter an IP address or range.\n"
+			// 	return
+			// }
 			let payload = {}
 
 			if (start && end) {
@@ -498,93 +524,79 @@ export default {
 					this.resetTimer()
 				})
 		},
-	},
 
-	// Error handling
-	validateForm() {
-		let isValid = true
-		this.inputErrors = {} // Clear previous error messages
+		initForm() {
+			this.ipScanForm.inputValue1 = ""
+			this.ipScanForm.inputValue2 = ""
+			this.ipScanForm.inputStart = ""
+			this.ipScanForm.inputEnd = ""
+			this.ipScanForm.subnetMask = ""
+			this.ipScanForm.scanType = ""
+			this.ipScanForm.additionalInputs = []
+		},
+		initStatus() {
+			this.eventLog = ""
+			this.scanResult = ""
+		},
+		onSubmit(e) {
+			e.preventDefault()
+			// if (
+			// 	(this.validateInputValue1() &&
+			// 		this.validateInputSM() &&
+			// 		this.validateInputST()) ||
+			// 	(this.validateInputValue2() && this.validateInputST()) ||
+			// 	(this.validateInputStart() &&
+			// 		this.validateInputEnd() &&
+			// 		this.validateInputST())
+			// ) {
 
-		if (!this.ipScanForm.SingleipAddress.trim()) {
-			this.inputErrors.SingleipAddress = "IP address is required."
-			isValid = false
-		} else if (!/^[\d.]+$/.test(this.ipScanForm.SingleipAddress.trim())) {
-			this.inputErrors.SingleipAddress = "Invalid IP address format."
-			isValid = false
-		}
+			const payload = {
+				inputValue1: this.ipScanForm.inputValue1,
+				inputValue2: this.ipScanForm.inputValue2,
+				inputStart: this.ipScanForm.inputStart,
+				inputEnd: this.ipScanForm.inputEnd,
+				subnetMask: this.ipScanForm.subnetMask,
+				scanType: this.ipScanForm.scanType,
+			}
+			this.validateInputValue1()
+			this.validateInputValue2()
+			this.validateInputStart()
+			this.validateInputEnd()
+			this.validateInputSM()
+			this.validateInputST()
+			this.scanIPs(payload)
+			this.initForm()
+		},
 
-		if (!this.ipScanForm.MultipleipAddress.trim()) {
-			this.inputErrors.MultipleipAddress = "IP address is required."
-			isValid = false
-		} else if (!/^[\d.]+$/.test(this.ipScanForm.ipAddress.trim())) {
-			this.inputErrors.MultipleipAddress = "Invalid IP address format."
-			isValid = false
-		}
-
-		return isValid
-	},
-
-	initForm() {
-		this.ipScanForm.inputValue1 = ""
-		this.ipScanForm.inputValue2 = ""
-		this.ipScanForm.inputStart = ""
-		this.ipScanForm.inputEnd = ""
-		this.ipScanForm.ipAddress = ""
-		this.ipScanForm.ipRange = ""
-		this.ipScanForm.ipAddresses = ""
-		this.ipScanForm.subnetMask = ""
-		this.ipScanForm.scanType = ""
-		this.ipScanForm.additionalInputs = []
-	},
-	initStatus() {
-		this.eventLog = ""
-		this.scanResult = ""
-	},
-	onSubmit(e) {
-		e.preventDefault()
-		const payload = {
-			inputValue1: this.ipScanForm.inputValue1,
-			inputValue2: this.ipScanForm.inputValue2,
-			inputStart: this.ipScanForm.inputStart,
-			inputEnd: this.ipScanForm.inputEnd,
-			ipAddress: this.ipScanForm.ipAddress,
-			ipRange: this.ipScanForm.ipRange,
-			ipAddresses: this.ipScanForm.ipAddresses,
-			subnetMask: this.ipScanForm.subnetMask,
-			scanType: this.ipScanForm.scanType,
-		}
-
-		this.scanIPs(payload)
-		this.initForm()
-	},
-	startTimer() {
-		if (!this.isRunning) {
-			this.isRunning = true
-			this.startTime = Date.now() - this.elapsedTime * 1000
-			this.updateTimer()
-		}
-	},
-	stopTimer() {
-		if (this.isRunning) {
+		startTimer() {
+			if (!this.isRunning) {
+				this.isRunning = true
+				this.startTime = Date.now() - this.elapsedTime * 1000
+				this.updateTimer()
+			}
+		},
+		stopTimer() {
+			if (this.isRunning) {
+				this.isRunning = false
+				clearInterval(this.timerInterval)
+			}
+		},
+		resetTimer() {
 			this.isRunning = false
+			this.elapsedTime = 0
 			clearInterval(this.timerInterval)
-		}
-	},
-	resetTimer() {
-		this.isRunning = false
-		this.elapsedTime = 0
-		clearInterval(this.timerInterval)
-	},
-	updateTimer() {
-		this.timerInterval = setInterval(() => {
-			this.elapsedTime = Math.floor((Date.now() - this.startTime) / 1000)
-		}, 1000)
-	},
-	addIPInput() {
-		this.ipScanForm.additionalInputs.push("")
-	},
-	removeIPInput(index) {
-		this.ipScanForm.additionalInputs.splice(index, 1)
+		},
+		updateTimer() {
+			this.timerInterval = setInterval(() => {
+				this.elapsedTime = Math.floor((Date.now() - this.startTime) / 1000)
+			}, 1000)
+		},
+		addIPInput() {
+			this.ipScanForm.additionalInputs.push("")
+		},
+		removeIPInput(index) {
+			this.ipScanForm.additionalInputs.splice(index, 1)
+		},
 	},
 	created() {
 		this.setDefaultInputVisibility()
