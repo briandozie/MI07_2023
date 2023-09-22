@@ -61,6 +61,10 @@
 								placeholder="IP address"
 								v-model="cveScanForm.ipAddress"
 							/>
+							<!-- Display IP Address Error Message -->
+							<div v-if="inputErrors.ipAddress" class="text-danger">
+								{{ inputErrors.ipAddress }}
+							</div>
 						</div>
 
 						<!-- Scan type dropdown menu -->
@@ -76,6 +80,10 @@
 							<option value="vulners">Vulners</option>
 							<!-- <option value="sU">UDP</option> -->
 						</select>
+						<!-- Display Scan Type Error Message -->
+						<div v-if="inputErrors.script" class="text-danger">
+							{{ inputErrors.script }}
+						</div>
 
 						<!-- Run button -->
 						<div class="run-button">
@@ -175,6 +183,10 @@ export default {
 				ipAddress: "",
 				script: "",
 			},
+			inputErrors: {
+				ipAddress: "",
+				script: "",
+			},
 			result: "",
 			cveScanResult: [],
 			eventLog: "",
@@ -228,6 +240,25 @@ export default {
 					this.stopTimer()
 					this.resetTimer()
 				})
+		},
+		validateForm() {
+			let isValid = true
+			this.inputErrors = {} // Clear previous error messages
+
+			if (!this.cveScanForm.ipAddress.trim()) {
+				this.inputErrors.ipAddress = "IP address is required."
+				isValid = false
+			} else if (!/^[\d.]+$/.test(this.cveScanForm.ipAddress.trim())) {
+				this.inputErrors.ipAddress = "Invalid IP address format."
+				isValid = false
+			}
+
+			if (!this.cveScanForm.script) {
+				this.inputErrors.script = "Script is required."
+				isValid = false
+			}
+
+			return isValid
 		},
 		// Method to identify links in output using regular expression
 		renderClickableLinks(text) {
@@ -299,13 +330,15 @@ export default {
 		},
 		onSubmit(e) {
 			e.preventDefault()
-			const payload = {
-				ipAddress: this.cveScanForm.ipAddress,
-				script: this.cveScanForm.script,
+			if (this.validateForm()) {
+				const payload = {
+					ipAddress: this.cveScanForm.ipAddress,
+					scanType: this.cveScanForm.script,
+				}
+				console.log(payload)
+				this.scanCVE(payload)
+				this.initForm()
 			}
-			console.log(payload)
-			this.scanCVE(payload)
-			this.initForm()
 		},
 		startTimer() {
 			if (!this.isRunning) {
