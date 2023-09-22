@@ -8,6 +8,7 @@ import DDOSAttack from "../components/DDOSAttack.vue"
 import DOSAttack from "../components/DOSAttack.vue"
 import Dashboard from "../components/Dashboard.vue"
 import HistoryDetail from "../components/HistoryDetail.vue"
+import Manual from "../components/Manual.vue"
 
 const routes = [
 	{
@@ -63,6 +64,12 @@ const routes = [
 		name: "historyDetail",
 		meta: { title: "History Details" },
 		component: HistoryDetail,
+	},
+	{
+		path: "/manual",
+		name: "Manual",
+		meta: { title: "Manual" },
+		component: Manual,
 	},
 ]
 
