@@ -2,33 +2,43 @@
 	<!-- Primary Navigation Bar -->
 	<div>
 		<nav
+			id="primaryNav"
 			class="navbar bg-dark border-bottom border-bottom-dark"
 			data-bs-theme="dark"
 		>
 			<div class="container-fluid">
 				<router-link class="navbar-brand" to="/home"
-					>SDN Intrusion & Penetration System</router-link
+					><img id="cm-logo" src="../assets/cm_logo_color_200.png" alt="" />SDN
+					Intrusion & Penetration System</router-link
 				>
-				<a class="navbar-brand ms-auto" href="#">
-					<i class="bi bi-gear"></i>
-				</a>
-				<a class="navbar-brand mS-auto" href="#">
-					<i class="bi bi-person"></i>
-				</a>
+				<div class="d-flex">
+					<a class="navbar-brand ms-auto" href="/manual">
+						<i class="bi bi-info-circle"></i>
+					</a>
+					<a class="navbar-brand ms-auto" href="#">
+						<i class="bi bi-gear"></i>
+					</a>
+					<a class="navbar-brand ms-auto" href="#">
+						<i class="bi bi-person"></i>
+					</a>
+				</div>
 			</div>
 		</nav>
 
 		<!-- Secondary Navigation Bar -->
-		<nav class="navbar bg-secondary" data-bs-theme="dark">
+		<nav id="secondaryNav" class="navbar bg-secondary" data-bs-theme="dark">
 			<div class="container-fluid navbar-expand">
-				<div class="nav nav-underline">
+				<ul class="nav nav-underline">
 					<router-link to="/cve" class="nav-link active">CVE Scan</router-link>
 					<router-link to="/service" class="nav-link">Service Scan</router-link>
 					<router-link to="/ip" class="nav-link">IP Scan</router-link>
 					<router-link to="/port" class="nav-link">Port Scan</router-link>
 					<router-link to="/dos" class="nav-link">DoS Attack</router-link>
 					<router-link to="/ddos" class="nav-link">DDoS Attack</router-link>
-				</div>
+				</ul>
+				<ul class="nav nav-underline ms-auto">
+					<router-link to="/dashboard" class="nav-link">Dashboard</router-link>
+				</ul>
 			</div>
 		</nav>
 
@@ -51,6 +61,10 @@
 								placeholder="IP address"
 								v-model="cveScanForm.ipAddress"
 							/>
+							<!-- Display IP Address Error Message -->
+							<div v-if="inputErrors.ipAddress" class="text-danger">
+								{{ inputErrors.ipAddress }}
+							</div>
 						</div>
 
 						<!-- Scan type dropdown menu -->
@@ -66,10 +80,16 @@
 							<option value="vulners">Vulners</option>
 							<!-- <option value="sU">UDP</option> -->
 						</select>
+						<!-- Display Scan Type Error Message -->
+						<div v-if="inputErrors.script" class="text-danger">
+							{{ inputErrors.script }}
+						</div>
 
 						<!-- Run button -->
 						<div class="run-button">
-							<button type="submit" class="btn btn-primary">Run</button>
+							<button type="submit" class="btn btn-primary" :disabled="display">
+								Run
+							</button>
 						</div>
 					</form>
 				</div>
@@ -154,11 +174,16 @@
 
 <script>
 import axios from "axios"
+import { getCurrentTimestamp } from "../shared/utilities.js"
 export default {
 	name: "CVEScan",
 	data() {
 		return {
 			cveScanForm: {
+				ipAddress: "",
+				script: "",
+			},
+			inputErrors: {
 				ipAddress: "",
 				script: "",
 			},
@@ -193,14 +218,18 @@ export default {
 			const path = "http://localhost:5000/cveScan/"
 			this.startTimer() // start timer
 			this.initStatus()
-			this.eventLog += `Scan started on network "${this.cveScanForm.ipAddress}"\n`
+			this.eventLog +=
+				getCurrentTimestamp() +
+				` Scan started on network "${this.cveScanForm.ipAddress}"\n`
 			this.display = true
 			axios
 				.post(path, payload)
 				.then((res) => {
 					console.log(res.data)
 					this.result = res.data
-					this.eventLog += `Scan completed successfully in ${this.formattedElapsedTimeEventLog}\n`
+					this.eventLog +=
+						getCurrentTimestamp() +
+						` Scan completed successfully in ${this.formattedElapsedTimeEventLog}\n`
 					this.parseCveScanOutput()
 				})
 				.catch((err) => {
@@ -211,6 +240,25 @@ export default {
 					this.stopTimer()
 					this.resetTimer()
 				})
+		},
+		validateForm() {
+			let isValid = true
+			this.inputErrors = {} // Clear previous error messages
+
+			if (!this.cveScanForm.ipAddress.trim()) {
+				this.inputErrors.ipAddress = "IP address is required."
+				isValid = false
+			} else if (!/^[\d.]+$/.test(this.cveScanForm.ipAddress.trim())) {
+				this.inputErrors.ipAddress = "Invalid IP address format."
+				isValid = false
+			}
+
+			if (!this.cveScanForm.script) {
+				this.inputErrors.script = "Script is required."
+				isValid = false
+			}
+
+			return isValid
 		},
 		// Method to identify links in output using regular expression
 		renderClickableLinks(text) {
@@ -282,13 +330,15 @@ export default {
 		},
 		onSubmit(e) {
 			e.preventDefault()
-			const payload = {
-				ipAddress: this.cveScanForm.ipAddress,
-				script: this.cveScanForm.script,
+			if (this.validateForm()) {
+				const payload = {
+					ipAddress: this.cveScanForm.ipAddress,
+					scanType: this.cveScanForm.script,
+				}
+				console.log(payload)
+				this.scanCVE(payload)
+				this.initForm()
 			}
-			console.log(payload)
-			this.scanCVE(payload)
-			this.initForm()
 		},
 		startTimer() {
 			if (!this.isRunning) {

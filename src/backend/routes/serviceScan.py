@@ -1,6 +1,7 @@
 from flask import Blueprint, request
+from utilities.databaseFunc import *
 import nmap
-from app import db
+
 serviceScan = Blueprint("serviceScan", __name__, url_prefix="/serviceScan")
 
 @serviceScan.post("/")
@@ -24,17 +25,9 @@ def ServiceScan():
 
     # Create the final JSON structure
     finalJson = {'ports': ports, 'total': totalNumber}
+    logActivity("SERVICE SCAN", ipAddress, scanType, ports)
 
     return finalJson
-
-def getCommand(operation, type):
-    collection = db["commands"]
-    x = collection.find_one({
-        "operation" : operation,
-        "type": type,
-        })
-    
-    return x["command"]
 
 def formatScanResult(scanner):
     # extract the indexes for the columns
@@ -51,6 +44,6 @@ def formatScanResult(scanner):
     rows_data = [[row[i] for i in keep_indices] for row in rows_data]
 
     # Convert the list of lists to a list of dictionaries
-    ports = [{'host': item[0], 'protocol': item[1], 'port': item[2], 'product': item[3], 'extrainfo': item[4], 'version': item[5]} for item in rows_data]
+    ports = [{'host': item[0], 'port': item[1], 'name': item[2], 'product': item[3], 'extrainfo': item[4], 'version': item[5]} for item in rows_data]
 
     return ports

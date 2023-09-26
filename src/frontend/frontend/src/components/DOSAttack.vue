@@ -1,25 +1,32 @@
 <template>
 	<div>
 		<nav
+			id="primaryNav"
 			class="navbar bg-dark border-bottom border-bottom-dark"
 			data-bs-theme="dark"
 		>
 			<div class="container-fluid">
 				<router-link class="navbar-brand" to="/home"
-					>SDN Intrusion & Penetration System</router-link
+					><img id="cm-logo" src="../assets/cm_logo_color_200.png" alt="" />SDN
+					Intrusion & Penetration System</router-link
 				>
-				<a class="navbar-brand ms-auto" href="#">
-					<i class="bi bi-gear"></i>
-				</a>
-				<a class="navbar-brand mS-auto" href="#">
-					<i class="bi bi-person"></i>
-				</a>
+				<div class="d-flex">
+					<a class="navbar-brand ms-auto" href="/manual">
+						<i class="bi bi-info-circle"></i>
+					</a>
+					<a class="navbar-brand ms-auto" href="#">
+						<i class="bi bi-gear"></i>
+					</a>
+					<a class="navbar-brand ms-auto" href="#">
+						<i class="bi bi-person"></i>
+					</a>
+				</div>
 			</div>
 		</nav>
 
 		<nav class="navbar bg-secondary" data-bs-theme="dark">
 			<div class="container-fluid navbar-expand">
-				<div class="nav nav-underline">
+				<ul class="nav nav-underline">
 					<router-link to="/cve" class="nav-link">CVE Scan</router-link>
 					<router-link to="/service" class="nav-link">Service Scan</router-link>
 					<router-link to="/ip" class="nav-link">IP Scan</router-link>
@@ -28,9 +35,13 @@
 						>DoS Attack</router-link
 					>
 					<router-link to="/ddos" class="nav-link">DDoS Attack</router-link>
-				</div>
+				</ul>
+				<ul class="nav nav-underline ms-auto">
+					<router-link to="/dashboard" class="nav-link">Dashboard</router-link>
+				</ul>
 			</div>
 		</nav>
+
 		<div class="container">
 			<div id="topRow" class="row">
 				<div class="col">
@@ -50,6 +61,10 @@
 								placeholder="IP address"
 								v-model="dosAttackForm.ipAddress"
 							/>
+							<!-- Display IP Address Error Message -->
+							<div v-if="inputErrors.ipAddress" class="text-danger">
+								{{ inputErrors.ipAddress }}
+							</div>
 						</div>
 
 						<!-- Target Port and Duration fields on the same line -->
@@ -66,6 +81,10 @@
 									placeholder="Port Number"
 									v-model="dosAttackForm.portNumber"
 								/>
+								<!-- Display Port Number Error Message -->
+								<div v-if="inputErrors.portNumber" class="text-danger">
+									{{ inputErrors.portNumber }}
+								</div>
 							</div>
 							<div class="col-md-6">
 								<!-- Timeout input text field -->
@@ -77,6 +96,10 @@
 									placeholder="Timeout (seconds)"
 									v-model="dosAttackForm.duration"
 								/>
+								<!-- Display TimeOut Duration Error Message -->
+								<div v-if="inputErrors.duration" class="text-danger">
+									{{ inputErrors.duration }}
+								</div>
 							</div>
 						</div>
 
@@ -93,6 +116,10 @@
 							<option value="--udp">UDP Flood</option>
 							<option value="--icmp">ICMP Flood</option>
 						</select>
+						<!-- Display Attack Type Error Message -->
+						<div v-if="inputErrors.attackType" class="text-danger">
+							{{ inputErrors.attackType }}
+						</div>
 
 						<!-- Target network input text field -->
 						<div id="packetSize" class="mb-3 w-75">
@@ -106,6 +133,10 @@
 								placeholder="Number of bytes"
 								v-model="dosAttackForm.packetSize"
 							/>
+							<!-- Display Packet Size Error Message -->
+							<div v-if="inputErrors.packetSize" class="text-danger">
+								{{ inputErrors.packetSize }}
+							</div>
 						</div>
 
 						<!-- Run button -->
@@ -184,6 +215,13 @@ export default {
 	data() {
 		return {
 			dosAttackForm: {
+				ipAddress: "",
+				portNumber: "",
+				attackType: "",
+				duration: "",
+				packetSize: "",
+			},
+			inputErrors: {
 				ipAddress: "",
 				portNumber: "",
 				attackType: "",
@@ -271,6 +309,51 @@ export default {
 
 			return `[${hours}:${minutes}:${seconds}]`
 		},
+		validateForm() {
+			let isValid = true
+			this.inputErrors = {} // Clear previous error messages
+
+			if (!this.dosAttackForm.ipAddress.trim()) {
+				this.inputErrors.ipAddress = "IP address is required."
+				isValid = false
+			} else if (!/^[\d.]+$/.test(this.dosAttackForm.ipAddress.trim())) {
+				this.inputErrors.ipAddress = "Invalid IP address format."
+				isValid = false
+			}
+
+			if (!this.dosAttackForm.portNumber.trim()) {
+				this.inputErrors.portNumber = "Port Number is required."
+				isValid = false
+			} else if (!/^\d+$/.test(this.dosAttackForm.portNumber)) {
+				this.inputErrors.portNumber =
+					"Port number must be a non-negative integer."
+				isValid = false
+			}
+
+			if (!this.dosAttackForm.attackType) {
+				this.inputErrors.attackType = "Attack type is required."
+				isValid = false
+			}
+
+			if (!this.dosAttackForm.duration.trim()) {
+				this.inputErrors.duration = "Time duration is required."
+				isValid = false
+			} else if (!/^\d+$/.test(this.dosAttackForm.duration)) {
+				this.inputErrors.duration = "Duration must be a non-negative integer."
+				isValid = false
+			}
+
+			if (!this.dosAttackForm.packetSize.trim()) {
+				this.inputErrors.packetSize = "Packet size is required."
+				isValid = false
+			} else if (!/^\d+$/.test(this.dosAttackForm.packetSize)) {
+				this.inputErrors.packetSize =
+					"Packet size must be a non-negative integer."
+				isValid = false
+			}
+
+			return isValid
+		},
 		initForm() {
 			this.dosAttackForm.ipAddress = ""
 			this.dosAttackForm.attackType = ""
@@ -284,14 +367,20 @@ export default {
 		},
 		onSubmit(e) {
 			e.preventDefault()
-			const payload = {
-				ipAddress: this.dosAttackForm.ipAddress,
-				portNumber: this.dosAttackForm.portNumber,
-				attackType: this.dosAttackForm.attackType,
-				duration: this.dosAttackForm.duration,
-				packetSize: this.dosAttackForm.packetSize,
+			if (this.validateForm()) {
+				const payload = {
+					ipAddress: this.dosAttackForm.ipAddress,
+					portNumber: this.dosAttackForm.portNumber,
+					attackType: this.dosAttackForm.attackType,
+					attackTypeLabel:
+						document.getElementById("attackTypeInput").options[
+							document.getElementById("attackTypeInput").selectedIndex
+						].textContent,
+					duration: this.dosAttackForm.duration,
+					packetSize: this.dosAttackForm.packetSize,
+				}
+				this.dosAttack(payload)
 			}
-			this.dosAttack(payload)
 		},
 		startTimer() {
 			if (!this.isRunning) {

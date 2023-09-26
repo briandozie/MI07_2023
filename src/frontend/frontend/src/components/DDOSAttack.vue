@@ -1,25 +1,32 @@
 <template>
 	<div>
 		<nav
+			id="primaryNav"
 			class="navbar bg-dark border-bottom border-bottom-dark"
 			data-bs-theme="dark"
 		>
 			<div class="container-fluid">
 				<router-link class="navbar-brand" to="/home"
-					>SDN Intrusion & Penetration System</router-link
+					><img id="cm-logo" src="../assets/cm_logo_color_200.png" alt="" />SDN
+					Intrusion & Penetration System</router-link
 				>
-				<a class="navbar-brand ms-auto" href="#">
-					<i class="bi bi-gear"></i>
-				</a>
-				<a class="navbar-brand mS-auto" href="#">
-					<i class="bi bi-person"></i>
-				</a>
+				<div class="d-flex">
+					<a class="navbar-brand ms-auto" href="/manual">
+						<i class="bi bi-info-circle"></i>
+					</a>
+					<a class="navbar-brand ms-auto" href="#">
+						<i class="bi bi-gear"></i>
+					</a>
+					<a class="navbar-brand ms-auto" href="#">
+						<i class="bi bi-person"></i>
+					</a>
+				</div>
 			</div>
 		</nav>
 
 		<nav class="navbar bg-secondary" data-bs-theme="dark">
 			<div class="container-fluid navbar-expand">
-				<div class="nav nav-underline">
+				<ul class="nav nav-underline">
 					<router-link to="/cve" class="nav-link">CVE Scan</router-link>
 					<router-link to="/service" class="nav-link">Service Scan</router-link>
 					<router-link to="/ip" class="nav-link">IP Scan</router-link>
@@ -28,7 +35,10 @@
 					<router-link to="/ddos" class="nav-link active"
 						>DDoS Attack</router-link
 					>
-				</div>
+				</ul>
+				<ul class="nav nav-underline ms-auto">
+					<router-link to="/dashboard" class="nav-link">Dashboard</router-link>
+				</ul>
 			</div>
 		</nav>
 
@@ -51,6 +61,10 @@
 								placeholder="IP address"
 								v-model="ddosAttackForm.ipAddress"
 							/>
+							<!-- Display IP Address Error Message -->
+							<div v-if="inputErrors.ipAddress" class="text-danger">
+								{{ inputErrors.ipAddress }}
+							</div>
 						</div>
 
 						<!-- Target Port and Duration fields on the same line -->
@@ -67,6 +81,10 @@
 									placeholder="Port Number"
 									v-model="ddosAttackForm.portNumber"
 								/>
+								<!-- Display Port Number Error Message -->
+								<div v-if="inputErrors.portNumber" class="text-danger">
+									{{ inputErrors.portNumber }}
+								</div>
 							</div>
 							<div class="col-md-6">
 								<!-- Timeout input text field -->
@@ -78,6 +96,10 @@
 									placeholder="Timeout (seconds)"
 									v-model="ddosAttackForm.duration"
 								/>
+								<!-- Display TimeOut Duration Error Message -->
+								<div v-if="inputErrors.duration" class="text-danger">
+									{{ inputErrors.duration }}
+								</div>
 							</div>
 						</div>
 
@@ -94,6 +116,10 @@
 							<option value="--udp">UDP Flood</option>
 							<option value="--icmp">ICMP Flood</option>
 						</select>
+						<!-- Display Attack Type Error Message -->
+						<div v-if="inputErrors.attackType" class="text-danger">
+							{{ inputErrors.attackType }}
+						</div>
 
 						<!-- Target network input text field -->
 						<div id="packetSize" class="mb-3 w-75">
@@ -107,13 +133,34 @@
 								placeholder="Number of bytes"
 								v-model="ddosAttackForm.packetSize"
 							/>
+							<!-- Display Packet Size Error Message -->
+							<div v-if="inputErrors.packetSize" class="text-danger">
+								{{ inputErrors.packetSize }}
+							</div>
 						</div>
 
-						<!-- Run button -->
-						<div class="run-button">
-							<button type="submit" class="btn btn-primary" :disabled="display">
-								Run
-							</button>
+						<div class="button-container">
+							<!-- Download bot script button -->
+							<div class="run-button">
+								<button
+									@click="downloadBotnetScript"
+									class="btn btn-secondary"
+									:disabled="display"
+								>
+									Download Botnet Script
+								</button>
+							</div>
+
+							<!-- Run button -->
+							<div class="run-button">
+								<button
+									@click="runDDOS"
+									class="btn btn-primary"
+									:disabled="display"
+								>
+									Run
+								</button>
+							</div>
 						</div>
 					</form>
 				</div>
@@ -185,6 +232,13 @@ export default {
 	data() {
 		return {
 			ddosAttackForm: {
+				ipAddress: "",
+				portNumber: "",
+				attackType: "",
+				duration: "",
+				packetSize: "",
+			},
+			inputErrors: {
 				ipAddress: "",
 				portNumber: "",
 				attackType: "",
@@ -272,6 +326,51 @@ export default {
 
 			return `[${hours}:${minutes}:${seconds}]`
 		},
+		validateForm() {
+			let isValid = true
+			this.inputErrors = {} // Clear previous error messages
+
+			if (!this.ddosAttackForm.ipAddress.trim()) {
+				this.inputErrors.ipAddress = "IP address is required."
+				isValid = false
+			} else if (!/^[\d.]+$/.test(this.ddosAttackForm.ipAddress.trim())) {
+				this.inputErrors.ipAddress = "Invalid IP address format."
+				isValid = false
+			}
+
+			if (!this.ddosAttackForm.portNumber.trim()) {
+				this.inputErrors.portNumber = "Port Number is required."
+				isValid = false
+			} else if (!/^\d+$/.test(this.ddosAttackForm.portNumber)) {
+				this.inputErrors.portNumber =
+					"Port number must be a non-negative integer."
+				isValid = false
+			}
+
+			if (!this.ddosAttackForm.attackType) {
+				this.inputErrors.attackType = "Attack type is required."
+				isValid = false
+			}
+
+			if (!this.ddosAttackForm.duration.trim()) {
+				this.inputErrors.duration = "Time duration is required."
+				isValid = false
+			} else if (!/^\d+$/.test(this.ddosAttackForm.duration)) {
+				this.inputErrors.duration = "Duration must be a non-negative integer."
+				isValid = false
+			}
+
+			if (!this.ddosAttackForm.packetSize.trim()) {
+				this.inputErrors.packetSize = "Packet size is required."
+				isValid = false
+			} else if (!/^\d+$/.test(this.ddosAttackForm.packetSize)) {
+				this.inputErrors.packetSize =
+					"Packet size must be a non-negative integer."
+				isValid = false
+			}
+
+			return isValid
+		},
 		initForm() {
 			this.ddosAttackForm.ipAddress = ""
 			this.ddosAttackForm.attackType = ""
@@ -283,16 +382,18 @@ export default {
 			this.eventLog = ""
 			this.result = ""
 		},
-		onSubmit(e) {
+		runDDOS(e) {
 			e.preventDefault()
-			const payload = {
-				ipAddress: this.ddosAttackForm.ipAddress,
-				portNumber: this.ddosAttackForm.portNumber,
-				attackType: this.ddosAttackForm.attackType,
-				duration: this.ddosAttackForm.duration,
-				packetSize: this.ddosAttackForm.packetSize,
+			if (this.validateForm()) {
+				const payload = {
+					ipAddress: this.ddosAttackForm.ipAddress,
+					portNumber: this.ddosAttackForm.portNumber,
+					attackType: this.ddosAttackForm.attackType,
+					duration: this.ddosAttackForm.duration,
+					packetSize: this.ddosAttackForm.packetSize,
+				}
+				this.ddosAttack(payload)
 			}
-			this.ddosAttack(payload)
 		},
 		startTimer() {
 			if (!this.isRunning) {
@@ -317,12 +418,47 @@ export default {
 				this.elapsedTime = Math.floor((Date.now() - this.startTime) / 1000)
 			}, 1000)
 		},
+		downloadBotnetScript(e) {
+			e.preventDefault()
+			const botnetScriptPath = "http://localhost:5000/ddosAttack/botnet"
+			// Make an HTTP request to your backend API to fetch the Python file content
+			// Replace 'your-api-endpoint' with the actual URL of your API endpoint
+			axios
+				.get(botnetScriptPath)
+				.then((response) => {
+					const pythonFileContent = response.data
+
+					// Create a Blob with the Python file content
+					const blob = new Blob([pythonFileContent], { type: "text/plain" })
+
+					// Create a temporary URL for the Blob
+					const url = URL.createObjectURL(blob)
+
+					// Create an anchor element to trigger the download
+					const a = document.createElement("a")
+					a.href = url
+					a.download = "botnet.py" // Replace with your desired file name
+					document.body.appendChild(a)
+					a.click()
+
+					// Clean up
+					URL.revokeObjectURL(url)
+					document.body.removeChild(a)
+				})
+				.catch((error) => {
+					console.error("Error fetching Python file:", error)
+				})
+		},
 	},
 	created() {},
 }
 </script>
 
 <style>
+.button-container {
+	display: flex; /* Use a flex container to place buttons side by side */
+	justify-content: flex-end;
+}
 .navbar {
 	height: 50px;
 }
@@ -336,11 +472,6 @@ form {
 .btn-primary {
 	min-width: 100px;
 	max-width: 100px;
-}
-.run-button {
-	padding-top: 53px;
-	padding-right: 20px;
-	text-align: right;
 }
 .card {
 	min-height: 100px;

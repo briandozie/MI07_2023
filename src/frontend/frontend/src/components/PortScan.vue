@@ -2,26 +2,33 @@
 	<!-- Primary Navigation Bar -->
 	<div>
 		<nav
+			id="primaryNav"
 			class="navbar bg-dark border-bottom border-bottom-dark"
 			data-bs-theme="dark"
 		>
 			<div class="container-fluid">
 				<router-link class="navbar-brand" to="/home"
-					>SDN Intrusion & Penetration System</router-link
+					><img id="cm-logo" src="../assets/cm_logo_color_200.png" alt="" />SDN
+					Intrusion & Penetration System</router-link
 				>
-				<a class="navbar-brand ms-auto" href="#">
-					<i class="bi bi-gear"></i>
-				</a>
-				<a class="navbar-brand mS-auto" href="#">
-					<i class="bi bi-person"></i>
-				</a>
+				<div class="d-flex">
+					<a class="navbar-brand ms-auto" href="/manual">
+						<i class="bi bi-info-circle"></i>
+					</a>
+					<a class="navbar-brand ms-auto" href="#">
+						<i class="bi bi-gear"></i>
+					</a>
+					<a class="navbar-brand ms-auto" href="#">
+						<i class="bi bi-person"></i>
+					</a>
+				</div>
 			</div>
 		</nav>
 
 		<!-- Secondary Navigation Bar -->
 		<nav class="navbar bg-secondary" data-bs-theme="dark">
 			<div class="container-fluid navbar-expand">
-				<div class="nav nav-underline">
+				<ul class="nav nav-underline">
 					<router-link to="/cve" class="nav-link">CVE Scan</router-link>
 					<router-link to="/service" class="nav-link">Service Scan</router-link>
 					<router-link to="/ip" class="nav-link">IP Scan</router-link>
@@ -30,7 +37,10 @@
 					>
 					<router-link to="/dos" class="nav-link">DoS Attack</router-link>
 					<router-link to="/ddos" class="nav-link">DDoS Attack</router-link>
-				</div>
+				</ul>
+				<ul class="nav nav-underline ms-auto">
+					<router-link to="/dashboard" class="nav-link">Dashboard</router-link>
+				</ul>
 			</div>
 		</nav>
 
@@ -53,6 +63,10 @@
 								placeholder="IP address"
 								v-model="portScanForm.ipAddress"
 							/>
+							<!-- Display IP Address Error Message -->
+							<div v-if="inputErrors.ipAddress" class="text-danger">
+								{{ inputErrors.ipAddress }}
+							</div>
 						</div>
 
 						<!-- Scan type dropdown menu -->
@@ -67,6 +81,10 @@
 							<option value="TCP">TCP</option>
 							<option value="UDP">UDP</option>
 						</select>
+						<!-- Display Scan Type Error Message -->
+						<div v-if="inputErrors.scanType" class="text-danger">
+							{{ inputErrors.scanType }}
+						</div>
 
 						<!-- Run button -->
 						<div class="run-button">
@@ -117,24 +135,28 @@
 				<div class="col">
 					<!-- Scan Result -->
 					<label for="resultOutput" class="form-label">Scan Result</label>
-					<table id="outputTable" class="table table-hover">
-						<thead>
-							<tr>
-								<th scope="col">Port</th>
-								<th scope="col">Status</th>
-								<th scope="col">Protocol</th>
-								<th scope="col">Host</th>
-							</tr>
-						</thead>
-						<tbody>
-							<tr v-for="result in scanResult.ports" :key="result.port">
-								<td>{{ result.port }}</td>
-								<td>{{ result.status }}</td>
-								<td>{{ result.protocol }}</td>
-								<td>{{ result.host }}</td>
-							</tr>
-						</tbody>
-					</table>
+					<div class="card">
+						<div class="card-body">
+							<table id="outputTable" class="table table-hover">
+								<thead>
+									<tr>
+										<th scope="col">Port</th>
+										<th scope="col">Status</th>
+										<th scope="col">Protocol</th>
+										<th scope="col">Host</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr v-for="result in scanResult.ports" :key="result.port">
+										<td>{{ result.port }}</td>
+										<td>{{ result.status }}</td>
+										<td>{{ result.protocol }}</td>
+										<td>{{ result.host }}</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -143,11 +165,16 @@
 
 <script>
 import axios from "axios"
+import { getCurrentTimestamp } from "../shared/utilities.js"
 export default {
 	name: "PortScan",
 	data() {
 		return {
 			portScanForm: {
+				ipAddress: "",
+				scanType: "",
+			},
+			inputErrors: {
 				ipAddress: "",
 				scanType: "",
 			},
@@ -181,14 +208,18 @@ export default {
 			const path = "http://127.0.0.1:5000/portScan/"
 			this.startTimer() // start timer
 			this.initStatus()
-			this.eventLog += `Scan started on network "${this.portScanForm.ipAddress}"\n`
+			this.eventLog +=
+				getCurrentTimestamp() +
+				` Scan started on network "${this.portScanForm.ipAddress}"\n`
 			this.display = true
 			axios
 				.post(path, payload)
 				.then((res) => {
 					console.log(res.data)
 					this.scanResult = res.data
-					this.eventLog += `Scan completed successfully in ${this.formattedElapsedTimeEventLog}\n`
+					this.eventLog +=
+						getCurrentTimestamp() +
+						` Scan completed successfully in ${this.formattedElapsedTimeEventLog}\n`
 				})
 				.catch((err) => {
 					console.log(err)
@@ -198,6 +229,25 @@ export default {
 					this.stopTimer()
 					this.resetTimer()
 				})
+		},
+		// Error handling
+		validateForm() {
+			let isValid = true
+			this.inputErrors = {} // Clear previous error messages
+
+			if (!this.portScanForm.ipAddress.trim()) {
+				this.inputErrors.ipAddress = "IP address is required."
+				isValid = false
+			} else if (!/^[\d.]+$/.test(this.portScanForm.ipAddress.trim())) {
+				this.inputErrors.ipAddress = "Invalid IP address format."
+				isValid = false
+			}
+			if (!this.portScanForm.scanType) {
+				this.inputErrors.scanType = "Scan type is required."
+				isValid = false
+			}
+
+			return isValid
 		},
 		initForm() {
 			this.portScanForm.ipAddress = ""
@@ -209,13 +259,15 @@ export default {
 		},
 		onSubmit(e) {
 			e.preventDefault()
-			const payload = {
-				ipAddress: this.portScanForm.ipAddress,
-				scanType: this.portScanForm.scanType,
+			if (this.validateForm()) {
+				const payload = {
+					ipAddress: this.portScanForm.ipAddress,
+					scanType: this.portScanForm.scanType,
+				}
+				console.log(payload)
+				this.scanPorts(payload)
+				this.initForm()
 			}
-			console.log(payload)
-			this.scanPorts(payload)
-			this.initForm()
 		},
 		startTimer() {
 			if (!this.isRunning) {
