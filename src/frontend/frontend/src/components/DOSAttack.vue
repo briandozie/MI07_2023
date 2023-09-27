@@ -259,6 +259,8 @@ export default {
 			const latencyPath = "http://localhost:5000/dosAttack/latency"
 			this.startTimer() // start timer
 			this.initStatus()
+
+			// update event log
 			this.eventLog +=
 				this.getCurrentTimestamp() +
 				` DoS Attack (${payload.attackType}) started on network "${payload.ipAddress}" for ${payload.duration} second(s)"\n`
@@ -266,6 +268,10 @@ export default {
 				this.getCurrentTimestamp() +
 				` Flooding network with packets of ${payload.packetSize} data byte(s)\n`
 			this.display = true
+			const currentTime = new Date()
+			const endTime = new Date(currentTime.getTime() + payload.duration * 1000)
+
+			// send POST request
 			axios
 				.post(dosPath, payload)
 				.then((res) => {
@@ -283,22 +289,26 @@ export default {
 					this.stopTimer()
 					this.resetTimer()
 				})
-			const currentTime = new Date()
-			const endTime = new Date(currentTime.getTime() + payload.duration * 1000)
-			this.checkLatency(latencyPath, payload, endTime)
+
+			// poll for latency ping results
+			this.checkLatency(latencyPath, endTime)
 		},
-		checkLatency(latencyPath, payload, endTime) {
+		checkLatency(latencyPath, endTime) {
 			axios
-				.post(latencyPath, { ipAddress: payload.ipAddress })
+				.post(latencyPath)
 				.then((res) => {
-					this.result += res.data + "\n"
+					if (res.data.length > 0) {
+						this.result += res.data + "\n"
+					}
 				})
 				.catch((err) => {
 					console.log(err)
 				})
 				.finally(() => {})
+
+			// poll for latency ping results every 5 seconds
 			if (new Date().getTime() < endTime.getTime()) {
-				setTimeout(this.checkLatency, 5000, latencyPath, payload, endTime)
+				setTimeout(this.checkLatency, 5000, latencyPath, endTime)
 			}
 		},
 		getCurrentTimestamp() {

