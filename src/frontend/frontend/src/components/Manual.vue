@@ -212,7 +212,7 @@
 
 <script></script>
 
-<style>
+<style scoped>
 .navbar {
 	height: 50px;
 }

@@ -272,10 +272,11 @@ export default {
 	methods: {
 		// POST Function
 		ddosAttack(payload) {
-			const dosPath = "http://localhost:5000/ddosAttack/"
+			const ddosPath = "http://localhost:5000/ddosAttack/"
 			const latencyPath = "http://localhost:5000/ddosAttack/latency"
 			this.startTimer() // start timer
 			this.initStatus()
+
 			this.eventLog +=
 				this.getCurrentTimestamp() +
 				` DDoS Attack (${payload.attackType}) started on network "${payload.ipAddress}" for ${payload.duration} second(s)"\n`
@@ -283,13 +284,14 @@ export default {
 				this.getCurrentTimestamp() +
 				` Flooding network with packets of ${payload.packetSize} data byte(s)\n`
 			this.display = true
+
 			axios
-				.post(dosPath, payload)
+				.post(ddosPath, payload)
 				.then((res) => {
 					console.log(res.data)
 					this.eventLog +=
 						this.getCurrentTimestamp() +
-						` DoS Attack ended after ${this.formattedElapsedTimeEventLog}\n`
+						` DDoS Attack ended after ${this.formattedElapsedTimeEventLog}\n`
 				})
 				.catch((err) => {
 					console.log(err)
@@ -308,7 +310,9 @@ export default {
 			axios
 				.post(latencyPath, { ipAddress: payload.ipAddress })
 				.then((res) => {
-					this.result += res.data + "\n"
+					if (res.data.length > 0) {
+						this.result += res.data + "\n"
+					}
 				})
 				.catch((err) => {
 					console.log(err)
@@ -391,6 +395,10 @@ export default {
 					attackType: this.ddosAttackForm.attackType,
 					duration: this.ddosAttackForm.duration,
 					packetSize: this.ddosAttackForm.packetSize,
+					attackTypeLabel:
+						document.getElementById("attackTypeInput").options[
+							document.getElementById("attackTypeInput").selectedIndex
+						].textContent,
 				}
 				this.ddosAttack(payload)
 			}
@@ -421,8 +429,6 @@ export default {
 		downloadBotnetScript(e) {
 			e.preventDefault()
 			const botnetScriptPath = "http://localhost:5000/ddosAttack/botnet"
-			// Make an HTTP request to your backend API to fetch the Python file content
-			// Replace 'your-api-endpoint' with the actual URL of your API endpoint
 			axios
 				.get(botnetScriptPath)
 				.then((response) => {

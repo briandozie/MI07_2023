@@ -333,7 +333,7 @@ export default {
 			if (this.validateForm()) {
 				const payload = {
 					ipAddress: this.cveScanForm.ipAddress,
-					scanType: this.cveScanForm.script,
+					script: this.cveScanForm.script,
 				}
 				console.log(payload)
 				this.scanCVE(payload)
