@@ -45,7 +45,7 @@ def scanIpAddress():
         startIP, endIP = ipRange.split("-")
         # scan network for hosts
         nm = nmap.PortScanner()
-        nm.scan(hosts=f"{startIP}-{endIP}", arguments=f"-{scanType} -D RND:30")
+        nm.scan(hosts=f"{startIP}-{endIP}",     arguments=f"-{scanType} -D RND:30")
         hostList = nm.all_hosts()
 
         logActivity("IP SCAN RANGE", ipRange, scanTypeLabel, hostList)
@@ -53,3 +53,5 @@ def scanIpAddress():
         return hostList
     else:
         return "Invalid request format"
+    
+    
