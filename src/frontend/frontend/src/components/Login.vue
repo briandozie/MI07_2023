@@ -49,20 +49,29 @@ export default {
 		getResponse(payload) {
 			const path = "http://localhost:5000/login/"
 			axios
-				.post(path, payload, { withCredentials: true }) //Send and receive cookies
+				.post(path, payload) //Send and receive cookies
 				.then((res) => {
 					console.log(res.data)
 					this.msg = res.data
 
 					// Check Response from Backend
 					if (res.status == 200) {
-						// Placeholder token for authenticated users
-						// const authToken = "userToken123"
-						// localStorage.setItem("authToken", authToken) //Store token in localStorage
-
 						// Success message upon login and redirect to home page
 						this.successMessage = "Login Successful!"
-						this.$router.push("/home")
+
+						//Handle and retrieve HTTP-only cookie from the server
+						const cookies = document.cookie.split("; ")
+						for (const cookie of cookies) {
+							const [name] = cookie.split("=")
+							if (name == "auth_token") {
+								//Set the received cookie as an HTTP-only cookie
+								document.cookie = "${name}=${value}; HttpOnly; Secure"
+								break
+							}
+						}
+
+						localStorage.setItem("authToken", this.successMessage)
+						this.$router.push("/home") //Change back to /home
 					} else {
 						// Display error message otherwise
 						this.errorMessage = "Invalid username or password"

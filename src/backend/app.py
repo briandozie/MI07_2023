@@ -21,6 +21,7 @@ from routes.dashboard import dashboard
 
 app = Flask(__name__) # creating flask app
 CORS(app, resources={r"/*":{'origins':"*"}})
+app.secret_key = b'j60e04te6ze77d35xg' # Added secret key (needs to be changed)
 
 # registering blueprints for routes
 app.register_blueprint(loginPage)

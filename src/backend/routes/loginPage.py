@@ -14,14 +14,16 @@ def login():
 
     if user:
         # Generate token for authenticated user
-        session['authenticated'] = True
+        token = "cookie123"
+        session['token'] = token
 
         # Set HTTP-only cookie
         response = make_response(jsonify(message="Login Successful"))
-        response.set_cookie('authToken', value='cookie123', httponly=True, secure=True)
+        response.set_cookie('authToken', token, httponly=True, secure=True)
     
-        return response
+        return response, 200
         # return jsonify(message="Login Successful")
+
     else:
         # In case of failed login, display error message and return
         # a 401 unauthorised status code
