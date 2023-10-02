@@ -49,7 +49,7 @@ export default {
 		getResponse(payload) {
 			const path = "http://localhost:5000/login/"
 			axios
-				.post(path, payload)
+				.post(path, payload, { withCredentials: true }) //Send and receive cookies
 				.then((res) => {
 					console.log(res.data)
 					this.msg = res.data
@@ -57,8 +57,8 @@ export default {
 					// Check Response from Backend
 					if (res.status == 200) {
 						// Placeholder token for authenticated users
-						const authToken = "userToken123"
-						localStorage.setItem("authToken", authToken) //Store token in localStorage
+						// const authToken = "userToken123"
+						// localStorage.setItem("authToken", authToken) //Store token in localStorage
 
 						// Success message upon login and redirect to home page
 						this.successMessage = "Login Successful!"

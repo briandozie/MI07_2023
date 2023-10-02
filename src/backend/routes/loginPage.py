@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, make_response
+from flask import Blueprint, request, jsonify, make_response, session
 from pymongo import MongoClient
 from app import db
 
@@ -14,10 +14,14 @@ def login():
 
     if user:
         # Generate token for authenticated user
-        #response = make_response(jsonify(message="Login Successful"))
-        return jsonify(message="Login Successful")
-        #response.set_cookie('authToken', value=auth_token, httponly=True, secure=True)
-        #return response
+        session['authenticated'] = True
+
+        # Set HTTP-only cookie
+        response = make_response(jsonify(message="Login Successful"))
+        response.set_cookie('authToken', value='cookie123', httponly=True, secure=True)
+    
+        return response
+        # return jsonify(message="Login Successful")
     else:
         # In case of failed login, display error message and return
         # a 401 unauthorised status code
