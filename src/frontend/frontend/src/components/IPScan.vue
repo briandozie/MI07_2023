@@ -235,11 +235,28 @@
 							{{ errors.scanType }}
 						</div>
 
-						<!-- Run button -->
-						<div class="run-button">
-							<button type="submit" class="btn btn-primary" :disabled="display">
-								Run
-							</button>
+						<div class="button-container">
+							<!-- Cancel Button -->
+							<div class="run-button">
+								<button
+									@click="cancelActivity"
+									class="btn btn-danger"
+									v-if="display"
+								>
+									Cancel
+								</button>
+							</div>
+
+							<!-- Run button -->
+							<div class="run-button">
+								<button
+									type="submit"
+									class="btn btn-primary"
+									:disabled="display"
+								>
+									Run
+								</button>
+							</div>
 						</div>
 					</form>
 				</div>
@@ -559,10 +576,12 @@ export default {
 				.post(path, payload)
 				.then((res) => {
 					console.log(res.data)
-					this.scanResult = res.data
-					this.eventLog +=
-						getCurrentTimestamp() +
-						` Scan completed successfully in ${this.formattedElapsedTimeEventLog}\n`
+					if (res.status === 200) {
+						this.scanResult = res.data
+						this.eventLog +=
+							getCurrentTimestamp() +
+							` Scan completed successfully in ${this.formattedElapsedTimeEventLog}\n`
+					}
 				})
 				.catch((err) => {
 					console.log(err)
@@ -656,6 +675,22 @@ export default {
 		},
 		removeIPInput(index) {
 			this.ipScanForm.additionalInputs.splice(index, 1)
+		},
+		cancelActivity(e) {
+			e.preventDefault()
+			const cancelPath = "http://localhost:5000/ipScan/cancel"
+			axios
+				.get(cancelPath)
+				.then((res) => {
+					if (res.status === 200) {
+						this.eventLog +=
+							getCurrentTimestamp() +
+							` Scan cancelled manually after ${this.formattedElapsedTimeEventLog}\n`
+					}
+				})
+				.catch((err) => {
+					console.log(err)
+				})
 		},
 	},
 	created() {

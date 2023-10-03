@@ -85,11 +85,28 @@
 							{{ inputErrors.scanType }}
 						</div>
 
-						<!-- Run button -->
-						<div class="run-button">
-							<button type="submit" class="btn btn-primary" :disabled="display">
-								Run
-							</button>
+						<div class="button-container">
+							<!-- Cancel Button -->
+							<div class="run-button">
+								<button
+									@click="cancelActivity"
+									class="btn btn-danger"
+									v-if="display"
+								>
+									Cancel
+								</button>
+							</div>
+
+							<!-- Run button -->
+							<div class="run-button">
+								<button
+									type="submit"
+									class="btn btn-primary"
+									:disabled="display"
+								>
+									Run
+								</button>
+							</div>
 						</div>
 					</form>
 				</div>
@@ -219,10 +236,12 @@ export default {
 				.post(path, payload)
 				.then((res) => {
 					console.log(res.data)
-					this.result = res.data
-					this.eventLog +=
-						getCurrentTimestamp() +
-						` Scan completed successfully in ${this.formattedElapsedTimeEventLog}\n`
+					if (res.status === 200) {
+						this.result = res.data
+						this.eventLog +=
+							getCurrentTimestamp() +
+							` Scan completed successfully in ${this.formattedElapsedTimeEventLog}\n`
+					}
 				})
 				.catch((err) => {
 					console.log(err)
@@ -295,6 +314,22 @@ export default {
 			this.timerInterval = setInterval(() => {
 				this.elapsedTime = Math.floor((Date.now() - this.startTime) / 1000)
 			}, 1000)
+		},
+		cancelActivity(e) {
+			e.preventDefault()
+			const cancelPath = "http://localhost:5000/serviceScan/cancel"
+			axios
+				.get(cancelPath)
+				.then((res) => {
+					if (res.status === 200) {
+						this.eventLog +=
+							getCurrentTimestamp() +
+							` Scan cancelled manually after ${this.formattedElapsedTimeEventLog}\n`
+					}
+				})
+				.catch((err) => {
+					console.log(err)
+				})
 		},
 	},
 	created() {},
