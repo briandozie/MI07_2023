@@ -139,11 +139,28 @@
 							</div>
 						</div>
 
-						<!-- Run button -->
-						<div class="run-button">
-							<button type="submit" class="btn btn-primary" :disabled="display">
-								Run
-							</button>
+						<div class="button-container">
+							<!-- Cancel Button -->
+							<div class="run-button">
+								<button
+									@click="cancelActivity"
+									class="btn btn-danger"
+									v-if="display"
+								>
+									Cancel
+								</button>
+							</div>
+
+							<!-- Run button -->
+							<div class="run-button">
+								<button
+									type="submit"
+									class="btn btn-primary"
+									:disabled="display"
+								>
+									Run
+								</button>
+							</div>
 						</div>
 					</form>
 				</div>
@@ -234,6 +251,7 @@ export default {
 			isRunning: false,
 			startTime: 0,
 			elapsedTime: 0,
+			isCancelled: false,
 		}
 	},
 	computed: {
@@ -307,9 +325,10 @@ export default {
 				.finally(() => {})
 
 			// poll for latency ping results every 5 seconds
-			if (new Date().getTime() < endTime.getTime()) {
+			if (new Date().getTime() < endTime.getTime() && !this.isCancelled) {
 				setTimeout(this.checkLatency, 5000, latencyPath, endTime)
 			}
+			this.isCancelled = false
 		},
 		getCurrentTimestamp() {
 			const now = new Date()
@@ -414,6 +433,23 @@ export default {
 			this.timerInterval = setInterval(() => {
 				this.elapsedTime = Math.floor((Date.now() - this.startTime) / 1000)
 			}, 1000)
+		},
+		cancelActivity(e) {
+			e.preventDefault()
+			this.isCancelled = true
+			const cancelPath = "http://localhost:5000/dosAttack/cancel"
+			axios
+				.get(cancelPath)
+				.then((res) => {
+					if (res.status === 200) {
+						this.eventLog +=
+							this.getCurrentTimestamp() +
+							` DoS Attack cancelled manually after ${this.formattedElapsedTimeEventLog}\n`
+					}
+				})
+				.catch((err) => {
+					console.log(err)
+				})
 		},
 	},
 	created() {},
