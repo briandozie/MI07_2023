@@ -60,17 +60,8 @@ export default {
 						this.successMessage = "Login Successful!"
 
 						//Handle and retrieve HTTP-only cookie from the server
-						const cookies = document.cookie.split("; ")
-						for (const cookie of cookies) {
-							const [name] = cookie.split("=")
-							if (name == "auth_token") {
-								//Set the received cookie as an HTTP-only cookie
-								document.cookie = "${name}=${value}; HttpOnly; Secure"
-								break
-							}
-						}
 
-						localStorage.setItem("authToken", this.successMessage)
+						//localStorage.setItem("authToken", this.successMessage)
 						this.$router.push("/home") //Change back to /home
 					} else {
 						// Display error message otherwise

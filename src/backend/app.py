@@ -1,6 +1,7 @@
 import os
 from flask import Flask
 from flask_cors import CORS
+from flask_session import Session
 from pymongo import MongoClient
 
 # connecting to MongoDB Atlas cloud database
@@ -20,8 +21,14 @@ from routes.ddosAttack import ddosAttack
 from routes.dashboard import dashboard
 
 app = Flask(__name__) # creating flask app
-CORS(app, resources={r"/*":{'origins':"*"}})
+app.config["SESSION_TYPE"] = "filesystem"
+app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_USE_SIGNER"] = True
+app.config["SESSION_KEY_PREFIX"] = "testing"
 app.secret_key = b'j60e04te6ze77d35xg' # Added secret key (needs to be changed)
+
+Session(app)
+CORS(app, resources={r"/*":{'origins':"*"}})
 
 # registering blueprints for routes
 app.register_blueprint(loginPage)

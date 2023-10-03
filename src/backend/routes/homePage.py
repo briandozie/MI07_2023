@@ -1,10 +1,10 @@
-from flask import Blueprint, session
+from flask import Blueprint, session, redirect, url_for
 
 homePage = Blueprint("homePage", __name__, url_prefix="/home")
 
 @homePage.get("/")
 def home():
-    if (session['token'] is None): 
-        return "Unauthenticated!"
+    if not session.get("authenticated"):
+        return redirect(url_for("loginPage.login"))
     else:
         return "Hello Flask!"

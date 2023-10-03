@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, make_response, session
+from flask import Blueprint, request, jsonify, session, redirect, url_for
 from pymongo import MongoClient
 from app import db
 
@@ -13,16 +13,11 @@ def login():
     user = getUser(username, password)
 
     if user:
-        # Generate token for authenticated user
-        token = "cookie123"
-        session['token'] = token
-
-        # Set HTTP-only cookie
-        response = make_response(jsonify(message="Login Successful"))
-        response.set_cookie('authToken', token, httponly=True, secure=True)
-    
-        return response, 200
-        # return jsonify(message="Login Successful")
+        #Perform user authentication by setting a session variable
+        session['authenticated'] = True
+        session['username'] = username
+        
+        return jsonify(message="Login Successful"), 200
 
     else:
         # In case of failed login, display error message and return
@@ -36,3 +31,9 @@ def getUser(username, password):
         "password" : password,
     })
     return user
+
+@loginPage.route("/logout", methods=["GET"])
+def logout():
+    # Clear the session and log the user out
+    session.clear()
+    return redirect(url_for("loginPage.login"))
