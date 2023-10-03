@@ -7,13 +7,12 @@ import signal
 import xml.etree.ElementTree as ET
 
 serviceScan = Blueprint("serviceScan", __name__, url_prefix="/serviceScan")
-nm = nmap.PortScanner()
 pid = 0
 cancelled = False
 
 @serviceScan.post("/")
 def ServiceScan():
-    global nm, pid, cancelled
+    global pid, cancelled
     
     # retrieve IP address and subnet mask from request body
     data = request.get_json()
