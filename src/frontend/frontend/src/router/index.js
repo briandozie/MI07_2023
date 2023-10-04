@@ -109,7 +109,7 @@ router.beforeEach(async (to, from, next) => {
 			// Checks to see if user is authenticated or not
 			const isAuthenticated = await checkAuthenticationStatus()
 			console.log(isAuthenticated)
-			// If user is unauthenticated, redirect to login page
+			// If user is not authenticated, redirect to login page
 			if (!isAuthenticated) {
 				next({ name: "Login" })
 			} else {
@@ -130,7 +130,7 @@ async function checkAuthenticationStatus() {
 			.then((res) => {
 				console.log(res.data)
 				if (res.status == 201) {
-					console.log("In res.status == 201")
+					// Return true if authorised
 					resolve(true)
 				} else {
 					resolve(false)

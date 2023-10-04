@@ -23,7 +23,7 @@ from routes.ddosAttack import ddosAttack
 from routes.dashboard import dashboard
 
 app = Flask(__name__) # creating flask app
-CORS(app, resources={r"/*":{'origins':"*"}}, supports_credentials=True)
+CORS(app, resources={r"/*":{'origins':"*"}}, supports_credentials=True) #set to true to support cookies
 
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG, format='%(asctime)s [%(levelname)s] - %(message)s')
 

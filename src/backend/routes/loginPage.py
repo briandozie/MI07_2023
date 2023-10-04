@@ -31,7 +31,7 @@ def login():
 def generateToken(username):
     secret_key = "CCP2023mi07"
 
-    # Token expires in 1 hour
+    # Token expires in 3 hour
     expiration = datetime.timedelta(hours=3)
 
     # Create payload with username and expiration time
