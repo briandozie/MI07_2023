@@ -10,6 +10,7 @@ import DOSAttack from "../components/DOSAttack.vue"
 import Dashboard from "../components/Dashboard.vue"
 import HistoryDetail from "../components/HistoryDetail.vue"
 import Manual from "../components/Manual.vue"
+import axios from "axios"
 
 const routes = [
 	{
@@ -98,25 +99,53 @@ const router = createRouter({
 	routes,
 })
 
-router.beforeEach((to, from, next) => {
-	// Checks to see if user is authenticated or not
-	const isAuthenticated = checkAuthenticationStatus()
-	// If user is unauthenticated, redirect to login page
-	if (to.name !== "Login" && !isAuthenticated) {
-		next({ name: "Login" })
-	} else {
+router.beforeEach(async (to, from, next) => {
+	// Check if the user is navigating to the login page
+	if (to.name == "Login") {
 		document.title = to.meta.title
 		next()
+	} else {
+		try {
+			// Checks to see if user is authenticated or not
+			const isAuthenticated = await checkAuthenticationStatus()
+			console.log(isAuthenticated)
+			// If user is unauthenticated, redirect to login page
+			if (!isAuthenticated) {
+				next({ name: "Login" })
+			} else {
+				document.title = to.meta.title
+				next()
+			}
+		} catch (error) {
+			console.error("An error occurred during authentication check:", error)
+			next({ name: "Login" }) // Redirect to login page in case of error
+		}
 	}
 })
 
-function checkAuthenticationStatus() {
-	// Retrive token from localStorage
-	const authToken = localStorage.getItem("token")
-
-	//Checks to see if authToken is valid
-	const isAuthenticated = !!authToken
-	return isAuthenticated
+async function checkAuthenticationStatus() {
+	return new Promise((resolve, reject) => {
+		axios
+			.get("http://localhost:5000/check-auth/")
+			.then((res) => {
+				console.log(res.data)
+				if (res.status == 201) {
+					console.log("In res.status == 201")
+					resolve(true)
+				} else {
+					resolve(false)
+				}
+			})
+			.catch((error) => {
+				if (error.response.status == 401) {
+					console.log("User is unauthenticated.")
+					resolve(false)
+				} else {
+					console.log("An error occured.")
+					reject(error)
+				}
+			})
+	})
 }
 
 function removeAuthToken() {

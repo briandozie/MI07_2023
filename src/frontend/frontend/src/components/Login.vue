@@ -56,9 +56,8 @@ export default {
 
 					// Check Response from Backend
 					if (res.status == 200) {
-						const token = res.data.token
-						localStorage.setItem("token", token)
-
+						//this.token = res.data.token
+						//localStorage.setItem("token", token)
 						// Success message upon login and redirect to home page
 						this.successMessage = "Login Successful!"
 						this.$router.push("/home")
@@ -82,6 +81,8 @@ export default {
 		initForm() {
 			this.userField.username = ""
 			this.userField.password = ""
+			this.successMessage = null
+			this.errorMessage = null
 		},
 		onSubmit(e) {
 			e.preventDefault()
@@ -93,8 +94,14 @@ export default {
 			this.getResponse(payload)
 			this.initForm()
 		},
+		// Function to send token in headers of subsequent requests
+		sendTokenInHeaders() {
+			axios.defaults.headers.common["Authorization"] = `Bearer ${this.token}`
+		},
 	},
-	created() {},
+	created() {
+		this.sendTokenInHeaders()
+	},
 }
 </script>
 
