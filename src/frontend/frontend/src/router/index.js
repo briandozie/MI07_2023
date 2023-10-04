@@ -10,7 +10,6 @@ import DOSAttack from "../components/DOSAttack.vue"
 import Dashboard from "../components/Dashboard.vue"
 import HistoryDetail from "../components/HistoryDetail.vue"
 import Manual from "../components/Manual.vue"
-import axios from "axios"
 
 const routes = [
 	{
@@ -111,30 +110,18 @@ router.beforeEach((to, from, next) => {
 	}
 })
 
-async function checkAuthenticationStatus() {
-	try {
-		const response = await axios.get(
-			"http://localhost:5000/check-authentication-status/"
-		)
-		const { authenticated, username } = response.data
+function checkAuthenticationStatus() {
+	// Retrive token from localStorage
+	const authToken = localStorage.getItem("token")
 
-		if (authenticated) {
-			console.log("User is authenticated.")
-			console.log("User=", username)
-			return true
-		} else {
-			console.log("User is not authenticated")
-			return false
-		}
-	} catch (error) {
-		console.error("Error checking authentication status", error)
-		return false
-	}
+	//Checks to see if authToken is valid
+	const isAuthenticated = !!authToken
+	return isAuthenticated
 }
 
 function removeAuthToken() {
 	//Removes user token from localStorage
-	localStorage.removeItem("authToken")
+	localStorage.removeItem("token")
 }
 
 export default router

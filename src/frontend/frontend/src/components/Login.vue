@@ -56,13 +56,12 @@ export default {
 
 					// Check Response from Backend
 					if (res.status == 200) {
+						const token = res.data.token
+						localStorage.setItem("token", token)
+
 						// Success message upon login and redirect to home page
 						this.successMessage = "Login Successful!"
-
-						//Handle and retrieve HTTP-only cookie from the server
-
-						//localStorage.setItem("authToken", this.successMessage)
-						this.$router.push("/home") //Change back to /home
+						this.$router.push("/home")
 					} else {
 						// Display error message otherwise
 						this.errorMessage = "Invalid username or password"

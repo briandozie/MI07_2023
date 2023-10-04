@@ -292,7 +292,7 @@ export default {
 						service: parts[2],
 						cves: [],
 					}
-				} else if (line.match(/https?:\/\/vulners\.com\/cve\/\S+/)) {
+				} else if (line.match(/https?:\/\/vulners\.com\/\S+/)) {
 					// Parse CVE lines
 					const cveParts = line.split(/\s+/)
 					const cveId = cveParts[1]
