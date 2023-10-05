@@ -3,6 +3,7 @@ from pymongo import MongoClient
 from app import db
 import jwt
 import datetime
+import os
 
 loginPage = Blueprint("loginPage", __name__, url_prefix="/login")
 
@@ -29,7 +30,7 @@ def login():
         return jsonify(error="Invalid username or password"), 401 
 
 def generateToken(username):
-    secret_key = "CCP2023mi07"
+    secret_key = os.getenv("SECRET_KEY")
 
     # Token expires in 3 hour
     expiration = datetime.timedelta(hours=3)

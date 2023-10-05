@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, request, current_app
 import jwt
+import os
 
 checkAuthRoute = Blueprint("checkAuthRoute", __name__, url_prefix="/check-auth")
 
@@ -7,7 +8,7 @@ checkAuthRoute = Blueprint("checkAuthRoute", __name__, url_prefix="/check-auth")
 def checkAuthenticationStatus():
     # Checks to see if "token" cookie is present in the request
     token = request.cookies.get("token")
-    secret_key = "CCP2023mi07"
+    secret_key = os.getenv("SECRET_KEY")
 
     current_app.logger.debug(f"Received token: {token}")
 
