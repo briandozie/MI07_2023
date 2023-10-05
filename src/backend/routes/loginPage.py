@@ -4,6 +4,7 @@ from app import db
 import jwt
 import datetime
 import os
+import bcrypt
 
 loginPage = Blueprint("loginPage", __name__, url_prefix="/login")
 
@@ -15,7 +16,7 @@ def login():
 
     user = getUser(username, password)
 
-    if user:
+    if user and verify_password(password, user['password']):
         # Generate a token
         token = generateToken(username)
 
@@ -46,10 +47,22 @@ def generateToken(username):
 
     return token
 
-def getUser(username, password):
+def getUser(username):
     users_collection = db["user"]
     user = users_collection.find_one({
         "username" : username,
-        "password" : password,
     })
     return user
+
+def hash_password(password):
+    # Generate a salt and hash the password
+    salt = bcrypt.gensalt()
+    hashed_passwd = bcrypt.hashpw(password.encode('utf-8'), salt)
+    return hashed_passwd
+
+def verify_password(provided_passwd, stored_passwd):
+    match = bcrypt.checkpw(provided_passwd.encode('utf-8'), stored_passwd)
+    return match
+
+#def change_password(username, password):
+    #hashed_password = hash_password(password)
