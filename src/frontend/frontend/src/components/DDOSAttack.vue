@@ -18,7 +18,7 @@
 						<i class="bi bi-gear"></i>
 					</a>
 					<a class="navbar-brand ms-auto" href="#">
-						<i class="bi bi-person"></i>
+						<i class="bi bi-box-arrow-right"></i> Logout
 					</a>
 				</div>
 			</div>

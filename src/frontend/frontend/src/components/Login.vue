@@ -90,7 +90,7 @@ export default {
 				username: this.userField.username,
 				password: this.userField.password,
 			}
-			console.log(payload)
+			// console.log(payload) Avoid displaying credentials
 			this.getResponse(payload)
 			this.initForm()
 		},
