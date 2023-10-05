@@ -14,7 +14,7 @@ def login():
     username = data["username"]
     password = data["password"]
 
-    user = getUser(username, password)
+    user = getUser(username)
 
     if user and verify_password(password, user['password']):
         # Generate a token
@@ -54,15 +54,7 @@ def getUser(username):
     })
     return user
 
-def hash_password(password):
-    # Generate a salt and hash the password
-    salt = bcrypt.gensalt()
-    hashed_passwd = bcrypt.hashpw(password.encode('utf-8'), salt)
-    return hashed_passwd
-
 def verify_password(provided_passwd, stored_passwd):
-    match = bcrypt.checkpw(provided_passwd.encode('utf-8'), stored_passwd)
+    match = bcrypt.checkpw(provided_passwd.encode('utf-8'), stored_passwd.encode('utf-8'))
     return match
-
-#def change_password(username, password):
-    #hashed_password = hash_password(password)
+    
