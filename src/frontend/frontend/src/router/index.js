@@ -22,15 +22,6 @@ const routes = [
 		name: "Login",
 		meta: { title: "Login" },
 		component: Login,
-		beforeEnter: (to, from, next) => {
-			if (from.path !== "/") {
-				alert("You have been logged out")
-
-				// Removes the user token from localStorage upon logout
-				removeAuthToken()
-			}
-			next()
-		},
 	},
 	{
 		path: "/home",
@@ -101,9 +92,25 @@ const router = createRouter({
 
 router.beforeEach(async (to, from, next) => {
 	// Check if the user is navigating to the login page
-	if (to.name == "Login") {
+	if (to.name == "Login" && from.path == "/") {
+		alert("Wrong route!")
 		document.title = to.meta.title
 		next()
+	} else if (to.name === "Login" && from.path !== "/") {
+		// Logouts the user and removes HTTP-only cookies
+		alert("In Router Guard!")
+		try {
+			const loggedOut = await logout()
+			console.log(loggedOut)
+			if (loggedOut) {
+				axios.defaults.headers.common["Authorization"] = ""
+				next()
+			} else {
+				console.error("Something went wrong!")
+			}
+		} catch (error) {
+			console.error("Something happened during logout!")
+		}
 	} else {
 		try {
 			// Checks to see if user is authenticated or not
@@ -148,9 +155,19 @@ async function checkAuthenticationStatus() {
 	})
 }
 
-function removeAuthToken() {
-	//Removes user token from localStorage
-	localStorage.removeItem("token")
+function logout() {
+	return new Promise((resolve, reject) => {
+		axios
+			.post("http://localhost:5000/check-auth/logout")
+			.then((res) => {
+				console.log(res.data)
+				resolve(true) // Resolve the promise if the logout is successful
+			})
+			.catch((error) => {
+				console.error("An error occurred during logout:", error)
+				reject(error) // Reject the promise if there's an error during logout
+			})
+	})
 }
 
 export default router
