@@ -101,6 +101,7 @@ router.beforeEach(async (to, from, next) => {
 			const loggedOut = await logout()
 			if (loggedOut) {
 				next()
+				alert("You have logged out.")
 			} else {
 				console.error("Something went wrong!")
 			}

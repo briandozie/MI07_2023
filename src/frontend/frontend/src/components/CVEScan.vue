@@ -18,9 +18,9 @@
 					<a class="navbar-brand ms-auto" href="#">
 						<i class="bi bi-gear"></i>
 					</a>
-					<a class="navbar-brand ms-auto" href="#">
+					<router-link class="navbar-brand ms-auto" to="/login">
 						<i class="bi bi-box-arrow-right"></i> Logout
-					</a>
+					</router-link>
 				</div>
 			</div>
 		</nav>
