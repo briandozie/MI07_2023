@@ -93,17 +93,13 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
 	// Check if the user is navigating to the login page
 	if (to.name == "Login" && from.path == "/") {
-		alert("Wrong route!")
 		document.title = to.meta.title
 		next()
 	} else if (to.name === "Login" && from.path !== "/") {
 		// Logouts the user and removes HTTP-only cookies
-		alert("In Router Guard!")
 		try {
 			const loggedOut = await logout()
-			console.log(loggedOut)
 			if (loggedOut) {
-				axios.defaults.headers.common["Authorization"] = ""
 				next()
 			} else {
 				console.error("Something went wrong!")
@@ -115,7 +111,7 @@ router.beforeEach(async (to, from, next) => {
 		try {
 			// Checks to see if user is authenticated or not
 			const isAuthenticated = await checkAuthenticationStatus()
-			console.log(isAuthenticated)
+			// console.log(isAuthenticated)
 			// If user is not authenticated, redirect to login page
 			if (!isAuthenticated) {
 				next({ name: "Login" })

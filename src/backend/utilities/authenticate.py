@@ -7,13 +7,12 @@ checkAuthRoute = Blueprint("checkAuthRoute", __name__, url_prefix="/check-auth")
 def checkAuthenticationStatus():
     # Checks to see if "token" cookie is present in the request
     token = request.cookies.get("token")
-
-    current_app.logger.debug(f"Received token: {token}")
-
+    # current_app.logger.debug(f"Received token: {token}")
+    
     if token:
         try:
             # If token is valid, then user is authenticated
-            current_app.logger.info("User is authenticated (auth.py)")
+            current_app.logger.info("User is authenticated")
             return jsonify(message="User is authenticated"), 201
         
         except jwt.ExpiredSignatureError:
@@ -32,7 +31,6 @@ def checkAuthenticationStatus():
 @checkAuthRoute.post("/logout")
 def logout():
     # Retrieve current cookie
-    current_app.logger.info("Logout route reached")
     token = request.cookies.get("token")
 
     if token:
