@@ -366,14 +366,15 @@ export default {
 
 	computed: {
 		isFormValid() {
-			return (
-				!this.errors.inputValue1 &&
-				!this.errors.inputValue2 &&
-				!this.errors.inputStart &&
-				!this.errors.inputEnd &&
-				!this.errors.subnetMask &&
-				!this.errors.scanType
-			)
+			const isValid =
+				(this.errors.inputValue1 === null &&
+					this.errors.scanType === null &&
+					this.errors.subnetMask === null) ||
+				(this.errors.inputValue2 === null && this.errors.scanType === null) ||
+				(this.errors.inputStart === null &&
+					this.errors.inputEnd === null &&
+					this.errors.scanType === null)
+			return isValid
 		},
 		formattedElapsedTime() {
 			const minutes = Math.floor(this.elapsedTime / 60)
