@@ -49,17 +49,15 @@ export default {
 		getResponse(payload) {
 			const path = "http://localhost:5000/login/"
 			axios
-				.post(path, payload)
+				.post(path, payload) //Send and receive cookies
 				.then((res) => {
 					console.log(res.data)
 					this.msg = res.data
 
 					// Check Response from Backend
 					if (res.status == 200) {
-						// Placeholder token for authenticated users
-						const authToken = "userToken123"
-						localStorage.setItem("authToken", authToken) //Store token in localStorage
-
+						//this.token = res.data.token
+						//localStorage.setItem("token", token)
 						// Success message upon login and redirect to home page
 						this.successMessage = "Login Successful!"
 						this.$router.push("/home")
@@ -83,6 +81,8 @@ export default {
 		initForm() {
 			this.userField.username = ""
 			this.userField.password = ""
+			this.successMessage = null
+			this.errorMessage = null
 		},
 		onSubmit(e) {
 			e.preventDefault()
@@ -90,12 +90,18 @@ export default {
 				username: this.userField.username,
 				password: this.userField.password,
 			}
-			console.log(payload)
+			// console.log(payload) Avoid displaying credentials
 			this.getResponse(payload)
 			this.initForm()
 		},
+		// Function to send token in headers of subsequent requests
+		sendTokenInHeaders() {
+			axios.defaults.headers.common["Authorization"] = `Bearer ${this.token}`
+		},
 	},
-	created() {},
+	created() {
+		this.sendTokenInHeaders()
+	},
 }
 </script>
 
@@ -105,21 +111,21 @@ export default {
 	justify-content: center;
 	align-items: center;
 	height: 100vh;
+	background: linear-gradient(to top, #333 0%, #eee 49%, #333 100%);
 }
 
 .background {
 	position: absolute;
 	width: 100%;
 	height: 100%;
-	background-color: rgba(192, 192, 192, 0.8); /* White background */
 	backdrop-filter: blur(10px); /* Apply Blur effect */
 	z-index: -1; /* Place the effect behind container */
 }
 
 .login-container {
 	background: rgba(255, 255, 255, 0.8); /* White background with transparency */
-	border-radius: 8px;
-	padding: 30px;
+	border-radius: 10px;
+	padding: 20px;
 	box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
 	text-align: center;
 	width: 400px;
@@ -134,6 +140,8 @@ export default {
 label {
 	font-weight: bold;
 	margin-bottom: 5px;
+	margin-right: 30px;
+	margin-left: 15px;
 }
 
 input {
@@ -141,6 +149,8 @@ input {
 	border: 1px solid #ccc;
 	border-radius: 4px;
 	margin-bottom: 10px;
+	margin-right: 30px;
+	margin-left: 15px;
 }
 
 button {

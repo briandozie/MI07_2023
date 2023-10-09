@@ -10,6 +10,7 @@ import DOSAttack from "../components/DOSAttack.vue"
 import Dashboard from "../components/Dashboard.vue"
 import HistoryDetail from "../components/HistoryDetail.vue"
 import Manual from "../components/Manual.vue"
+import axios from "axios"
 
 const routes = [
 	{
@@ -21,15 +22,6 @@ const routes = [
 		name: "Login",
 		meta: { title: "Login" },
 		component: Login,
-		beforeEnter: (to, from, next) => {
-			if (from.path !== "/") {
-				alert("You have been logged out")
-
-				// Removes the user token from localStorage upon logout
-				removeAuthToken()
-			}
-			next()
-		},
 	},
 	{
 		path: "/home",
@@ -98,30 +90,81 @@ const router = createRouter({
 	routes,
 })
 
-router.beforeEach((to, from, next) => {
-	// Checks to see if user is authenticated or not
-	const isAuthenticated = checkAuthenticationStatus()
-	// If user is unauthenticated, redirect to login page
-	if (to.name !== "Login" && !isAuthenticated) {
-		next({ name: "Login" })
-	} else {
+router.beforeEach(async (to, from, next) => {
+	// Check if the user is navigating to the login page
+	if (to.name == "Login" && from.path == "/") {
 		document.title = to.meta.title
 		next()
+	} else if (to.name === "Login" && from.path !== "/") {
+		// Logouts the user and removes HTTP-only cookies
+		try {
+			const loggedOut = await logout()
+			if (loggedOut) {
+				next()
+				alert("You have logged out.")
+			} else {
+				console.error("Something went wrong!")
+			}
+		} catch (error) {
+			console.error("Something happened during logout!")
+		}
+	} else {
+		try {
+			// Checks to see if user is authenticated or not
+			const isAuthenticated = await checkAuthenticationStatus()
+			// console.log(isAuthenticated)
+			// If user is not authenticated, redirect to login page
+			if (!isAuthenticated) {
+				next({ name: "Login" })
+			} else {
+				document.title = to.meta.title
+				next()
+			}
+		} catch (error) {
+			console.error("An error occurred during authentication check:", error)
+			next({ name: "Login" }) // Redirect to login page in case of error
+		}
 	}
 })
 
-function checkAuthenticationStatus() {
-	// Retrive token from localStorage
-	const authToken = localStorage.getItem("authToken")
-
-	//Checks to see if authToken is valid
-	const isAuthenticated = !!authToken
-	return isAuthenticated
+async function checkAuthenticationStatus() {
+	return new Promise((resolve, reject) => {
+		axios
+			.get("http://localhost:5000/check-auth/")
+			.then((res) => {
+				console.log(res.data)
+				if (res.status == 201) {
+					// Return true if authorised
+					resolve(true)
+				} else {
+					resolve(false)
+				}
+			})
+			.catch((error) => {
+				if (error.response.status == 401) {
+					console.log("User is unauthenticated.")
+					resolve(false)
+				} else {
+					console.log("An error occured.")
+					reject(error)
+				}
+			})
+	})
 }
 
-function removeAuthToken() {
-	//Removes user token from localStorage
-	localStorage.removeItem("authToken")
+function logout() {
+	return new Promise((resolve, reject) => {
+		axios
+			.post("http://localhost:5000/check-auth/logout")
+			.then((res) => {
+				console.log(res.data)
+				resolve(true) // Resolve the promise if the logout is successful
+			})
+			.catch((error) => {
+				console.error("An error occurred during logout:", error)
+				reject(error) // Reject the promise if there's an error during logout
+			})
+	})
 }
 
 export default router
