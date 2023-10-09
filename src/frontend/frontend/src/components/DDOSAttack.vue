@@ -140,12 +140,23 @@
 						</div>
 
 						<div class="button-container">
+							<!-- Cancel Button -->
+							<div class="run-button">
+								<button
+									@click="cancelActivity"
+									class="btn btn-danger"
+									v-if="display"
+								>
+									Cancel
+								</button>
+							</div>
+
 							<!-- Download bot script button -->
 							<div class="run-button">
 								<button
 									@click="downloadBotnetScript"
 									class="btn btn-secondary"
-									:disabled="display"
+									v-if="!display"
 								>
 									Download Botnet Script
 								</button>
@@ -251,6 +262,7 @@ export default {
 			isRunning: false,
 			startTime: 0,
 			elapsedTime: 0,
+			isCancelled: false,
 		}
 	},
 	computed: {
@@ -304,11 +316,11 @@ export default {
 				})
 			const currentTime = new Date()
 			const endTime = new Date(currentTime.getTime() + payload.duration * 1000)
-			this.checkLatency(latencyPath, payload, endTime)
+			this.checkLatency(latencyPath, endTime)
 		},
-		checkLatency(latencyPath, payload, endTime) {
+		checkLatency(latencyPath, endTime) {
 			axios
-				.post(latencyPath, { ipAddress: payload.ipAddress })
+				.post(latencyPath)
 				.then((res) => {
 					if (res.data.length > 0) {
 						this.result += res.data + "\n"
@@ -318,9 +330,12 @@ export default {
 					console.log(err)
 				})
 				.finally(() => {})
-			if (new Date().getTime() < endTime.getTime()) {
-				setTimeout(this.checkLatency, 5000, latencyPath, payload, endTime)
+
+			// poll for latency ping results every 5 seconds
+			if (new Date().getTime() < endTime.getTime() && !this.isCancelled) {
+				setTimeout(this.checkLatency, 5000, latencyPath, endTime)
 			}
+			this.isCancelled = false
 		},
 		getCurrentTimestamp() {
 			const now = new Date()
@@ -455,6 +470,23 @@ export default {
 					console.error("Error fetching Python file:", error)
 				})
 		},
+		cancelActivity(e) {
+			e.preventDefault()
+			this.isCancelled = true
+			const cancelPath = "http://localhost:5000/ddosAttack/cancel"
+			axios
+				.get(cancelPath)
+				.then((res) => {
+					if (res.status === 200) {
+						this.eventLog +=
+							this.getCurrentTimestamp() +
+							` Scan cancelled manually after ${this.formattedElapsedTimeEventLog}\n`
+					}
+				})
+				.catch((err) => {
+					console.log(err)
+				})
+		},
 	},
 	created() {},
 }
@@ -475,9 +507,8 @@ form {
 	padding-top: 30px;
 	margin-left: 50px;
 }
-.btn-primary {
+.btn {
 	min-width: 100px;
-	max-width: 100px;
 }
 .card {
 	min-height: 100px;

