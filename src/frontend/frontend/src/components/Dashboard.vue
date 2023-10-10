@@ -102,9 +102,10 @@
 							<span aria-hidden="true">&laquo;</span>
 						</a>
 					</li>
+
 					<li
 						class="page-item"
-						v-for="page in pages"
+						v-for="page in displayedPages"
 						:key="page"
 						:class="{ active: currentPage === page }"
 					>
@@ -112,6 +113,7 @@
 							page
 						}}</a>
 					</li>
+
 					<li
 						class="page-item"
 						:class="{ disabled: currentPage === totalPages }"
@@ -136,9 +138,26 @@ export default {
 			historyLog: [],
 			itemsPerPage: 10, // Number of items per page
 			currentPage: 1,
+			pagesToShow: 10,
 		}
 	},
 	computed: {
+		// Use a computed property to dynamically calculate the displayed pages
+		displayedPages() {
+			const startPage = Math.max(
+				1,
+				this.currentPage - Math.floor(this.pagesToShow / 2)
+			)
+			const endPage = Math.min(
+				this.totalPages,
+				startPage + this.pagesToShow - 1
+			)
+
+			return Array.from(
+				{ length: endPage - startPage + 1 },
+				(_, i) => startPage + i
+			)
+		},
 		// Calculate the total number of pages
 		totalPages() {
 			return Math.ceil(this.historyLog.length / this.itemsPerPage)
