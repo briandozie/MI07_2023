@@ -56,9 +56,8 @@
 							<strong>[ STEP ]</strong> The user needs to provide the desired IP
 							address of the targeted network and select either 'Vuln' or
 							'Vulners' for the CVE Script field. Once all the necessary fields
-							are filled, the user can begin the scan by clicking the “Run”
-							button. During the scan, the system employs relevant nmap commands
-							to detect vulnerabilities and exposures in the network.
+							are filled, the user can start the scan by clicking the “Run”
+							button.
 						</p>
 						<p>
 							On the right side of the interface, there is an event log that
@@ -77,7 +76,7 @@
 							<strong>[ STEP ]</strong> The user needs to provide the desired IP
 							address of the targeted network on which the user wants to perform
 							the service scan, along with the scan type - TCP. After all fields
-							are filled, the user can start the attack by clicking on the “Run”
+							are filled, the user can start the scan by clicking on the “Run”
 							button.
 						</p>
 						<p>
@@ -109,10 +108,9 @@
 							TCP.
 						</p>
 						<p>
-							For the IP Range, by clicking the 'add' button, the user needs to
-							provide a range IP address of the targeted network(eg.
-							192.168.0.1-150) on which the user wants to perform the IP scan,
-							along with the scan type - TCP.
+							For the IP Range, the user needs to provide a range IP address of
+							the targeted network(eg: 192.168.0.1-150) on which the user wants
+							to perform the IP scan, along with the scan type - TCP.
 						</p>
 						<p>
 							The user can start the scanning by clicking on the “Run” button.
@@ -133,8 +131,8 @@
 							<strong>[ STEP ]</strong> The user needs to provide the desired IP
 							address of the targeted network on which the user wants to perform
 							the port scan, along with the scan type, either TCP or UDP. After
-							all fields are filled, the user can start the attack by clicking
-							on the “Run” button.
+							all fields are filled, the user can start the scan by clicking on
+							the “Run” button.
 						</p>
 						<p>
 							On the right side, there is an event log that will display in real
