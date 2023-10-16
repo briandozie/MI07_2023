@@ -17,9 +17,9 @@
 					<a class="navbar-brand ms-auto" href="#">
 						<i class="bi bi-gear"></i>
 					</a>
-					<a class="navbar-brand ms-auto" href="#">
-						<i class="bi bi-person"></i>
-					</a>
+					<router-link class="navbar-brand ms-auto" to="/login">
+						<i class="bi bi-box-arrow-right"></i> Logout
+					</router-link>
 				</div>
 			</div>
 		</nav>
@@ -140,12 +140,23 @@
 						</div>
 
 						<div class="button-container">
+							<!-- Cancel Button -->
+							<div class="run-button">
+								<button
+									@click="cancelActivity"
+									class="btn btn-danger"
+									v-if="display"
+								>
+									Cancel
+								</button>
+							</div>
+
 							<!-- Download bot script button -->
 							<div class="run-button">
 								<button
 									@click="downloadBotnetScript"
 									class="btn btn-secondary"
-									:disabled="display"
+									v-if="!display"
 								>
 									Download Botnet Script
 								</button>
@@ -251,6 +262,7 @@ export default {
 			isRunning: false,
 			startTime: 0,
 			elapsedTime: 0,
+			isCancelled: false,
 		}
 	},
 	computed: {
@@ -272,10 +284,11 @@ export default {
 	methods: {
 		// POST Function
 		ddosAttack(payload) {
-			const dosPath = "http://localhost:5000/ddosAttack/"
+			const ddosPath = "http://localhost:5000/ddosAttack/"
 			const latencyPath = "http://localhost:5000/ddosAttack/latency"
 			this.startTimer() // start timer
 			this.initStatus()
+
 			this.eventLog +=
 				this.getCurrentTimestamp() +
 				` DDoS Attack (${payload.attackType}) started on network "${payload.ipAddress}" for ${payload.duration} second(s)"\n`
@@ -283,13 +296,14 @@ export default {
 				this.getCurrentTimestamp() +
 				` Flooding network with packets of ${payload.packetSize} data byte(s)\n`
 			this.display = true
+
 			axios
-				.post(dosPath, payload)
+				.post(ddosPath, payload)
 				.then((res) => {
 					console.log(res.data)
 					this.eventLog +=
 						this.getCurrentTimestamp() +
-						` DoS Attack ended after ${this.formattedElapsedTimeEventLog}\n`
+						` DDoS Attack ended after ${this.formattedElapsedTimeEventLog}\n`
 				})
 				.catch((err) => {
 					console.log(err)
@@ -302,21 +316,26 @@ export default {
 				})
 			const currentTime = new Date()
 			const endTime = new Date(currentTime.getTime() + payload.duration * 1000)
-			this.checkLatency(latencyPath, payload, endTime)
+			this.checkLatency(latencyPath, endTime)
 		},
-		checkLatency(latencyPath, payload, endTime) {
+		checkLatency(latencyPath, endTime) {
 			axios
-				.post(latencyPath, { ipAddress: payload.ipAddress })
+				.post(latencyPath)
 				.then((res) => {
-					this.result += res.data + "\n"
+					if (res.data.length > 0) {
+						this.result += res.data + "\n"
+					}
 				})
 				.catch((err) => {
 					console.log(err)
 				})
 				.finally(() => {})
-			if (new Date().getTime() < endTime.getTime()) {
-				setTimeout(this.checkLatency, 5000, latencyPath, payload, endTime)
+
+			// poll for latency ping results every 5 seconds
+			if (new Date().getTime() < endTime.getTime() && !this.isCancelled) {
+				setTimeout(this.checkLatency, 5000, latencyPath, endTime)
 			}
+			this.isCancelled = false
 		},
 		getCurrentTimestamp() {
 			const now = new Date()
@@ -391,6 +410,10 @@ export default {
 					attackType: this.ddosAttackForm.attackType,
 					duration: this.ddosAttackForm.duration,
 					packetSize: this.ddosAttackForm.packetSize,
+					attackTypeLabel:
+						document.getElementById("attackTypeInput").options[
+							document.getElementById("attackTypeInput").selectedIndex
+						].textContent,
 				}
 				this.ddosAttack(payload)
 			}
@@ -421,8 +444,6 @@ export default {
 		downloadBotnetScript(e) {
 			e.preventDefault()
 			const botnetScriptPath = "http://localhost:5000/ddosAttack/botnet"
-			// Make an HTTP request to your backend API to fetch the Python file content
-			// Replace 'your-api-endpoint' with the actual URL of your API endpoint
 			axios
 				.get(botnetScriptPath)
 				.then((response) => {
@@ -449,6 +470,23 @@ export default {
 					console.error("Error fetching Python file:", error)
 				})
 		},
+		cancelActivity(e) {
+			e.preventDefault()
+			this.isCancelled = true
+			const cancelPath = "http://localhost:5000/ddosAttack/cancel"
+			axios
+				.get(cancelPath)
+				.then((res) => {
+					if (res.status === 200) {
+						this.eventLog +=
+							this.getCurrentTimestamp() +
+							` Scan cancelled manually after ${this.formattedElapsedTimeEventLog}\n`
+					}
+				})
+				.catch((err) => {
+					console.log(err)
+				})
+		},
 	},
 	created() {},
 }
@@ -469,9 +507,8 @@ form {
 	padding-top: 30px;
 	margin-left: 50px;
 }
-.btn-primary {
+.btn {
 	min-width: 100px;
-	max-width: 100px;
 }
 .card {
 	min-height: 100px;

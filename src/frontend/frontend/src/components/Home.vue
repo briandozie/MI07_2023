@@ -17,9 +17,9 @@
 					<a class="navbar-brand ms-auto" href="#">
 						<i class="bi bi-gear"></i>
 					</a>
-					<a class="navbar-brand ms-auto" href="#">
-						<i class="bi bi-person"></i>
-					</a>
+					<router-link class="navbar-brand ms-auto" to="/login">
+						<i class="bi bi-box-arrow-right"></i> Logout
+					</router-link>
 				</div>
 			</div>
 		</nav>
@@ -85,5 +85,11 @@ p {
 	display: block;
 	padding-top: 10px;
 	margin-left: 15px;
+}
+.navbar-brand.ms-auto {
+	color: #fff; /* Text color */
+	text-decoration: none; /* Remove underline */
+	cursor: pointer; /* Change cursor on hover */
+	margin-left: 15px; /* Add some spacing */
 }
 </style>

@@ -17,9 +17,9 @@
 					<a class="navbar-brand ms-auto" href="#">
 						<i class="bi bi-gear"></i>
 					</a>
-					<a class="navbar-brand ms-auto" href="#">
-						<i class="bi bi-person"></i>
-					</a>
+					<router-link class="navbar-brand ms-auto" to="/login">
+						<i class="bi bi-box-arrow-right"></i> Logout
+					</router-link>
 				</div>
 			</div>
 		</nav>
@@ -139,11 +139,28 @@
 							</div>
 						</div>
 
-						<!-- Run button -->
-						<div class="run-button">
-							<button type="submit" class="btn btn-primary" :disabled="display">
-								Run
-							</button>
+						<div class="button-container">
+							<!-- Cancel Button -->
+							<div class="run-button">
+								<button
+									@click="cancelActivity"
+									class="btn btn-danger"
+									v-if="display"
+								>
+									Cancel
+								</button>
+							</div>
+
+							<!-- Run button -->
+							<div class="run-button">
+								<button
+									type="submit"
+									class="btn btn-primary"
+									:disabled="display"
+								>
+									Run
+								</button>
+							</div>
 						</div>
 					</form>
 				</div>
@@ -234,6 +251,7 @@ export default {
 			isRunning: false,
 			startTime: 0,
 			elapsedTime: 0,
+			isCancelled: false,
 		}
 	},
 	computed: {
@@ -259,6 +277,8 @@ export default {
 			const latencyPath = "http://localhost:5000/dosAttack/latency"
 			this.startTimer() // start timer
 			this.initStatus()
+
+			// update event log
 			this.eventLog +=
 				this.getCurrentTimestamp() +
 				` DoS Attack (${payload.attackType}) started on network "${payload.ipAddress}" for ${payload.duration} second(s)"\n`
@@ -266,6 +286,10 @@ export default {
 				this.getCurrentTimestamp() +
 				` Flooding network with packets of ${payload.packetSize} data byte(s)\n`
 			this.display = true
+			const currentTime = new Date()
+			const endTime = new Date(currentTime.getTime() + payload.duration * 1000)
+
+			// send POST request
 			axios
 				.post(dosPath, payload)
 				.then((res) => {
@@ -283,23 +307,28 @@ export default {
 					this.stopTimer()
 					this.resetTimer()
 				})
-			const currentTime = new Date()
-			const endTime = new Date(currentTime.getTime() + payload.duration * 1000)
-			this.checkLatency(latencyPath, payload, endTime)
+
+			// poll for latency ping results
+			this.checkLatency(latencyPath, endTime)
 		},
-		checkLatency(latencyPath, payload, endTime) {
+		checkLatency(latencyPath, endTime) {
 			axios
-				.post(latencyPath, { ipAddress: payload.ipAddress })
+				.post(latencyPath)
 				.then((res) => {
-					this.result += res.data + "\n"
+					if (res.data.length > 0) {
+						this.result += res.data + "\n"
+					}
 				})
 				.catch((err) => {
 					console.log(err)
 				})
 				.finally(() => {})
-			if (new Date().getTime() < endTime.getTime()) {
-				setTimeout(this.checkLatency, 5000, latencyPath, payload, endTime)
+
+			// poll for latency ping results every 5 seconds
+			if (new Date().getTime() < endTime.getTime() && !this.isCancelled) {
+				setTimeout(this.checkLatency, 5000, latencyPath, endTime)
 			}
+			this.isCancelled = false
 		},
 		getCurrentTimestamp() {
 			const now = new Date()
@@ -404,6 +433,23 @@ export default {
 			this.timerInterval = setInterval(() => {
 				this.elapsedTime = Math.floor((Date.now() - this.startTime) / 1000)
 			}, 1000)
+		},
+		cancelActivity(e) {
+			e.preventDefault()
+			this.isCancelled = true
+			const cancelPath = "http://localhost:5000/dosAttack/cancel"
+			axios
+				.get(cancelPath)
+				.then((res) => {
+					if (res.status === 200) {
+						this.eventLog +=
+							this.getCurrentTimestamp() +
+							` DoS Attack cancelled manually after ${this.formattedElapsedTimeEventLog}\n`
+					}
+				})
+				.catch((err) => {
+					console.log(err)
+				})
 		},
 	},
 	created() {},

@@ -17,9 +17,9 @@
 					<a class="navbar-brand ms-auto" href="#">
 						<i class="bi bi-gear"></i>
 					</a>
-					<a class="navbar-brand ms-auto" href="#">
-						<i class="bi bi-person"></i>
-					</a>
+					<router-link class="navbar-brand ms-auto" to="/login">
+						<i class="bi bi-box-arrow-right"></i> Logout
+					</router-link>
 				</div>
 			</div>
 		</nav>
@@ -212,13 +212,14 @@
 								placeholder="Subnet mask"
 								v-model="ipScanForm.subnetMask"
 							/>
+							<div
+								class="error-message text-danger"
+								v-if="showInputField1 && errors.subnetMask"
+							>
+								{{ errors.subnetMask }}
+							</div>
 						</div>
-						<div
-							class="error-message text-danger"
-							v-if="showInputField1 && errors.subnetMask"
-						>
-							{{ errors.subnetMask }}
-						</div>
+
 						<!-- Scan type dropdown menu -->
 						<label for="scanTypeInput" class="form-label">Scan Type</label>
 						<select
@@ -234,11 +235,28 @@
 							{{ errors.scanType }}
 						</div>
 
-						<!-- Run button -->
-						<div class="run-button">
-							<button type="submit" class="btn btn-primary" :disabled="display">
-								Run
-							</button>
+						<div class="button-container">
+							<!-- Cancel Button -->
+							<div class="run-button">
+								<button
+									@click="cancelActivity"
+									class="btn btn-danger"
+									v-if="display"
+								>
+									Cancel
+								</button>
+							</div>
+
+							<!-- Run button -->
+							<div class="run-button">
+								<button
+									type="submit"
+									class="btn btn-primary"
+									:disabled="display"
+								>
+									Run
+								</button>
+							</div>
 						</div>
 					</form>
 				</div>
@@ -347,6 +365,17 @@ export default {
 	},
 
 	computed: {
+		isFormValid() {
+			const isValid =
+				(this.errors.inputValue1 === null &&
+					this.errors.scanType === null &&
+					this.errors.subnetMask === null) ||
+				(this.errors.inputValue2 === null && this.errors.scanType === null) ||
+				(this.errors.inputStart === null &&
+					this.errors.inputEnd === null &&
+					this.errors.scanType === null)
+			return isValid
+		},
 		formattedElapsedTime() {
 			const minutes = Math.floor(this.elapsedTime / 60)
 			const seconds = this.elapsedTime % 60
@@ -365,43 +394,60 @@ export default {
 
 	methods: {
 		validateInputValue1() {
-			if (!this.ipScanForm.inputValue1.trim()) {
-				this.errors.inputValue1 = "Input Value 1 is required."
+			const inputValue1 = this.ipScanForm.inputValue1.trim()
+			if (!inputValue1) {
+				this.errors.inputValue1 = "Ip address is required."
+			} else if (!/^\d+(\.\d+)*$/.test(inputValue1)) {
+				this.errors.inputValue1 = "Invalid IP address format."
 			} else {
 				this.errors.inputValue1 = null // No error
 			}
 		},
 		validateInputValue2() {
-			if (!this.ipScanForm.inputValue2.trim()) {
-				this.errors.inputValue2 = "Input Value 2 is required."
+			// Multiple Ip
+			const inputValue2 = this.ipScanForm.inputValue2.trim()
+			if (!inputValue2) {
+				this.errors.inputValue2 = "Ip address is required."
+			} else if (!/^\d+(\.\d+)*$/.test(inputValue2)) {
+				this.errors.inputValue2 = "Invalid IP address format."
 			} else {
 				this.errors.inputValue2 = null // No error
 			}
 		},
 		validateInputStart() {
-			if (!this.ipScanForm.inputStart.trim()) {
-				this.errors.inputStart = "Input Value S is required."
+			const inputStart = this.ipScanForm.inputStart.trim()
+			if (!inputStart) {
+				this.errors.inputStart = "Ip address is required."
+			} else if (!/^\d+(\.\d+)*$/.test(inputStart)) {
+				this.errors.inputStart = "Invalid IP address format."
 			} else {
 				this.errors.inputStart = null // No error
 			}
 		},
 		validateInputEnd() {
-			if (!this.ipScanForm.inputEnd.trim()) {
-				this.errors.inputEnd = "Input Value E is required."
+			const inputEnd = this.ipScanForm.inputEnd.trim()
+			if (!inputEnd) {
+				this.errors.inputEnd = "Ip address is required."
+			} else if (!/^\d+(\.\d+)*$/.test(inputEnd)) {
+				this.errors.inputEnd = "Invalid IP address format."
 			} else {
 				this.errors.inputEnd = null // No error
 			}
 		},
 		validateInputSM() {
-			if (!this.ipScanForm.subnetMask.trim()) {
-				this.errors.subnetMask = "Input Value E is required."
+			// subnet mask
+			const subnetMask = this.ipScanForm.subnetMask.trim()
+			if (!subnetMask) {
+				this.errors.subnetMask = "Subnet mask is required."
+			} else if (!/^\d+(\.\d+)*$/.test(subnetMask)) {
+				this.errors.subnetMask = "Invalid subnet mask format."
 			} else {
 				this.errors.subnetMask = null // No error
 			}
 		},
 		validateInputST() {
 			if (!this.ipScanForm.scanType.trim()) {
-				this.errors.scanType = "Input Value E is required."
+				this.errors.scanType = "Scan type is required."
 			} else {
 				this.errors.scanType = null // No error
 			}
@@ -531,10 +577,12 @@ export default {
 				.post(path, payload)
 				.then((res) => {
 					console.log(res.data)
-					this.scanResult = res.data
-					this.eventLog +=
-						getCurrentTimestamp() +
-						` Scan completed successfully in ${this.formattedElapsedTimeEventLog}\n`
+					if (res.status === 200) {
+						this.scanResult = res.data
+						this.eventLog +=
+							getCurrentTimestamp() +
+							` Scan completed successfully in ${this.formattedElapsedTimeEventLog}\n`
+					}
 				})
 				.catch((err) => {
 					console.log(err)
@@ -561,32 +609,43 @@ export default {
 		},
 		onSubmit(e) {
 			e.preventDefault()
-			// if (
-			// 	(this.validateInputValue1() &&
-			// 		this.validateInputSM() &&
-			// 		this.validateInputST()) ||
-			// 	(this.validateInputValue2() && this.validateInputST()) ||
-			// 	(this.validateInputStart() &&
-			// 		this.validateInputEnd() &&
-			// 		this.validateInputST())
-			// ) {
 
-			const payload = {
-				inputValue1: this.ipScanForm.inputValue1,
-				inputValue2: this.ipScanForm.inputValue2,
-				inputStart: this.ipScanForm.inputStart,
-				inputEnd: this.ipScanForm.inputEnd,
-				subnetMask: this.ipScanForm.subnetMask,
-				scanType: this.ipScanForm.scanType,
-			}
+			// Validate the form inputs
 			this.validateInputValue1()
 			this.validateInputValue2()
 			this.validateInputStart()
 			this.validateInputEnd()
 			this.validateInputSM()
 			this.validateInputST()
-			this.scanIPs(payload)
-			this.initForm()
+
+			// Check if the form is valid
+			if (this.isFormValid) {
+				// Proceed with the IP scan
+				const payload = {
+					inputValue1: this.ipScanForm.inputValue1,
+					inputValue2: this.ipScanForm.inputValue2,
+					inputStart: this.ipScanForm.inputStart,
+					inputEnd: this.ipScanForm.inputEnd,
+					subnetMask: this.ipScanForm.subnetMask,
+					scanType: this.ipScanForm.scanType,
+				}
+				this.scanIPs(payload)
+				this.initForm()
+			} else {
+				// The form is invalid, do not proceed with the scan
+				console.log("Form is invalid. Please correct the errors.")
+			}
+
+			// const payload = {
+			// 	inputValue1: this.ipScanForm.inputValue1,
+			// 	inputValue2: this.ipScanForm.inputValue2,
+			// 	inputStart: this.ipScanForm.inputStart,
+			// 	inputEnd: this.ipScanForm.inputEnd,
+			// 	subnetMask: this.ipScanForm.subnetMask,
+			// 	scanType: this.ipScanForm.scanType,
+			// }
+			// this.scanIPs(payload)
+			// this.initForm()
 		},
 
 		startTimer() {
@@ -617,6 +676,22 @@ export default {
 		},
 		removeIPInput(index) {
 			this.ipScanForm.additionalInputs.splice(index, 1)
+		},
+		cancelActivity(e) {
+			e.preventDefault()
+			const cancelPath = "http://localhost:5000/ipScan/cancel"
+			axios
+				.get(cancelPath)
+				.then((res) => {
+					if (res.status === 200) {
+						this.eventLog +=
+							getCurrentTimestamp() +
+							` Scan cancelled manually after ${this.formattedElapsedTimeEventLog}\n`
+					}
+				})
+				.catch((err) => {
+					console.log(err)
+				})
 		},
 	},
 	created() {

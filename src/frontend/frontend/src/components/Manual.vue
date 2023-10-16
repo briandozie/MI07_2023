@@ -18,9 +18,9 @@
 					<a class="navbar-brand ms-auto" href="#">
 						<i class="bi bi-gear"></i>
 					</a>
-					<a class="navbar-brand ms-auto" href="#">
-						<i class="bi bi-person"></i>
-					</a>
+					<router-link class="navbar-brand ms-auto" to="/login">
+						<i class="bi bi-box-arrow-right"></i> Logout
+					</router-link>
 				</div>
 			</div>
 		</nav>
@@ -53,22 +53,17 @@
 							the potential threats and vulnerabilities present in the network.
 						</p>
 						<p>
-							<strong>[ STEP ]</strong> User is able to enter the desired IP
-							address of the targeted network that the user wants to perform the
-							vulnerability scan. For the CVE Script field, user can select
-							either 'Vuln' or 'Vulners'. After all field are filled, the user
-							can start the attack by clicking on the “Run” button. The system
-							uses relevant nmap commands and performs a network scan on the
-							targeted network to detect all the common vulnerabilities and
-							exposures present in the network.
+							<strong>[ STEP ]</strong> The user needs to provide the desired IP
+							address of the targeted network and select either 'Vuln' or
+							'Vulners' for the CVE Script field. Once all the necessary fields
+							are filled, the user can start the scan by clicking the “Run”
+							button.
 						</p>
 						<p>
-							There is an event log that will display in realtime what is being
-							done or executed by the system during the scan. Additionally, on
-							the right side of the webpage, there is a status tab that will
-							display the result of the scan. This section will display the
-							details of the result such as the target IP address, number of
-							ports scanned, and the list of vulnerabilities of each port.
+							On the right side of the interface, there is an event log that
+							provides real-time updates on the actions being executed by the
+							system throughout the scan. Additionally, a status bar displays
+							details such as the port, state, service, and associated CVE.
 						</p>
 					</li>
 					<li>
@@ -78,20 +73,18 @@
 							and detect the various services in the network.
 						</p>
 						<p>
-							<strong>[ STEP ]</strong> The user is able to enter the desired IP
-							address and subnet mask of the targeted network that the user
-							wants to perform the Service scan, along with the scan type - TCP.
-							After all field are filled, the user can start the attack by
-							clicking on the “Run” button.
+							<strong>[ STEP ]</strong> The user needs to provide the desired IP
+							address of the targeted network on which the user wants to perform
+							the service scan, along with the scan type - TCP. After all fields
+							are filled, the user can start the scan by clicking on the “Run”
+							button.
 						</p>
 						<p>
-							At the bottom of the webpage, there is an event log that will
-							display in realtime what is being done or executed by the system
-							during the scan. Additionally, on the right side of the webpage,
-							there is a status tab that will display the result of the scan.
-							This section will display the details of the result such as the
-							target IP address, number of Ports scanned, and the list of active
-							services running on the ports.
+							On the right side, there is an event log that will display in real
+							time what is being done or executed by the system during the scan.
+							Additionally, there is a status bar for the scan result to display
+							the details of the result, such as the target IP address, port
+							number, port name, product, extra information and version.
 						</p>
 					</li>
 					<li>
@@ -102,33 +95,30 @@
 							network.
 						</p>
 						<p>
-							<strong>[ STEP ]</strong> There will be 3 type of IP Scan which
-							are Single IP, Multiple IP and IP Range. For the Single IP,The
-							user is able to enter a IP address and subnet mask(Normally is 24)
-							of the targeted network that the user wants to perform the IP
-							scan, along with the scan type - TCP.
+							<strong>[ STEP ]</strong> There will be 3 types of IP Scan which
+							are Single IP, Multiple IP and IP Range. For the Single IP, the
+							user needs to provide an IP address and subnet mask(Normally is
+							24) of the targeted network on which the user wants to perform the
+							IP scan, along with the scan type - TCP.
 						</p>
 						<p>
-							For the Multiple IP, by clicking the 'add' button, the user is
-							able to enter more than 1 IP address of the targeted network that
+							For the Multiple IP, by clicking the 'add' button, the user needs
+							to provide more than 1 IP address of the targeted network on which
 							the user wants to perform the IP scan, along with the scan type -
 							TCP.
 						</p>
 						<p>
-							For the IP Range, by clicking the 'add' button, the user is able
-							to enter a range IP address of the targeted network(eg.
-							192.168.0.1-150) that the user wants to perform the IP scan, along
-							with the scan type - TCP.
+							For the IP Range, the user needs to provide a range IP address of
+							the targeted network(eg: 192.168.0.1-150) on which the user wants
+							to perform the IP scan, along with the scan type - TCP.
 						</p>
 						<p>
-							The user can start the attack by clicking on the “Run” button.At
-							the bottom of the webpage, there is an event log that will display
-							in realtime what is being done or executed by the system during
-							the scan. Additionally, on the right side of the webpage, there is
-							a status tab that will display the result of the scan. This
-							section will display the details of the result such as the target
-							IP address, number of IPs scanned, and the list of active IP
-							addresses.
+							The user can start the scanning by clicking on the “Run” button.
+							On the right side, there is an event log that will display in real
+							time what is being done or executed by the system during the scan.
+							Additionally, there is a status bar for the scan result to display
+							a list of IP addresses of the host devices that are connected to
+							the network.
 						</p>
 					</li>
 					<li>
@@ -138,70 +128,76 @@
 							the scanned network.
 						</p>
 						<p>
-							<strong>[ STEP ]</strong> The user is able to enter the desired IP
-							address and subnet mask of the targeted network that the user
-							wants to perform the port scan, along with the scan type, either
-							TCP or UDP. After all field are filled, the user can start the
-							attack by clicking on the “Run” button.
+							<strong>[ STEP ]</strong> The user needs to provide the desired IP
+							address of the targeted network on which the user wants to perform
+							the port scan, along with the scan type, either TCP or UDP. After
+							all fields are filled, the user can start the scan by clicking on
+							the “Run” button.
 						</p>
 						<p>
-							At the bottom of the webpage, there is an event log that will
-							display in realtime what is being done or executed by the system
-							during the scan. Additionally, on the right side of the webpage,
-							there is a status tab that will display the result of the scan.
-							This section will display the details of the result such as the
-							target IP address, number of ports scanned, open ports detected,
-							and the list of open ports.
+							On the right side, there is an event log that will display in real
+							time what is being done or executed by the system during the scan.
+							Additionally, there is a status bar for the scan result to display
+							the details of the result, such as the port, status, protocol and
+							host.
 						</p>
 					</li>
 					<li>
 						<strong>Denial-of-service (DoS) Attack</strong>
 						<p>
-							DoS Attack should perform network attacks on the targeted network.
-							The network attacks performed should simulate real-world network
-							intrusions and scenarios.
+							DoS Attack performs network attacks on the targeted network of the
+							IP, which the user floods a targeted IP to prevent it from
+							accessing connected online services and sites.
 						</p>
 						<p>
-							<strong>[ STEP ]</strong> The user is able to enter the necessary
-							information required for the DoS attack such as the target network
-							IP address, duration of attack, and type of attack - SYN Flood.
-							After all field are filled, the user can start the attack by
-							clicking on the “Run” button.
+							<strong>[ STEP ]</strong> The user need to provide the necessary
+							information required for the DoS attack such as the targeted
+							network IP address, target port, duration of the attack, type of
+							attack - (SYN Flood, UDP Flood, ICMP Flood) and packet size. After
+							all fields are filled, the user can start the attack by clicking
+							on the “Run” button.
 						</p>
 						<p>
-							At the bottom of the webpage, there is an event log that will
-							display in realtime what is being done or executed by the system
-							during the attack. Next, on the right side of the webpage, there
-							is a status tab that will display the current status of the
-							attack. This section will display the important information on the
-							targeted network such as bandwidth, latency, packet loss,
-							throughput, and errors, which is being monitored as the attack is
-							being performed.
+							On the right side, there is an event log that will display in real
+							time what is being done or executed by the system during the
+							attack. Additionally, there is a status tab for the current status
+							of the attack to display the important information on the targeted
+							network, such as bandwidth, latency, packet loss, throughput, and
+							errors, which is being monitored as the attack is being performed.
 						</p>
 					</li>
 					<li>
 						<strong>Distributed Denial-of-Service (DDoS) Attack</strong>
 						<p>
-							DDoS Attack should perform network attacks on the targeted
-							network. The network attacks performed should simulate real-world
-							network intrusions and scenarios.
+							DDoS attack is a DoS attack that performs network attacks by using
+							multiple computers or machines to flood the targeted network of
+							the IP to prevent it from accessing connected online services and
+							sites.
 						</p>
 						<p>
-							<strong>[ STEP ]</strong> The user is able to enter the necessary
-							information required for the DDoS attack such as the target
-							network IP address, duration of attack, and type of attack - SYN
-							Flood. After all field are filled, the user can start the attack
-							by clicking on the “Run” button.
+							<strong>[ STEP ]</strong> The user needs to provide the necessary
+							information required for the DoS attack such as the target network
+							IP address, target port, duration of the attack, type of attacks -
+							(SYN Flood, UDP Flood, ICMP Flood) and packet size. After all
+							fields are filled, the user can start the attack by clicking on
+							the “Run” button.
 						</p>
 						<p>
-							At the bottom of the webpage, there is an event log that will
-							display in realtime what is being done or executed by the system
-							during the attack. Next, on the right side of the webpage, there
-							is a status tab that will display the current status of the
-							attack. This section will display the important information on the
-							targeted network such as bandwidth, latency, packet loss,
-							throughput, and errors, which is being monitored as the attack is
-							being performed.
+							On the right side, there is an event log that will display in real
+							time what is being done or executed by the system during the
+							attack. Additionally, there is a status tab for the current status
+							of the attack to display the important information on the targeted
+							network, such as bandwidth, latency, packet loss, throughput, and
+							errors, which is being monitored as the attack is being performed.
+						</p>
+					</li>
+					<li>
+						<strong>Dashboard</strong>
+						<p>
+							The user can view the history log on the dashboard. There is a
+							status tab that displays the history activities, and for more
+							details of the history activities, the user can click on the
+							activity. The details and results of the activity will be shown.
 						</p>
 					</li>
 				</ul>
@@ -212,7 +208,7 @@
 
 <script></script>
 
-<style>
+<style scoped>
 .navbar {
 	height: 50px;
 }
