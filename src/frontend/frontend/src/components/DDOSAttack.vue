@@ -146,6 +146,7 @@
 									@click="cancelActivity"
 									class="btn btn-danger"
 									v-if="display"
+									:disabled="isCancelled"
 								>
 									Cancel
 								</button>
@@ -301,9 +302,15 @@ export default {
 				.post(ddosPath, payload)
 				.then((res) => {
 					console.log(res.data)
-					this.eventLog +=
-						this.getCurrentTimestamp() +
-						` DDoS Attack ended after ${this.formattedElapsedTimeEventLog}\n`
+					if (this.isCancelled) {
+						this.eventLog +=
+							this.getCurrentTimestamp() +
+							` DoS Attack cancelled manually after ${this.formattedElapsedTimeEventLog}\n`
+					} else {
+						this.eventLog +=
+							this.getCurrentTimestamp() +
+							` DoS Attack ended after ${this.formattedElapsedTimeEventLog}\n`
+					}
 				})
 				.catch((err) => {
 					console.log(err)
@@ -470,22 +477,17 @@ export default {
 					console.error("Error fetching Python file:", error)
 				})
 		},
-		cancelActivity(e) {
+		async cancelActivity(e) {
 			e.preventDefault()
 			this.isCancelled = true
 			const cancelPath = "http://localhost:5000/ddosAttack/cancel"
-			axios
-				.get(cancelPath)
-				.then((res) => {
-					if (res.status === 200) {
-						this.eventLog +=
-							this.getCurrentTimestamp() +
-							` Scan cancelled manually after ${this.formattedElapsedTimeEventLog}\n`
-					}
-				})
-				.catch((err) => {
-					console.log(err)
-				})
+			try {
+				this.eventLog +=
+					this.getCurrentTimestamp() + ` Cancelling DDoS Attack ...\n`
+				await axios.get(cancelPath)
+			} catch (err) {
+				console.error(err)
+			}
 		},
 	},
 	created() {},

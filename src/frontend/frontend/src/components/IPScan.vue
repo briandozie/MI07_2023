@@ -569,8 +569,14 @@ export default {
 			const path = "http://localhost:5000/ipScan/"
 			this.startTimer()
 			this.initStatus()
-			this.eventLog +=
-				getCurrentTimestamp() + ` Scan started on network "${ipInfo}"\n`
+			if (input1) {
+				this.eventLog +=
+					getCurrentTimestamp() +
+					` Scan started on network "${ipInfo}/${payload.subnetMask}"\n`
+			} else {
+				this.eventLog +=
+					getCurrentTimestamp() + ` Scan started on network "${ipInfo}"\n`
+			}
 			this.display = true
 			console.log(payload)
 			axios

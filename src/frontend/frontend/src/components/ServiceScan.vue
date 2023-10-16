@@ -92,6 +92,7 @@
 									@click="cancelActivity"
 									class="btn btn-danger"
 									v-if="display"
+									:disabled="isCancelled"
 								>
 									Cancel
 								</button>
