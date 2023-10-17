@@ -40,56 +40,127 @@
 			</div>
 		</nav>
 
-		<p>This is the Home Page</p>
-		<!-- <button type="button" class="btn btn-primary">{{ msg }}</button> -->
+		<div class="row container">
+			<div class="col">
+				<img id="image" src="../assets/pic.jpg" alt="" />
+			</div>
+			<div class="col">
+				<div id="padd">
+					<p>WELCOME,</p>
+					<h1 class="admin-section">ADMIN</h1>
+					<div>
+						<h3 class="message">
+							Software-Defined Intrusion and Penetration System
+						</h3>
+						<p3>
+							The project is a software-based intrusion and penetration testing
+							system that can be used to target and identify vulnerabilities in
+							Industrial Control Systems (ICS) utilizing Software-defined
+							Networking (SDN) framework.
+						</p3>
+					</div>
+				</div>
+			</div>
+		</div>
 	</div>
 </template>
 
-<script>
-// import axios from "axios"
-// export default {
-//   name: "Home",
-//   data() {
-//     return {
-//       msg: "",
-//     }
-//   },
-//   methods: {
-//     getResponse() {
-//       const path = "http://localhost:5000/home"
-//       axios
-//         .get(path)
-//         .then((res) => {
-//           console.log(res.data)
-//           this.msg = res.data
-//         })
-//         .catch((err) => {
-//           console.log(err)
-//         })
-//     },
-//   },
-//   created() {
-//     this.getResponse()
-//   },
-// }
-</script>
+<script></script>
 
-<style>
-#cm-logo {
-	padding-right: 15px;
+<style scoped>
+body {
+	overflow-x: hidden;
 }
+.col {
+	margin: 0;
+	padding: 0;
+}
+.container {
+	max-width: 100%;
+	max-height: 100%;
+}
+#image {
+	width: 100%;
+	height: 715px;
+	object-fit: cover;
+}
+
+#padd {
+	padding: 110px 80px 0px 80px;
+}
+.card {
+	padding: 0;
+	margin: 0;
+	height: 80px;
+}
+.spacer {
+	height: 20px;
+}
+
+#topRow {
+	width: 100%;
+	overflow: hidden;
+	height: 600px;
+}
+.message {
+	text-align: right;
+	margin-top: 20px;
+	margin-left: 100px;
+}
+#cm-logo {
+	max-width: 100%;
+	max-height: 100%;
+	width: auto;
+	height: auto;
+	object-fit: cover;
+}
+
+.pad {
+	margin-left: 60px;
+}
+
 #primaryNav {
 	height: 80px;
 }
 p {
 	display: block;
+	/* padding-top: 100px; */
+}
+p2 {
+	text-align: right;
+	display: block;
 	padding-top: 10px;
-	margin-left: 15px;
+	margin-left: 100px;
+}
+
+p3 {
+	text-align: right;
+	display: block;
+	padding-top: 40px;
+	margin-left: 100px;
 }
 .navbar-brand.ms-auto {
 	color: #fff; /* Text color */
 	text-decoration: none; /* Remove underline */
 	cursor: pointer; /* Change cursor on hover */
 	margin-left: 15px; /* Add some spacing */
+}
+.card {
+	min-height: 80px;
+}
+.col {
+	padding-top: 0;
+	margin-top: 0;
+}
+.admin-section {
+	border-bottom: 1px solid black; /* Add a 1-pixel solid border with a gray color below Admin */
+	padding-bottom: 20px; /* Add spacing below the border for separation */
+}
+#eventCard {
+	min-height: 80px;
+	max-height: 80px;
+}
+.card-body {
+	white-space: pre-wrap;
 }
 </style>
