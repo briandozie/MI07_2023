@@ -403,6 +403,9 @@ export default {
 </script>
 
 <style>
+#primaryNav {
+	height: 80px;
+}
 .navbar {
 	height: 50px;
 }
