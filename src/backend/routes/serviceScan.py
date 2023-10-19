@@ -1,5 +1,6 @@
 from flask import Blueprint, request
 from utilities.databaseFunc import *
+from utilities.utilities import *
 import nmap
 import subprocess
 import os
@@ -19,30 +20,34 @@ def ServiceScan():
     ipAddress = data["ipAddress"]
     scanType = data["scanType"]
     
-    # retrieve command from database
-    command = getCommand("SERVICESCAN", scanType)
-    command = command.format(
-        ipAddress = ipAddress
-    )
+    if isHostReachable(ipAddress):
 
-    process = subprocess.Popen(command, shell=True, text=True, stdout=subprocess.PIPE, preexec_fn=os.setsid)
-    pid = process.pid
-    output, _ = process.communicate() # Wait for the process to finish and get the output
+        # retrieve command from database
+        command = getCommand("SERVICESCAN", scanType)
+        command = command.format(
+            ipAddress = ipAddress
+        )
 
-    if not cancelled:
-        ports = formatScanResult(output)
+        process = subprocess.Popen(command, shell=True, text=True, stdout=subprocess.PIPE, preexec_fn=os.setsid)
+        pid = process.pid
+        output, _ = process.communicate() # Wait for the process to finish and get the output
 
-        # Calculate the total number of items
-        totalNumber = len(ports)
+        if not cancelled:
+            ports = formatScanResult(output)
 
-        # Create the final JSON structure
-        finalJson = {'ports': ports, 'total': totalNumber}
-        logActivity("SERVICE SCAN", ipAddress, scanType, ports)
+            # Calculate the total number of items
+            totalNumber = len(ports)
 
-        return finalJson
+            # Create the final JSON structure
+            finalJson = {'ports': ports, 'total': totalNumber}
+            logActivity("SERVICE SCAN", ipAddress, scanType, ports)
+
+            return finalJson
+        else:
+            cancelled = False
+            return {}, 204
     else:
-        cancelled = False
-        return {}, 204
+        return {}, 400
 
 def formatScanResult(output):
     # Parse the XML data

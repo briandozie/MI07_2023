@@ -222,33 +222,32 @@ export default {
 	},
 	methods: {
 		// POST Function
-		scanServices(payload) {
+		async scanServices(payload) {
 			const path = "http://localhost:5000/serviceScan/"
 			this.startTimer() // start timer
 			this.initStatus()
+			const target = this.serviceScanForm.ipAddress
 			this.eventLog +=
 				getCurrentTimestamp() +
 				` Scan started on network "${this.serviceScanForm.ipAddress}"\n`
 			this.display = true
-			axios
-				.post(path, payload)
-				.then((res) => {
-					console.log(res.data)
-					if (res.status === 200) {
-						this.result = res.data
-						this.eventLog +=
-							getCurrentTimestamp() +
-							` Scan completed successfully in ${this.formattedElapsedTimeEventLog}\n`
-					}
-				})
-				.catch((err) => {
-					console.log(err)
-				})
-				.finally(() => {
-					this.display = false
-					this.stopTimer()
-					this.resetTimer()
-				})
+
+			try {
+				const res = await axios.post(path, payload)
+				if (res.status === 200) {
+					this.result = res.data
+					this.eventLog +=
+						getCurrentTimestamp() +
+						` Scan completed successfully in ${this.formattedElapsedTimeEventLog}\n`
+				}
+			} catch {
+				this.eventLog +=
+					getCurrentTimestamp() + ` Scan aborted: ${target} is not reachable\n`
+			} finally {
+				this.display = false
+				this.stopTimer()
+				this.resetTimer()
+			}
 		},
 		// Error handling
 		validateForm() {

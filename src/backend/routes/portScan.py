@@ -1,5 +1,6 @@
 from flask import Blueprint, request
 from utilities.databaseFunc import *
+from utilities.utilities import *
 import nmap
 import subprocess
 import os
@@ -18,31 +19,36 @@ def PortScan():
     data = request.get_json()
     ipAddress = data["ipAddress"]
     scanType = data["scanType"]
+
+    if isHostReachable(ipAddress):
     
-    # retrieve command from database
-    command = getCommand("PORTSCAN", scanType)
-    command = command.format(
-        ipAddress = ipAddress
-    )
+        # retrieve command from database
+        command = getCommand("PORTSCAN", scanType)
+        command = command.format(
+            ipAddress = ipAddress
+        )
 
-    process = subprocess.Popen(command, shell=True, text=True, stdout=subprocess.PIPE, preexec_fn=os.setsid)
-    pid = process.pid
-    output, _ = process.communicate() # Wait for the process to finish and get the output
+        process = subprocess.Popen(command, shell=True, text=True, stdout=subprocess.PIPE, preexec_fn=os.setsid)
+        pid = process.pid
+        output, _ = process.communicate() # Wait for the process to finish and get the output
 
-    if not cancelled:
-        ports = formatScanResult(output)
+        if not cancelled:
+            ports = formatScanResult(output)
 
-        # Calculate the total number of items
-        totalNumber = len(ports)
+            # Calculate the total number of items
+            totalNumber = len(ports)
 
-        # Create the final JSON structure
-        finalJson = {'ports': ports, 'total': totalNumber}
-        logActivity("PORT SCAN", ipAddress, scanType, ports)
+            # Create the final JSON structure
+            finalJson = {'ports': ports, 'total': totalNumber}
+            logActivity("PORT SCAN", ipAddress, scanType, ports)
 
-        return finalJson
+            return finalJson
+        else:
+            cancelled = False
+            return {}, 204
+        
     else:
-        cancelled = False
-        return {}, 204
+        return {}, 400
 
 def formatScanResult(output):
    # Parse the XML data

