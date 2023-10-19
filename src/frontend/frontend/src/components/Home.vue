@@ -41,7 +41,7 @@
 		</nav>
 
 		<div class="row container">
-			<div class="col">
+			<div class="col col-left">
 				<img id="image" src="../assets/pic.jpg" alt="" />
 			</div>
 			<div class="col">
@@ -49,15 +49,25 @@
 					<p>WELCOME,</p>
 					<h1 class="admin-section">ADMIN</h1>
 					<div>
+						<br />
 						<h3 class="message">
 							Software-Defined Intrusion and Penetration System
 						</h3>
 						<p3>
 							The project is a software-based intrusion and penetration testing
 							system that can be used to target and identify vulnerabilities in
-							Industrial Control Systems (ICS) utilizing Software-defined
+							Industrial Control Systems (ICS) utilizing Software-Defined
 							Networking (SDN) framework.
 						</p3>
+					</div>
+					<div id="button">
+						<button
+							type="submit"
+							class="btn btn-primary"
+							@click="navigateToManual"
+						>
+							Learn More
+						</button>
 					</div>
 				</div>
 			</div>
@@ -65,7 +75,16 @@
 	</div>
 </template>
 
-<script></script>
+<script>
+export default {
+	methods: {
+		navigateToManual() {
+			// Use $router.push to navigate to another route
+			this.$router.push("/manual")
+		},
+	},
+}
+</script>
 
 <style scoped>
 body {
@@ -77,16 +96,25 @@ body {
 }
 .container {
 	max-width: 100%;
-	max-height: 100%;
+	min-height: 100vh;
+	height: 100%;
 }
+.col-left {
+	flex: 1.5;
+	display: flex;
+	align-items: stretch;
+	overflow: hidden; /* Ensure that no content overflows and causes extra space */
+}
+
 #image {
 	width: 100%;
-	height: 715px;
+	height: 100%;
 	object-fit: cover;
+	object-position: top; /* Align the top of the image */
 }
 
 #padd {
-	padding: 110px 80px 0px 80px;
+	padding: 200px 80px 0px 80px;
 }
 .card {
 	padding: 0;
@@ -113,6 +141,7 @@ body {
 	width: auto;
 	height: auto;
 	object-fit: cover;
+	padding-right: 10px;
 }
 
 .pad {
@@ -136,7 +165,7 @@ p2 {
 p3 {
 	text-align: right;
 	display: block;
-	padding-top: 40px;
+	padding-top: 20px;
 	margin-left: 100px;
 }
 .navbar-brand.ms-auto {
@@ -162,5 +191,15 @@ p3 {
 }
 .card-body {
 	white-space: pre-wrap;
+}
+#button {
+	display: flex;
+	justify-content: flex-end;
+	margin-top: 30px; /* Adjust the margin as needed */
+}
+
+#button button {
+	/* Adjust the width of the button */
+	min-width: 150px !important;
 }
 </style>
