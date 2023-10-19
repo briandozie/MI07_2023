@@ -511,4 +511,12 @@ form {
 	overflow-y: auto;
 	max-height: 300px;
 }
+#cm-logo {
+	max-width: 100%;
+	max-height: 100%;
+	width: auto;
+	height: auto;
+	object-fit: cover;
+	padding-right: 10px;
+}
 </style>
