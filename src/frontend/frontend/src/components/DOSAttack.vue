@@ -14,9 +14,6 @@
 					<a class="navbar-brand ms-auto" href="/manual">
 						<i class="bi bi-info-circle"></i>
 					</a>
-					<a class="navbar-brand ms-auto" href="#">
-						<i class="bi bi-gear"></i>
-					</a>
 					<router-link class="navbar-brand ms-auto" to="/login">
 						<i class="bi bi-box-arrow-right"></i> Logout
 					</router-link>
@@ -146,6 +143,7 @@
 									@click="cancelActivity"
 									class="btn btn-danger"
 									v-if="display"
+									:disabled="isCancelled"
 								>
 									Cancel
 								</button>
@@ -294,9 +292,15 @@ export default {
 				.post(dosPath, payload)
 				.then((res) => {
 					console.log(res.data)
-					this.eventLog +=
-						this.getCurrentTimestamp() +
-						` DoS Attack ended after ${this.formattedElapsedTimeEventLog}\n`
+					if (this.isCancelled) {
+						this.eventLog +=
+							this.getCurrentTimestamp() +
+							` DoS Attack cancelled manually after ${this.formattedElapsedTimeEventLog}\n`
+					} else {
+						this.eventLog +=
+							this.getCurrentTimestamp() +
+							` DoS Attack ended after ${this.formattedElapsedTimeEventLog}\n`
+					}
 				})
 				.catch((err) => {
 					console.log(err)
@@ -434,22 +438,18 @@ export default {
 				this.elapsedTime = Math.floor((Date.now() - this.startTime) / 1000)
 			}, 1000)
 		},
-		cancelActivity(e) {
+		async cancelActivity(e) {
 			e.preventDefault()
 			this.isCancelled = true
 			const cancelPath = "http://localhost:5000/dosAttack/cancel"
-			axios
-				.get(cancelPath)
-				.then((res) => {
-					if (res.status === 200) {
-						this.eventLog +=
-							this.getCurrentTimestamp() +
-							` DoS Attack cancelled manually after ${this.formattedElapsedTimeEventLog}\n`
-					}
-				})
-				.catch((err) => {
-					console.log(err)
-				})
+
+			try {
+				this.eventLog +=
+					this.getCurrentTimestamp() + ` Cancelling DoS Attack ...\n`
+				await axios.get(cancelPath)
+			} catch (err) {
+				console.error(err)
+			}
 		},
 	},
 	created() {},

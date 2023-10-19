@@ -44,7 +44,13 @@ def DDOSAttack():
     bots.start()
     bots.join()
 
-    logActivityDOS("DDOS ATTACK", data, latencyPingList)
+    if not cancel_event.is_set():
+        # collect results
+        latency_ping_list_result = list(latencyPingList)  # Copy the list to avoid shared memory issues
+
+        # log dos attack details to database
+        logActivityDOS("DDOS ATTACK", data, latency_ping_list_result)
+
     latencyPingList.clear()
     threads.clear()
     accepted_addresses.clear()
@@ -161,6 +167,7 @@ def getIpAddress():
 def cancelScan():
     global threads, cancelled, accepted_addresses
     cancelled = True
+    cancel_event.set()  # Set the cancel event
 
     # send a command to each bot here
     cancel_command = "cancel_ddos" 
