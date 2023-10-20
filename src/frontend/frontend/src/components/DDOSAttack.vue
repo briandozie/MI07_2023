@@ -299,6 +299,7 @@ export default {
 			const endTime = new Date(currentTime.getTime() + payload.duration * 1000)
 
 			try {
+				this.checkLatency(latencyPath, endTime) // poll for latency ping results
 				await axios.post(ddosPath, payload)
 
 				if (this.isCancelled) {
@@ -310,8 +311,6 @@ export default {
 						this.getCurrentTimestamp() +
 						` DoS Attack ended after ${this.formattedElapsedTimeEventLog}\n`
 				}
-				// poll for latency ping results
-				this.checkLatency(latencyPath, endTime)
 			} catch (err) {
 				this.eventLog +=
 					this.getCurrentTimestamp() +

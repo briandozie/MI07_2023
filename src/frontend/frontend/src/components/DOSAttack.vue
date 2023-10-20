@@ -289,6 +289,7 @@ export default {
 			const endTime = new Date(currentTime.getTime() + payload.duration * 1000)
 
 			try {
+				this.checkLatency(latencyPath, endTime) // poll for latency ping results
 				await axios.post(dosPath, payload)
 
 				if (this.isCancelled) {
