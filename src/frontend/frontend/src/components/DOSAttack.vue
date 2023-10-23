@@ -14,9 +14,6 @@
 					<a class="navbar-brand ms-auto" href="/manual">
 						<i class="bi bi-info-circle"></i>
 					</a>
-					<a class="navbar-brand ms-auto" href="#">
-						<i class="bi bi-gear"></i>
-					</a>
 					<router-link class="navbar-brand ms-auto" to="/login">
 						<i class="bi bi-box-arrow-right"></i> Logout
 					</router-link>
@@ -146,6 +143,7 @@
 									@click="cancelActivity"
 									class="btn btn-danger"
 									v-if="display"
+									:disabled="isCancelled"
 								>
 									Cancel
 								</button>
@@ -272,11 +270,12 @@ export default {
 	},
 	methods: {
 		// POST Function
-		dosAttack(payload) {
+		async dosAttack(payload) {
 			const dosPath = "http://localhost:5000/dosAttack/"
 			const latencyPath = "http://localhost:5000/dosAttack/latency"
 			this.startTimer() // start timer
 			this.initStatus()
+			const target = this.dosAttackForm.ipAddress
 
 			// update event log
 			this.eventLog +=
@@ -289,27 +288,31 @@ export default {
 			const currentTime = new Date()
 			const endTime = new Date(currentTime.getTime() + payload.duration * 1000)
 
-			// send POST request
-			axios
-				.post(dosPath, payload)
-				.then((res) => {
-					console.log(res.data)
+			try {
+				this.checkLatency(latencyPath, endTime) // poll for latency ping results
+				await axios.post(dosPath, payload)
+
+				if (this.isCancelled) {
+					this.eventLog +=
+						this.getCurrentTimestamp() +
+						` DoS Attack cancelled manually after ${this.formattedElapsedTimeEventLog}\n`
+				} else {
 					this.eventLog +=
 						this.getCurrentTimestamp() +
 						` DoS Attack ended after ${this.formattedElapsedTimeEventLog}\n`
-				})
-				.catch((err) => {
-					console.log(err)
-				})
-				.finally(() => {
-					this.display = false
-					this.initForm()
-					this.stopTimer()
-					this.resetTimer()
-				})
-
-			// poll for latency ping results
-			this.checkLatency(latencyPath, endTime)
+				}
+				// poll for latency ping results
+				this.checkLatency(latencyPath, endTime)
+			} catch (err) {
+				this.eventLog +=
+					this.getCurrentTimestamp() +
+					` DoS attack aborted: ${target} is not reachable\n`
+			} finally {
+				this.display = false
+				this.initForm()
+				this.stopTimer()
+				this.resetTimer()
+			}
 		},
 		checkLatency(latencyPath, endTime) {
 			axios
@@ -434,22 +437,18 @@ export default {
 				this.elapsedTime = Math.floor((Date.now() - this.startTime) / 1000)
 			}, 1000)
 		},
-		cancelActivity(e) {
+		async cancelActivity(e) {
 			e.preventDefault()
 			this.isCancelled = true
 			const cancelPath = "http://localhost:5000/dosAttack/cancel"
-			axios
-				.get(cancelPath)
-				.then((res) => {
-					if (res.status === 200) {
-						this.eventLog +=
-							this.getCurrentTimestamp() +
-							` DoS Attack cancelled manually after ${this.formattedElapsedTimeEventLog}\n`
-					}
-				})
-				.catch((err) => {
-					console.log(err)
-				})
+
+			try {
+				this.eventLog +=
+					this.getCurrentTimestamp() + ` Cancelling DoS Attack ...\n`
+				await axios.get(cancelPath)
+			} catch (err) {
+				console.error(err)
+			}
 		},
 	},
 	created() {},
@@ -512,5 +511,13 @@ form {
 .scrollable {
 	overflow-y: auto;
 	max-height: 300px;
+}
+#cm-logo {
+	max-width: 100%;
+	max-height: 100%;
+	width: auto;
+	height: auto;
+	object-fit: cover;
+	padding-right: 10px;
 }
 </style>

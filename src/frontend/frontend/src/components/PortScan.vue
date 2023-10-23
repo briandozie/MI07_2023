@@ -15,9 +15,6 @@
 					<a class="navbar-brand ms-auto" href="/manual">
 						<i class="bi bi-info-circle"></i>
 					</a>
-					<a class="navbar-brand ms-auto" href="#">
-						<i class="bi bi-gear"></i>
-					</a>
 					<router-link class="navbar-brand ms-auto" to="/login">
 						<i class="bi bi-box-arrow-right"></i> Logout
 					</router-link>
@@ -221,49 +218,32 @@ export default {
 	},
 	methods: {
 		// POST Function
-		scanPorts(payload) {
+		async scanPorts(payload) {
 			const path = "http://127.0.0.1:5000/portScan/"
 			this.startTimer() // start timer
 			this.initStatus()
+			const target = this.portScanForm.ipAddress
 			this.eventLog +=
 				getCurrentTimestamp() +
 				` Scan started on network "${this.portScanForm.ipAddress}"\n`
 			this.display = true
-			axios
-				.post(path, payload)
-				.then((res) => {
-					console.log(res.data)
-					if (res.status === 200) {
-						this.scanResult = res.data
-						this.eventLog +=
-							getCurrentTimestamp() +
-							` Scan completed successfully in ${this.formattedElapsedTimeEventLog}\n`
-					}
-				})
-				.catch((err) => {
-					console.log(err)
-				})
-				.finally(() => {
-					this.display = false
-					this.stopTimer()
-					this.resetTimer()
-				})
-		},
-		cancelActivity(e) {
-			e.preventDefault()
-			const cancelPath = "http://localhost:5000/portScan/cancel"
-			axios
-				.get(cancelPath)
-				.then((res) => {
-					if (res.status === 200) {
-						this.eventLog +=
-							getCurrentTimestamp() +
-							` Scan cancelled manually after ${this.formattedElapsedTimeEventLog}\n`
-					}
-				})
-				.catch((err) => {
-					console.log(err)
-				})
+
+			try {
+				const response = await axios.post(path, payload)
+				if (response.status === 200) {
+					this.scanResult = response.data
+					this.eventLog +=
+						getCurrentTimestamp() +
+						` Scan completed successfully in ${this.formattedElapsedTimeEventLog}\n`
+				}
+			} catch (error) {
+				this.eventLog +=
+					getCurrentTimestamp() + ` Scan aborted: ${target} is not reachable\n`
+			} finally {
+				this.display = false
+				this.stopTimer()
+				this.resetTimer()
+			}
 		},
 		// Error handling
 		validateForm() {
@@ -381,5 +361,13 @@ form {
 }
 .progress-bar-container .progress {
 	flex: 1;
+}
+#cm-logo {
+	max-width: 100%;
+	max-height: 100%;
+	width: auto;
+	height: auto;
+	object-fit: cover;
+	padding-right: 10px;
 }
 </style>

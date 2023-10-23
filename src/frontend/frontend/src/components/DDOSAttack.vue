@@ -14,9 +14,6 @@
 					<a class="navbar-brand ms-auto" href="/manual">
 						<i class="bi bi-info-circle"></i>
 					</a>
-					<a class="navbar-brand ms-auto" href="#">
-						<i class="bi bi-gear"></i>
-					</a>
 					<router-link class="navbar-brand ms-auto" to="/login">
 						<i class="bi bi-box-arrow-right"></i> Logout
 					</router-link>
@@ -146,6 +143,7 @@
 									@click="cancelActivity"
 									class="btn btn-danger"
 									v-if="display"
+									:disabled="isCancelled"
 								>
 									Cancel
 								</button>
@@ -283,9 +281,10 @@ export default {
 	},
 	methods: {
 		// POST Function
-		ddosAttack(payload) {
+		async ddosAttack(payload) {
 			const ddosPath = "http://localhost:5000/ddosAttack/"
 			const latencyPath = "http://localhost:5000/ddosAttack/latency"
+			const target = this.ddosAttackForm.ipAddress
 			this.startTimer() // start timer
 			this.initStatus()
 
@@ -296,27 +295,32 @@ export default {
 				this.getCurrentTimestamp() +
 				` Flooding network with packets of ${payload.packetSize} data byte(s)\n`
 			this.display = true
-
-			axios
-				.post(ddosPath, payload)
-				.then((res) => {
-					console.log(res.data)
-					this.eventLog +=
-						this.getCurrentTimestamp() +
-						` DDoS Attack ended after ${this.formattedElapsedTimeEventLog}\n`
-				})
-				.catch((err) => {
-					console.log(err)
-				})
-				.finally(() => {
-					this.display = false
-					this.initForm()
-					this.stopTimer()
-					this.resetTimer()
-				})
 			const currentTime = new Date()
 			const endTime = new Date(currentTime.getTime() + payload.duration * 1000)
-			this.checkLatency(latencyPath, endTime)
+
+			try {
+				this.checkLatency(latencyPath, endTime) // poll for latency ping results
+				await axios.post(ddosPath, payload)
+
+				if (this.isCancelled) {
+					this.eventLog +=
+						this.getCurrentTimestamp() +
+						` DoS Attack cancelled manually after ${this.formattedElapsedTimeEventLog}\n`
+				} else {
+					this.eventLog +=
+						this.getCurrentTimestamp() +
+						` DoS Attack ended after ${this.formattedElapsedTimeEventLog}\n`
+				}
+			} catch (err) {
+				this.eventLog +=
+					this.getCurrentTimestamp() +
+					` DDoS attack aborted: ${target} is not reachable\n`
+			} finally {
+				this.display = false
+				this.initForm()
+				this.stopTimer()
+				this.resetTimer()
+			}
 		},
 		checkLatency(latencyPath, endTime) {
 			axios
@@ -470,22 +474,17 @@ export default {
 					console.error("Error fetching Python file:", error)
 				})
 		},
-		cancelActivity(e) {
+		async cancelActivity(e) {
 			e.preventDefault()
 			this.isCancelled = true
 			const cancelPath = "http://localhost:5000/ddosAttack/cancel"
-			axios
-				.get(cancelPath)
-				.then((res) => {
-					if (res.status === 200) {
-						this.eventLog +=
-							this.getCurrentTimestamp() +
-							` Scan cancelled manually after ${this.formattedElapsedTimeEventLog}\n`
-					}
-				})
-				.catch((err) => {
-					console.log(err)
-				})
+			try {
+				this.eventLog +=
+					this.getCurrentTimestamp() + ` Cancelling DDoS Attack ...\n`
+				await axios.get(cancelPath)
+			} catch (err) {
+				console.error(err)
+			}
 		},
 	},
 	created() {},
@@ -546,5 +545,13 @@ form {
 .scrollable {
 	overflow-y: auto;
 	max-height: 300px;
+}
+#cm-logo {
+	max-width: 100%;
+	max-height: 100%;
+	width: auto;
+	height: auto;
+	object-fit: cover;
+	padding-right: 10px;
 }
 </style>

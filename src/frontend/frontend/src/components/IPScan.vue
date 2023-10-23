@@ -14,9 +14,6 @@
 					<a class="navbar-brand ms-auto" href="/manual">
 						<i class="bi bi-info-circle"></i>
 					</a>
-					<a class="navbar-brand ms-auto" href="#">
-						<i class="bi bi-gear"></i>
-					</a>
 					<router-link class="navbar-brand ms-auto" to="/login">
 						<i class="bi bi-box-arrow-right"></i> Logout
 					</router-link>
@@ -569,8 +566,14 @@ export default {
 			const path = "http://localhost:5000/ipScan/"
 			this.startTimer()
 			this.initStatus()
-			this.eventLog +=
-				getCurrentTimestamp() + ` Scan started on network "${ipInfo}"\n`
+			if (input1) {
+				this.eventLog +=
+					getCurrentTimestamp() +
+					` Scan started on network "${ipInfo}/${payload.subnetMask}"\n`
+			} else {
+				this.eventLog +=
+					getCurrentTimestamp() + ` Scan started on network "${ipInfo}"\n`
+			}
 			this.display = true
 			console.log(payload)
 			axios
@@ -748,5 +751,13 @@ form {
 }
 .progress-bar-container .progress {
 	flex: 1;
+}
+#cm-logo {
+	max-width: 100%;
+	max-height: 100%;
+	width: auto;
+	height: auto;
+	object-fit: cover;
+	padding-right: 10px;
 }
 </style>

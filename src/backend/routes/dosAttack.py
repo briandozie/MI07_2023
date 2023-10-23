@@ -1,5 +1,6 @@
 from flask import Blueprint, request
 from utilities.databaseFunc import *
+from utilities.utilities import *
 import subprocess
 import signal
 import time
@@ -69,38 +70,41 @@ def DOSAttack():
     attack_type = data["attackType"]
     duration = int(data["duration"])
 
-    # get dos command from database
-    command = getCommand("DOS", "PINGFLOOD")
-    command = command.format(
-        attackType=attack_type,
-        packetSize=packet_size,
-        portNumber=port_number,
-        ipAddress=ip_address)
+    if isHostReachable(ip_address):
+        # get dos command from database
+        command = getCommand("DOS", "PINGFLOOD")
+        command = command.format(
+            attackType=attack_type,
+            packetSize=packet_size,
+            portNumber=port_number,
+            ipAddress=ip_address)
 
-    # create process for latency polling
-    latency_check = threading.Thread(target=check_latency_periodically, args=(ip_address, duration))
-    latency_check.start()
+        # create process for latency polling
+        latency_check = threading.Thread(target=check_latency_periodically, args=(ip_address, duration))
+        latency_check.start()
 
-    # create process for dos attack
-    attack = threading.Thread(target=dos, args=(command, duration))
-    attack.start()
+        # create process for dos attack
+        attack = threading.Thread(target=dos, args=(command, duration))
+        attack.start()
 
-    # wait for processes to finish
-    attack.join()
-    latency_check.join()
+        # wait for processes to finish
+        attack.join()
+        latency_check.join()
 
-    if not cancel_event.is_set():
-        # collect results
-        latency_ping_list_result = list(latency_ping_list)  # Copy the list to avoid shared memory issues
+        if not cancel_event.is_set():
+            # collect results
+            latency_ping_list_result = list(latency_ping_list)  # Copy the list to avoid shared memory issues
 
-        # log dos attack details to database
-        logActivityDOS("DOS ATTACK", data, latency_ping_list_result)
+            # log dos attack details to database
+            logActivityDOS("DOS ATTACK", data, latency_ping_list_result)
 
-    # Clear the global list
-    latency_ping_list.clear()
-    cancel_event.clear()
+        # Clear the global list
+        latency_ping_list.clear()
+        cancel_event.clear()
 
-    return ""
+        return ""
+    else:
+        return {}, 400
 
 @dosAttack.post("/latency")
 def checkLatency():

@@ -15,9 +15,6 @@
 					<a class="navbar-brand ms-auto" href="/manual">
 						<i class="bi bi-info-circle"></i>
 					</a>
-					<a class="navbar-brand ms-auto" href="#">
-						<i class="bi bi-gear"></i>
-					</a>
 					<router-link class="navbar-brand ms-auto" to="/login">
 						<i class="bi bi-box-arrow-right"></i> Logout
 					</router-link>
@@ -231,33 +228,33 @@ export default {
 	},
 	methods: {
 		// POST Function
-		scanCVE(payload) {
+		async scanCVE(payload) {
 			const path = "http://localhost:5000/cveScan/"
 			this.startTimer() // start timer
 			this.initStatus()
+			const target = this.cveScanForm.ipAddress
 			this.eventLog +=
 				getCurrentTimestamp() +
 				` Scan started on network "${this.cveScanForm.ipAddress}"\n`
 			this.display = true
-			axios
-				.post(path, payload)
-				.then((res) => {
-					if (res.status === 200) {
-						this.result = res.data
-						this.eventLog +=
-							getCurrentTimestamp() +
-							` Scan completed successfully in ${this.formattedElapsedTimeEventLog}\n`
-						this.parseCveScanOutput()
-					}
-				})
-				.catch((err) => {
-					console.log(err)
-				})
-				.finally(() => {
-					this.display = false
-					this.stopTimer()
-					this.resetTimer()
-				})
+
+			try {
+				const res = await axios.post(path, payload)
+				if (res.status === 200) {
+					this.result = res.data
+					this.eventLog +=
+						getCurrentTimestamp() +
+						` Scan completed successfully in ${this.formattedElapsedTimeEventLog}\n`
+					this.parseCveScanOutput()
+				}
+			} catch (error) {
+				this.eventLog +=
+					getCurrentTimestamp() + ` Scan aborted: ${target} is not reachable\n`
+			} finally {
+				this.display = false
+				this.stopTimer()
+				this.resetTimer()
+			}
 		},
 		validateForm() {
 			let isValid = true
@@ -403,6 +400,9 @@ export default {
 </script>
 
 <style>
+#primaryNav {
+	height: 80px;
+}
 .navbar {
 	height: 50px;
 }
@@ -459,5 +459,13 @@ form {
 }
 .custom-link:hover {
 	color: #0056b3;
+}
+#cm-logo {
+	max-width: 100%;
+	max-height: 100%;
+	width: auto;
+	height: auto;
+	object-fit: cover;
+	padding-right: 10px;
 }
 </style>
