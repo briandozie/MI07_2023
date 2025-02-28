@@ -3,9 +3,8 @@
 - Effectively launch different types of intrusion scans and attacks against a given IP address.
 - Log and document the findings
 
-
-
-## Initial Setup
+## Presentation with Product Demo
+https://www.canva.com/design/DAFiQAN-D2Y/OAZfB7YxBUtsh5Hz0GWXwA/edit?utm_content=DAFiQAN-D2Y&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton
 
 1. Activate virtual environment
 2. Set terminal execution policy to unrestricted
