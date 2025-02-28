@@ -1,3 +1,10 @@
+## Software-Defined Intrusion & Penetration System
+- Develop a web-based penetration system
+- Effectively launch different types of intrusion scans and attacks against a given IP address.
+- Log and document the findings
+
+
+
 ## Initial Setup
 
 1. Activate virtual environment
