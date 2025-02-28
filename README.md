@@ -6,6 +6,7 @@
 ## Presentation with Product Demo
 https://www.canva.com/design/DAFiQAN-D2Y/OAZfB7YxBUtsh5Hz0GWXwA/edit?utm_content=DAFiQAN-D2Y&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton
 
+## Initial Setup
 1. Activate virtual environment
 2. Set terminal execution policy to unrestricted
 2. Create .env file
